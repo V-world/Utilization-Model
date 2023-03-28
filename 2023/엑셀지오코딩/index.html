@@ -2,10 +2,10 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
 	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.5/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
 	<link rel="stylesheet" href="css/index.css">
 </head>
@@ -13,8 +13,10 @@
 
 <div id="map"></div>
 <div class="topTools">
+<!-- 이미지 출처 : https://pixabay.com/ko/vectors/%ea%bc%ac%eb%a6%ac%ed%91%9c-%ec%9c%84%ec%b9%98-%ec%83%81-%ec%83%81%ec%a7%95-%eb%b0%94%eb%8a%98-1873545/-->
 	<img src="https://cdn.pixabay.com/photo/2016/11/30/18/14/tag-1873545_960_720.png" onclick="$('#csvGeo').click();">
 	<input type="file" id="csvGeo" accept=".xls" hidden="hidden" onchange="readExcel()"/>
+<!-- 이미지 출처 : https://pixabay.com/ko/vectors/%eb%aa%a9%eb%a1%9d-%ed%95%a0-%ea%b2%83-%eb%aa%a9%eb%a1%9d%eb%b3%b4%ea%b8%b0-6495877/ -->
 	<img src="https://cdn.pixabay.com/photo/2021/07/27/05/52/list-6495877_960_720.png" onclick="popuptoogle('seeBox')">
 </div>
 <div id="filecheck">
