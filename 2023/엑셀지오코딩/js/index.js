@@ -49,7 +49,7 @@ function readExcel() {
                         simple: "false",
                         format: "json",
                         type: "PARCEL",
-                        key: "E5B1657B-9B6F-3A4B-91EF-98512BE931A1",
+                        key: "E5B1657B-9B6F-3A4B-91EF-98512BE931A1",  //이 인증키를 개발 및 운영에 사용하지마세요.
                     },
                     dataType: "jsonp",
                     async: false,
