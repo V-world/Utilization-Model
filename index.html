@@ -1,11 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 	<meta charset="UTF-8">
-	<title>Title</title>
+	<style>
+		.title{
+			text-align: center;
+			margin: 20px
+		}
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-gap: 10px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        span{
+	        font-size: 15px
+        }
+        .box a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-decoration: none;
+            color: #333;
+        }
+        .box a img {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .box a img:hover {
+			transform: scale(1.2);
+			transition: 0.5s;
+		}
+
+        @media (max-width: 999px) {
+            .container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                grid-gap: 10px;
+                max-width: 800px;
+            }
+            .box a img {
+                width: 300px;
+                height: 300px;
+            }
+            span{
+	            font-size: 27px
+            }
+        }
+	</style>
 </head>
 <body>
-	<a href="2023/출입국 외국인청 활용모델">출입국 외국인청 활용모델</a>
-	<a href="2023/엑셀지오코딩/">엑셀 지오코딩</a>
+<div class="title"> 브이월드 오픈API 활용모델 </div>
+<div class="container">
+	<div class="box">
+		<a href="2023/출입국 외국인청 활용모델/index.html">
+<!-- 출처 : https://pixabay.com/ko/illustrations/%ed%95%ad%ea%b3%b5%ea%b8%b0-%eb%b9%84%ed%96%89%ea%b8%b0-%ea%b3%b5%ed%95%ad-%eb%8f%84%ec%b0%a9-19184/ -->
+			<img src="https://cdn.pixabay.com/photo/2012/02/29/15/49/aircraft-19184_960_720.jpg" alt="Image 1">
+			<span>출입국 외국인청</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="2023/엑셀지오코딩/index.html">
+<!-- 출처 : https://pixabay.com/ko/vectors/%ea%bc%ac%eb%a6%ac%ed%91%9c-%ec%9c%84%ec%b9%98-%ec%83%81-%ec%83%81%ec%a7%95-%eb%b0%94%eb%8a%98-1873545/-->
+			<img src="https://cdn.pixabay.com/photo/2016/11/30/18/14/tag-1873545_960_720.png" alt="Image 2">
+			<span>엑셀 지오코딩</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 3">
+			<span>4월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 4">
+			<span>5월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 3">
+			<span>6월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 4">
+			<span>7월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 3">
+			<span>8월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 4">
+			<span>9월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 3">
+			<span>10월 공개예정</span>
+		</a>
+	</div>
+	<div class="box">
+		<a href="#">
+			<img src="https://via.placeholder.com/300x300" alt="Image 4">
+			<span>11월 공개예정</span>
+		</a>
+	</div>
+</div>
 </body>
 </html>
