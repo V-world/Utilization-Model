@@ -38,7 +38,7 @@ function readExcel() {
                 // 주소 검색 API 호출
                 $.ajax({
                     type: "get",
-                    url: "http://api.vworld.kr/req/address",
+                    url: "https://api.vworld.kr/req/address",
                     data: {
                         service: "address",
                         request: "getcoord",
@@ -275,7 +275,7 @@ apikey = "CEB52025-E065-364C-9DBA-44880E3B02B8"; //이 인증키를 개발 및 �
 let Satellite = new ol.layer.Tile({
     name: "Satellite",
     source: new ol.source.XYZ({
-        url: "http://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png"
+        url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png"
     })
 });
 // 지도 생성
