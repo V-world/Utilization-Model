@@ -49,7 +49,7 @@ function readExcel() {
                         simple: "false",
                         format: "json",
                         type: "PARCEL",
-                        key: "E5B1657B-9B6F-3A4B-91EF-98512BE931A1",  //이 인증키를 개발 및 운영에 사용하지마세요.
+                        key: apikey
                     },
                     dataType: "jsonp",
                     async: false,
@@ -67,6 +67,7 @@ function readExcel() {
                             // #popup-content 요소 안에 실패 메시지 추가
                             $("#popup-content").append("<span style='color: #DC143C'>(실패)</span> " + a["주소"] + "<br/>")
                         }
+                        document.getElementById("popup-content").scrollTop = document.getElementById("popup-content").scrollHeight
                         // #popup 요소의 높이 조절
                         document.getElementById("popup").style.height = (document.getElementById("popup-content").offsetHeight + 150) + "px"
                     },
@@ -200,10 +201,52 @@ window.addEventListener("resize", function () {
 /**
  * 지오코딩 결과를 팝업에 표시하고 확인시 지오코딩 목록과 Openlayers의 레이어에 추가
  */
+
+function designChange(img){
+    //class 추가하기
+    switch (img.classList.toString()){
+        case "designimg":
+            if (document.querySelector(".chkimg" != null) || document.querySelector(".chkimg")){
+                document.querySelector(".chkimg").classList.add("designimg");
+                document.querySelector(".chkimg").classList.remove("chkimg");
+            }
+            img.classList.remove("designimg");
+            img.classList.add("chkimg");
+            document.getElementById("inputimage").value = img.attributes.src.value;
+            break;
+        case "chkimg":
+            img.classList.remove("chkimg");
+            img.classList.add("designimg");
+            document.getElementById("inputimage").value = "";
+            break;
+    }
+}
+
     // "filecheck", "cancel-button", "ok-button"이라는 id를 가진 요소를 찾아서 각각의 변수에 저장
 const popupContainer = document.getElementById("filecheck");
 const cancelButton = document.getElementById("cancel-button");
 const okButton = document.getElementById("ok-button");
+const designButton = document.getElementById("design-button");
+const canceldesign = document.getElementById("cancel-design");
+const okdesign = document.getElementById("ok-design")
+
+okdesign.addEventListener("click", () => {
+    if (document.getElementById("inputimage").value === "") {
+        alert("이미지를 선택해주세요.");
+    }else{
+        document.getElementById("popup-design").style.display = "none";
+        document.getElementById("popup-buttons").style.display = "block";
+    }
+});
+canceldesign.addEventListener("click", () => {
+    document.getElementById("popup-design").style.display = "none";
+    document.getElementById("popup-buttons").style.display = "block";
+    document.getElementById("inputimage").value = "";
+});
+designButton.addEventListener("click", () => {
+    document.getElementById("popup-design").style.display = "block";
+    document.getElementById("popup-buttons").style.display = "none";
+});
 // cancelButton 요소에 클릭 이벤트 리스너 추가
 cancelButton.addEventListener("click", () => {
     // popupContainer 요소를 숨김
@@ -219,19 +262,37 @@ okButton.addEventListener("click", () => {
         Math.floor(Math.random() * 256) + "," +
         "0.8)";
     // 원형 스타일 정의
-    var redCircleStyle = new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 6,
-            fill: new ol.style.Fill({
-                color: color
+    var redCircleStyle;
+    if (document.getElementById("inputimage").value === "") {
+        redCircleStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 6,
+                fill: new ol.style.Fill({
+                    color: color
+                }),
+                stroke: new ol.style.Stroke({
+                    color: color,
+                    width: 2
+                })
+            })
+        });
+    }else{
+        redCircleStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                src: document.getElementById("inputimage").value,
+                scale: 0.038,
+                anchor: [0.5, 0.5],
+                rotateWithView: false
             }),
             stroke: new ol.style.Stroke({
                 color: color,
                 width: 2
+            }),
+            fill: new ol.style.Fill({
+                color: color
             })
-        })
-    });
-    // popupContainer 요소를 숨김
+        });
+    }
     popupContainer.style.display = "none";
     // #seeBox 요소 안에 새로운 HTML 요소 추가
     $("#seeBox").append('<div class="seeBoxList"><div class="SeeBoxTitle"><span class="onoffSpan">' + fileName + ' </span><span onclick="xlsdownload(\'' + fileName + '\')">(다운로드)</span><label class="onofSwitch"><input type="checkbox" value="' + fileName + '" checked> <span class="chkSwitch"></span></label></div><div id="' + fileName + '"></div></div>')
@@ -269,15 +330,6 @@ okButton.addEventListener("click", () => {
 /**
  * Openlayers의 지도 표출 및 기능 구현
  */
-// API 키 값 저장
-apikey = "CEB52025-E065-364C-9DBA-44880E3B02B8"; //이 인증키를 개발 및 운영에 사용하지마세요.
-// 위성 지도 레이어 정의
-let Satellite = new ol.layer.Tile({
-    name: "Satellite",
-    source: new ol.source.XYZ({
-        url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png"
-    })
-});
 // 지도 생성
 let Map = new ol.Map({
     target: "map",
