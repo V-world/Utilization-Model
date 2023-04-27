@@ -7,3 +7,15 @@ let Satellite = new ol.layer.Tile({
         url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png"
     })
 });
+let White = new ol.layer.Tile({
+    name: "White",
+    source: new ol.source.XYZ({
+        url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/white/{z}/{y}/{x}.png"
+    })
+});
+let Base = new ol.layer.Tile({
+    name: "Base",
+    source: new ol.source.XYZ({
+        url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png"
+    })
+});
