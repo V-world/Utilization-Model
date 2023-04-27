@@ -89,7 +89,7 @@
 	</div>
 	<!--팝업-->
 	<div id="popup" class="ol-popup">
-		<a href="#" id="popup-closer" class="ol-popup-closer" onclick="popupClose()"></a>
+		<a href="#" id="popup-closer" class="ol-popup-closer" onclick="popupClose()"> </a>
 		<div id="popup-content">
 			<div id="popup-one">
 				<span id="locName"></span>
@@ -105,9 +105,9 @@
 					</thead>
 					<tbody>
 					<tr>
-						<td><img class="iconimage" id="weather"><span id="weatherV">()</span></td>
-						<td><img class="iconimage" id="pm10" src="css/보통.png"><span id="pm10V">()</span></td>
-						<td><img class="iconimage" id="pm25" src="css/보통.png"><span id="pm25V">()</span></td>
+						<td class="tdline"><img class="iconimage" id="weather"><p id="weatherV">()</p></td>
+						<td class="tdline"><img class="iconimage" id="pm10" src="css/보통.png"><p id="pm10V">()</p></td>
+						<td class="tdline"><img class="iconimage" id="pm25" src="css/보통.png"><p id="pm25V">()</p></td>
 					</tr>
 					</tbody>
 				</table>
@@ -120,7 +120,6 @@
 <script>
 
 
-
     const view = new ol.View({
         center: ol.proj.transform([127.100616, 37.402142], 'EPSG:4326', 'EPSG:3857'),
         zoom: 7,
@@ -130,7 +129,7 @@
 
     let map2d = new ol.Map({
         target: "map2d",
-        layers: [White],
+        layers: [Base],
         view: view
     })
 
@@ -279,27 +278,43 @@
         name: "weathermarkers",
         style: function (feature) {
             return new ol.style.Style({
+                text: new ol.style.Text({
+                    text: feature.get("sig") + "\n(" + feature.get("wtmp") + "℃)",
+                    textOverflow: 'ellipsis',
+                    overflow: true,
+                    font: 'bold 12px sans-serif',
+                    fill: new ol.style.Fill({
+                        color: "#000"
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: "#fff",
+                        width: 3
+                    }),
+                    offsetY: 40,
+                    textAlign: 'center',
+	                backgroundFill: new ol.style.Fill({
+		                color: 'rgba(255, 255, 255, 0.2)'
+	                }),
+	                backgroundStroke: new ol.style.Stroke({
+		                color: '#ffcc33',
+		                width: 2
+	                }),
+                }),
                 image: new ol.style.Icon(({
                     anchor: [0.5, 10],
                     anchorXUnits: 'fraction',
                     anchorYUnits: 'pixels',
                     src: feature.get("iconWeather"),
-                    scale: 0.15
+                    scale: 0.15,
                 })),
+	            fill: new ol.style.Fill({
+		            color: 'rgba(255, 255, 255, 0.2)'
+	            }),
+	            stroke: new ol.style.Stroke({
+		            color: '#ffcc33',
+		            width: 2
+	            }),
             });
-        },
-        text: function (feature){
-            return new ol.style.Text({
-				text: feature.get("textWeather"),
-				font: 'bold 12px sans-serif',
-				fill: new ol.style.Fill({
-					color: '#000'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#fff',
-					width: 3
-				})
-			})
         }
     });
 
@@ -346,20 +361,20 @@
                             } else if (itemT.category === "PTY") {
                                 locPty = itemT.fcstValue;
                             }
-	                        switch (itemT.category){
-		                        case "TMP":
+                            switch (itemT.category) {
+                                case "TMP":
                                     //현재기온
                                     wtmp = itemT.fcstValue;
                                     break;
-								case "TMN":
+                                case "TMN":
                                     //최저기온
                                     wtmn = itemT.fcstValue;
                                     break;
                                 case "TMX":
                                     //최고기온
                                     wtmx = itemT.fcstValue;
-									break;
-	                        }
+                                    break;
+                            }
                             if (locSky === "1") {
                                 weathermarkers.getSource().addFeatures([
                                     new ol.Feature({
@@ -367,9 +382,9 @@
                                         name: item.properties.sig_kor_nm,
                                         iconWeather: "./css/sun.png",
                                         sig: item.properties.sig_kor_nm,
-	                                    wtmp: wtmp,
-	                                    wtmn: wtmn,
-	                                    wtmx: wtmx
+                                        wtmp: wtmp,
+                                        wtmn: wtmn,
+                                        wtmx: wtmx
                                     })
                                 ])
                             } else if (locPty === "0") {
@@ -434,7 +449,7 @@
 
             var gon;
             if (feature.get("sig").indexOf(" ") !== -1) {
-				gon = feature.get("sig").split(" ")[1]
+                gon = feature.get("sig").split(" ")[1]
                 $.ajax({
                     url: "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?",
                     type: "GET",
@@ -449,28 +464,28 @@
                         ver: "1.3"
                     },
                     success: function (dataT) {
-                        dataT.response.body.items.forEach(function (itemT){
-                            if (itemT.no2Flag == null && itemT.pm10Value !== "-" && itemT.pm25Value !== "-"){
+                        dataT.response.body.items.forEach(function (itemT) {
+                            if (itemT.no2Flag == null && itemT.pm10Value !== "-" && itemT.pm25Value !== "-") {
                                 wPM10V = itemT.pm10Value;
                                 wPM25V = itemT.pm25Value;
                             }
                         })
                     }
                 })
-			}else if (feature.get("sig").indexOf("시") !== -1) {
-	            $.ajax({
-		            url: "https://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getTMStdrCrdnt?",
-		            type: "GET",
-		            dataType: "json",
-		            data: {
+            } else if (feature.get("sig").indexOf("시") !== -1) {
+                $.ajax({
+                    url: "https://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getTMStdrCrdnt?",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
                         serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
-			            returnType: "json",
-			            numOfRows: "15",
-			            pageNo: "1",
-			            umdName: feature.get("sig"),
-		            },
-		            success: function (dataH){
-                        dataH.response.body.items.forEach(function (itemH){
+                        returnType: "json",
+                        numOfRows: "15",
+                        pageNo: "1",
+                        umdName: feature.get("sig"),
+                    },
+                    success: function (dataH) {
+                        dataH.response.body.items.forEach(function (itemH) {
                             $.ajax({
                                 url: "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?",
                                 type: "GET",
@@ -485,20 +500,20 @@
                                     ver: "1.3"
                                 },
                                 success: function (dataF) {
-                                    if (dataF.response.body.totalCount !== 0){
-                                        dataF.response.body.items.forEach(function (itemF){
-											if (itemF.no2Flag == null && itemF.pm10Value !== "-" && itemF.pm25Value !== "-"){
-												wPM10V = itemF.pm10Value;
-												wPM25V = itemF.pm25Value;
-											}
-										})
+                                    if (dataF.response.body.totalCount !== 0) {
+                                        dataF.response.body.items.forEach(function (itemF) {
+                                            if (itemF.no2Flag == null && itemF.pm10Value !== "-" && itemF.pm25Value !== "-") {
+                                                wPM10V = itemF.pm10Value;
+                                                wPM25V = itemF.pm25Value;
+                                            }
+                                        })
                                     }
                                 }
                             })
-			            })
-		            }
-	            })
-            }else{
+                        })
+                    }
+                })
+            } else {
                 gon = feature.get("sig")
                 $.ajax({
                     url: "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?",
@@ -514,8 +529,8 @@
                         ver: "1.3"
                     },
                     success: function (dataT) {
-                        dataT.response.body.items.forEach(function (itemT){
-                            if (itemT.no2Flag == null && itemT.pm10Value !== "-" && itemT.pm25Value !== "-"){
+                        dataT.response.body.items.forEach(function (itemT) {
+                            if (itemT.no2Flag == null && itemT.pm10Value !== "-" && itemT.pm25Value !== "-") {
                                 wPM10V = itemT.pm10Value;
                                 wPM25V = itemT.pm25Value;
                             }
@@ -524,9 +539,9 @@
                 })
             }
 
-	        $("#weatherV").html("(" + feature.get("wtmp") + "℃)");
-	        $("#pm10V").html("("+ wPM10V +"㎍/㎥)");
-            $("#pm25V").html("("+ wPM25V +"㎍/㎥)");
+            $("#weatherV").html("(" + feature.get("wtmp") + "℃)");
+            $("#pm10V").html("(" + wPM10V + "㎍/㎥)");
+            $("#pm25V").html("(" + wPM25V + "㎍/㎥)");
             $("#locName").html("위치: " + feature.get("name"));
             $("#weather").attr("src", feature.get("iconWeather"));
             var coordinate = e.coordinate;
@@ -535,7 +550,6 @@
             popupClose()
         }
     });
-
 
 
 </script>

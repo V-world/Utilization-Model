@@ -41,6 +41,10 @@ hr{
     border: 1px solid #66CCCC;
 }
 
+.tdline{
+    vertical-align: middle;
+}
+
 table{
     border-collapse: collapse;
     width: 100%;
