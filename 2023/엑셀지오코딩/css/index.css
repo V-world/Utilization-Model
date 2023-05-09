@@ -254,3 +254,11 @@ ul.geolists li{
     background-color: #9E9E9E;
     color: #F5F5F5;
 }
+
+#guide{
+    position: fixed;
+    bottom: 7px;
+    right: 10px;
+    background-color: #FFFFFF;
+    font-size: 20px;
+}

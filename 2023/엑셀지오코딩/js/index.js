@@ -62,25 +62,56 @@ function readExcel() {
                             $("#popup-content").append("<span style='color: #32CD32'>(성공)</span> " + a["주소"] + "<br/>")
                             // API 호출이 실패하면
                         } else {
-                            // geofall 배열에 주소 추가
-                            geofall.push(a["주소"])
-                            // #popup-content 요소 안에 실패 메시지 추가
-                            $("#popup-content").append("<span style='color: #DC143C'>(실패)</span> " + a["주소"] + "<br/>")
+                            $.ajax({
+                                type: "get",
+                                url: "https://api.vworld.kr/req/address",
+                                data: {
+                                    service: "address",
+                                    request: "getcoord",
+                                    version: "2.0",
+                                    crs: "epsg:4326",
+                                    address: a["주소"],
+                                    refine: "true",
+                                    simple: "false",
+                                    format: "json",
+                                    type: "ROAD",
+                                    key: apikey
+                                },
+                                dataType: "jsonp",
+                                async: false,
+                                success: function (dataT) {
+                                    if (dataT?.response?.result?.point?.x) {
+                                        // geosuccess 배열에 변환된 좌표 추가
+                                        geosuccess.push([a["주소"], [dataT.response.result.point.x, dataT.response.result.point.y]])
+                                        // #popup-content 요소 안에 성공 메시지 추가
+                                        $("#popup-content").append("<span style='color: #32CD32'>(성공)</span> " + a["주소"] + "<br/>")
+                                        // API 호출이 실패하면
+                                    }else{
+                                        // geofall 배열에 주소 추가
+                                        geofall.push(a["주소"])
+                                        // #popup-content 요소 안에 실패 메시지 추가
+                                        $("#popup-content").append("<span style='color: #DC143C'>(실패)</span> " + a["주소"] + "<br/>")
+                                    }
+                                    document.getElementById("popup-content").scrollTop = document.getElementById("popup-content").scrollHeight
+                                    // #popup 요소의 높이 조절
+                                    document.getElementById("popup").style.height = (document.getElementById("popup-content").offsetHeight + 170) + "px"
+                                }
+                            })
                         }
                         document.getElementById("popup-content").scrollTop = document.getElementById("popup-content").scrollHeight
                         // #popup 요소의 높이 조절
-                        document.getElementById("popup").style.height = (document.getElementById("popup-content").offsetHeight + 150) + "px"
+                        document.getElementById("popup").style.height = (document.getElementById("popup-content").offsetHeight + 170) + "px"
                     },
                 });
             })
         };
         // FileReader 객체가 파일을 읽음
         reader.readAsBinaryString(input.files[0]);
+        // popuptoogle 함수 호출
+        popuptoogle("filecheck");
     }
     // "csvGeo"라는 id를 가진 요소의 값을 빈 문자열로 설정
     document.getElementById("csvGeo").value = "";
-    // popuptoogle 함수 호출
-    popuptoogle("filecheck");
 }
 
 
@@ -294,6 +325,7 @@ okButton.addEventListener("click", () => {
         });
     }
     popupContainer.style.display = "none";
+    document.getElementById("inputimage").value = "";
     // #seeBox 요소 안에 새로운 HTML 요소 추가
     $("#seeBox").append('<div class="seeBoxList"><div class="SeeBoxTitle"><span class="onoffSpan">' + fileName + ' </span><span onclick="xlsdownload(\'' + fileName + '\')">(다운로드)</span><label class="onofSwitch"><input type="checkbox" value="' + fileName + '" checked> <span class="chkSwitch"></span></label></div><div id="' + fileName + '"></div></div>')
     // Map 객체에 새로운 벡터 레이어 추가
@@ -374,3 +406,19 @@ Map.on("movestart", function (){
     // #seeBox 요소를 숨김
     $("#seeBox").hide();
 })
+
+
+/**
+ * 디버그용
+ */
+function cmd(){
+    console.debug("imgshow() : 이미지 입력창 보이기")
+    console.debug("imgput() : 이미지 입력창에 기본값 입력")
+}
+function imgshow(){
+    document.getElementById("inputimage").hidden = false;
+}
+function imgput(){
+    // 이미지 출처 https://pixabay.com/ko/vectors/%ec%84%b8%ea%b3%84-%ec%a7%80%ea%b5%ac-%ed%96%89%ec%84%b1-%eb%8c%80%eb%a5%99-%ea%b5%ac%ec%b2%b4-153534/
+    document.getElementById("inputimage").value = "https://cdn.pixabay.com/photo/2013/07/12/18/35/world-153534_960_720.png";
+}
