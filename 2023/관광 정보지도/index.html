@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Title</title>
+	<meta charset="UTF-8">
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.5/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.6/turf.js"></script>
+	<link rel="stylesheet" href="css/index.css">
+	<script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
+
+	<style>
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+	<div class="contentMenu">
+		<button class="contentSel">관광지</button>
+		<div class="contentItems">
+			<a href="#">관광지</a>
+			<a href="#">문화시설</a>
+			<a href="#">행사/공연/축제</a>
+			<a href="#">여행코스</a>
+			<a href="#">레포츠</a>
+			<a href="#">숙박</a>
+			<a href="#">쇼핑</a>
+			<a href="#">음식점</a>
+		</div>
+	</div>
+	<div id="locName">
+		<span id="locSido">경기도</span>
+	</div>
+	<div class="menu-container" id="menu">
+		<div style="margin: 100px"></div>
+		<div style="margin: 90px"></div>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울특별시" data-id=1>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산광역시" data-id=2>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구광역시" data-id=3>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천광역시" data-id=4>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주광역시" data-id=5>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전광역시" data-id=6>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산광역시" data-id=7>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종특별자치시" data-id=8>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기도" data-id=9>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원도" data-id=10>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충청북도" data-id=11>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충청남도" data-id=12>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전라북도" data-id=13>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전라남도" data-id=14>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경상북도" data-id=15>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경상남도" data-id=16>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주특별자치도" data-id=17>
+		<div style="margin: 90px"></div>
+		<div style="margin: 100px"></div>
+	</div>
+
+	<script src="../../keys/vworld.js"></script>
+	<script>
+        let Map = new ol.Map({
+            target: "map",
+            layers: [Satellite],
+            view: new ol.View({
+                center: EPSGChg(127.100616, 37.402142),
+                zoom: 10,
+                minZoom: 5,
+                maxZoom: 18,
+            })
+        })
+
+        function EPSGChg(x, y) {
+			return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
+		}
+
+        $(document).ready(function() {
+            var menuContainer = $('#menu');
+            var images = menuContainer.find('img');
+
+            var middleImageIndex = Math.floor(images.length / 2);
+            var middleImage = images[middleImageIndex];
+
+            var offset = middleImage.offsetLeft - (menuContainer[0].offsetWidth / 2) + (middleImage.offsetWidth / 2);
+            menuContainer[0].scrollLeft = offset;
+
+            var altText = middleImage.alt;
+            $("#locSido").text(altText);
+
+            menuContainer.on('scroll', function() {
+                var middlePosition = menuContainer[0].scrollLeft + (menuContainer[0].clientWidth / 2);
+                var middleImage;
+                for (var i = 0; i < images.length; i++) {
+                    var image = images[i];
+                    var imagePosition = image.offsetLeft + (image.offsetWidth / 2);
+                    if (imagePosition >= middlePosition) {
+                        middleImage = image;
+                        break;
+                    }
+                }
+                if (middleImage) {
+                    var altText = middleImage.alt;
+                    $("#locSido").text(altText);
+                }
+            });
+
+            $('.menu-container img').click(function() {
+                var offset = this.offsetLeft - (menuContainer[0].offsetWidth / 2) + (this.offsetWidth / 2);
+                menuContainer.animate({
+                    scrollLeft: offset
+                }, 150);
+            });
+        });
+
+	</script>
+</body>
+</html>
