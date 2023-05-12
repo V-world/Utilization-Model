@@ -118,6 +118,16 @@
             font-size: 20px;
         }
 
+        #loading{
+            position: fixed;
+			width: 30%;
+	        left: 50%;
+	        transform: translate(-50%, -50%);
+			z-index: 9999;
+			display: none;
+	        top: 50%;
+        }
+
 	</style>
 </head>
 <body>
@@ -140,25 +150,27 @@
 	</div>
 	<div class="menu-container" id="menu">
 		<div style="flex-shrink: 0; width: 380px"></div>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울특별시" data-id=1>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산광역시" data-id=2>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구광역시" data-id=3>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천광역시" data-id=4>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주광역시" data-id=5>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전광역시" data-id=6>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산광역시" data-id=7>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종특별자치시" data-id=8>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기도" data-id=9>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원도" data-id=10>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충청북도" data-id=11>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충청남도" data-id=12>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전라북도" data-id=13>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전라남도" data-id=14>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경상북도" data-id=15>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경상남도" data-id=16>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주특별자치도" data-id=17>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울" data-id=1>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산" data-id=2>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구" data-id=3>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천" data-id=4>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주" data-id=5>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전" data-id=6>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산" data-id=7>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종" data-id=8>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기" data-id=9>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원" data-id=10>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충북" data-id=11>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충남" data-id=12>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전북" data-id=13>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전남" data-id=14>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경북" data-id=15>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경남" data-id=16>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주" data-id=17>
 		<div style="flex-shrink: 0; width: 380px;"></div>
 	</div>
+
+	<img id="loading" src="css/loading.gif"/>
 
 	<script src="../../keys/vworld.js"></script>
 	<script>
@@ -173,18 +185,88 @@
             })
         })
 
+        function EPSGChg(x, y) {
+            return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
+        }
+
         Map.on("movestart", function() {
             $(".contentItems").hide();
 		})
 
+        var informationMarker = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            name: "informationMarker",
+            style: function (feature) {
+                return new ol.style.Style({
+                    image: new ol.style.Icon(({
+                        anchor: [0.5, 10],
+                        anchorXUnits: 'fraction',
+                        anchorYUnits: 'pixels',
+                        src: feature.get("emoji"),
+                        scale: 1,
+                    })),
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ffcc33',
+                        width: 2
+                    }),
+                });
+            }
+        });
+
+        Map.addLayer(informationMarker)
+
+    </script>
+	<script>
+
+        /**
+         * 유니코드를 이모지로 변환
+         * @uniemoji 이모지
+         * @returns 이모지 임의의 URL 주소
+         */
+        // 🗽0x1F5FD
+        // 🏛0x1F3DB
+        // 🎆0x1F386
+        // 🛫0x1F6EB
+        // 🚴0x1F6B4
+        // ⛺0x26FA
+        // 🏪0x1F3EA
+        // 🍝0x1F35D
+
+        var emojiid;
+        window.onload = function() {
+	        emojiid = {
+                12: String.fromCodePoint(0x1F5FD),
+		        14: String.fromCodePoint(0x1F3DB),
+		        15: String.fromCodePoint(0x1F386),
+		        25: String.fromCodePoint(0x1F6EB),
+		        28: String.fromCodePoint(0x1F6B4),
+		        32: String.fromCodePoint(0x26FA),
+		        38: String.fromCodePoint(0x1F3EA),
+		        39: String.fromCodePoint(0x1F35D),
+	        }
+        }
+
+        function emojiConvert(uniemoji) {
+            emoji = emojiid[uniemoji];
+            var canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            var ctx = canvas.getContext('2d');
+            ctx.font = '64px serif';
+            ctx.fillText(emoji, 0, 64);
+            return canvas.toDataURL();
+        }
+
+
         let content = 12;
 
-        function EPSGChg(x, y) {
-			return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
-		}
         function contentSel(a){
             $("#contentSel").text(a.text);
             content = a.getAttribute("data-id");
+            dataload();
             $(".contentItems").hide();
         }
 
@@ -192,10 +274,45 @@
             $(".contentItems").toggle();
         });
 
+        function dataload(){
+            $.ajax({
+                url: "http://apis.data.go.kr/B551011/KorService1/searchKeyword1",
+                data: {
+                    numOfRows: 100,
+                    pageNo: 1,
+                    MobileOS: "ETC",
+                    MobileApp: "VWORLD",
+                    ServiceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+                    _type: "json",
+                    contentTypeId: content,
+                    keyword: $("#locSido").text(),
+                },
+	            beforeSend: function() {
+                    informationMarker.getSource().clear();
+                    $("#loading").show();
+				},
+                success: function(data) {
+                    data.response.body.items.item.forEach(function (item){
+                        informationMarker.getSource().addFeatures([
+                            new ol.Feature({
+                                geometry: new ol.geom.Point(EPSGChg(item.mapx, item.mapy)),
+                                name: item.title,
+                                emoji: emojiConvert(content),
+	                            addr: item.addr1
+                            })
+                        ])
+                    });
+                },
+	            complete: function() {
+                    $("#loading").hide();
+                }
+            });
+        };
 
         $(document).ready(function() {
             var menuContainer = $('#menu');
             var images = menuContainer.find('img');
+            var isScrolling;
 
             var middleImageIndex = Math.floor(images.length / 2);
             var middleImage = images[middleImageIndex];
@@ -221,6 +338,11 @@
                     var altText = middleImage.alt;
                     $("#locSido").text(altText);
                 }
+
+                window.clearTimeout(isScrolling);
+                isScrolling = setTimeout(function() {
+                    dataload()
+                }, 200);
             });
 
             $('.menu-container img').click(function() {
