@@ -31,7 +31,7 @@
 		</div>
 	</div>
 	<div id="locName">
-		<span id="locSido">경기도</span>
+		<span id="locSido">서울</span>
 	</div>
 	<div class="menu-container" id="menu">
 		<div style="flex-shrink: 0; width: 380px"></div>
@@ -270,16 +270,6 @@
             var menuContainer = $('#menu');
             var images = menuContainer.find('img');
             var isScrolling;
-
-            var middleImageIndex = Math.floor(images.length / 2);
-            var middleImage = images[middleImageIndex];
-
-            var offset = middleImage.offsetLeft - (menuContainer[0].offsetWidth / 2) + (middleImage.offsetWidth / 2);
-            menuContainer[0].scrollLeft = offset;
-
-            var altText = middleImage.alt;
-            $("#locSido").text(altText);
-
             menuContainer.on('scroll', function() {
                 var middlePosition = menuContainer[0].scrollLeft + (menuContainer[0].clientWidth / 2);
                 var middleImage;

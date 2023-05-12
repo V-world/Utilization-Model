@@ -103,38 +103,6 @@ body {
     font-size: 20px;
 }
 
-#loading{
-    position: fixed;
-    width: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-    display: none;
-    top: 50%;
-}
-
-#info{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    min-height: 50%;
-    background-color: #f1f1f1;
-    overflow-y: hidden;
-    transition: transform 0.3s;
-    z-index: 1;
-}
-
-#info.hide {
-    transform: translateY(100%);
-}
-
-.close-button {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    border: none;
-    font-size: 50px;
-    cursor: pointer;
+.contentMenu:hover .contentItems {
+    display: block;
 }
