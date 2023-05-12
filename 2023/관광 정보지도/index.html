@@ -13,121 +13,6 @@
 	<script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
 
 	<style>
-        @font-face {
-            font-family: 'TheJamsil5Bold';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
-            font-weight: 700;
-            font-style: normal;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        #map{
-            width: 100%;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-            background: #f5f5f5;
-        }
-        .menu-container {
-            width: 100%;
-            position: fixed;
-            bottom: 0;
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: scroll;
-            background-color: #FFFFFF;
-        }
-
-        .menu-container img {
-            width: 115px;
-            height: 115px;
-            padding: 10px;
-            margin: 40px;
-            border: 3px solid #4997f6;
-            border-radius: 100%;
-        }
-
-        #locName{
-            position: fixed;
-            left: 50%;
-            transform: translate(-50%, 0);
-            bottom: 250px;
-            display: inline-block;
-        }
-        #locName span{
-            display: inline-block;
-            padding: 25px;
-            color: #4997f6;
-            background: #FFFFFF;
-            border-radius: 20px;
-            font-family: TheJamsil5Bold, sans-serif;
-            border: #4997f6 3px solid;
-            font-size: 30px;
-        }
-        #locName:after{
-            border-width: 30px 20px;
-            left: 50%;
-            margin-left: -20px;
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-color: #4997f6 transparent transparent transparent;
-            bottom: -60px;
-        }
-
-
-        .contentMenu {
-            position: fixed;
-            top: 5px;
-            right: 5px;
-            display: inline-block;
-        }
-
-        .contentMenu .contentSel {
-            padding: 16px;
-            color: #4997f6;
-            font-size: 30px;
-            border-radius: 20px;
-            border: 1px solid #4997f6;
-            width: 180px;
-            font-family: TheJamsil5Bold, sans-serif;
-            cursor: pointer;
-        }
-
-        .contentMenu .contentItems {
-            display: none;
-            position: absolute;
-            padding-left: 10px;
-            min-width: 130px;
-            z-index: 1;
-            text-align: center;
-        }
-
-        .contentMenu .contentItems a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            border: 1px solid #4997f6;
-            font-family: TheJamsil5Bold , sans-serif;
-            font-size: 20px;
-        }
-
-        #loading{
-            position: fixed;
-			width: 30%;
-	        left: 50%;
-	        transform: translate(-50%, -50%);
-			z-index: 9999;
-			display: none;
-	        top: 50%;
-        }
-
 	</style>
 </head>
 <body>
@@ -150,27 +35,35 @@
 	</div>
 	<div class="menu-container" id="menu">
 		<div style="flex-shrink: 0; width: 380px"></div>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울" data-id=1>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산" data-id=2>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구" data-id=3>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천" data-id=4>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주" data-id=5>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전" data-id=6>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산" data-id=7>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종" data-id=8>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기" data-id=9>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원" data-id=10>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충북" data-id=11>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충남" data-id=12>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전북" data-id=13>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전남" data-id=14>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경북" data-id=15>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경남" data-id=16>
-		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주" data-id=17>
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울" data-id="1">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천" data-id="2">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전" data-id="3">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구" data-id="4">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주" data-id="5">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산" data-id="6">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산" data-id="7">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종" data-id="8">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기" data-id="31">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원" data-id="32">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충북" data-id="33">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충남" data-id="34">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경북" data-id="35">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경남" data-id="36">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전북" data-id="37">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전남" data-id="38">
+		<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주" data-id="39">
 		<div style="flex-shrink: 0; width: 380px;"></div>
 	</div>
 
 	<img id="loading" src="css/loading.gif"/>
+
+	<div id="info" class="hide">
+		<button class="close-button" onclick="$('#info').addClass('hide');">&times;</button>
+		<h1 id="info_title">관광지</h1>
+		<h3 id="info_addr"> 경기도 </h3>
+		<div id="info_img"></div>
+		<h4 id="info_tel">전화번호</h4>
+	</div>
 
 	<script src="../../keys/vworld.js"></script>
 	<script>
@@ -190,7 +83,7 @@
         }
 
         Map.on("movestart", function() {
-            $(".contentItems").hide();
+            $('#info').addClass('hide');
 		})
 
         var informationMarker = new ol.layer.Vector({
@@ -218,25 +111,50 @@
 
         Map.addLayer(informationMarker)
 
+        Map.on("click", function (e) {
+            var feature = Map.forEachFeatureAtPixel(e.pixel,
+                function (feature) {
+                    return feature;
+                });
+            if (feature) {
+                $("#info_title").text(feature.get("name"))
+                $("#info_addr").text(feature.get("addr"))
+	            var imghtml = "";
+                if (feature.get("img1") == null && feature.get("img2") == null){
+                    imghtml = ""
+                } else if (feature.get("img2") == null){
+                    imghtml = "<img src='" + feature.get("img1") + "' alt='이미지' style='width: 100%; height: 100%;'>"
+                } else {
+					imghtml = "<img src='" + feature.get("img1") + "' alt='이미지' style='width: 50%; height: 100%;'><img src='" + feature.get("img2") + "' alt='이미지' style='width: 50%; height: 100%;'>"
+				}
+                $("#info_img").html(imghtml)
+	            if (feature.get("tel") === "" || feature.get("tel") == null || feature.get("tel") === " "){
+		            $("#info_tel").text("전화번호: 없음")
+	            } else {
+		            $("#info_tel").text("전화번호: " + feature.get("tel"))
+	            }
+                $('#info').removeClass("hide");
+            } else {
+                $('#info').addClass("hide");
+            }
+		});
+
     </script>
 	<script>
 
-        /**
-         * 유니코드를 이모지로 변환
-         * @uniemoji 이모지
-         * @returns 이모지 임의의 URL 주소
-         */
-        // 🗽0x1F5FD
-        // 🏛0x1F3DB
-        // 🎆0x1F386
-        // 🛫0x1F6EB
-        // 🚴0x1F6B4
-        // ⛺0x26FA
-        // 🏪0x1F3EA
-        // 🍝0x1F35D
 
         var emojiid;
         window.onload = function() {
+            /*
+            🗽0x1F5FD
+            🏛0x1F3DB
+            🎆0x1F386
+            🛫0x1F6EB
+            🚴0x1F6B4
+            ⛺0x26FA
+            🏪0x1F3EA
+            🍝0x1F35D
+            */
 	        emojiid = {
                 12: String.fromCodePoint(0x1F5FD),
 		        14: String.fromCodePoint(0x1F3DB),
@@ -249,6 +167,12 @@
 	        }
         }
 
+
+        /**
+         * 유니코드를 이모지로 변환
+         * @uniemoji 이모지
+         * @returns 이모지 임의의 URL 주소
+         */
         function emojiConvert(uniemoji) {
             emoji = emojiid[uniemoji];
             var canvas = document.createElement('canvas');
@@ -262,6 +186,7 @@
 
 
         let content = 12;
+        let areaCode = 9;
 
         function contentSel(a){
             $("#contentSel").text(a.text);
@@ -276,7 +201,7 @@
 
         function dataload(){
             $.ajax({
-                url: "http://apis.data.go.kr/B551011/KorService1/searchKeyword1",
+                url: "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?",
                 data: {
                     numOfRows: 100,
                     pageNo: 1,
@@ -285,26 +210,58 @@
                     ServiceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
                     _type: "json",
                     contentTypeId: content,
-                    keyword: $("#locSido").text(),
+	                areaCode: areaCode,
                 },
 	            beforeSend: function() {
                     informationMarker.getSource().clear();
                     $("#loading").show();
 				},
                 success: function(data) {
+                    let addr;
+                    let img1, img2;
                     data.response.body.items.item.forEach(function (item){
-                        informationMarker.getSource().addFeatures([
-                            new ol.Feature({
-                                geometry: new ol.geom.Point(EPSGChg(item.mapx, item.mapy)),
-                                name: item.title,
-                                emoji: emojiConvert(content),
-	                            addr: item.addr1
-                            })
-                        ])
-                    });
+                         if (item.addr1 == null) {
+							 addr = item.addr2;
+						 } else {
+							 addr = item.addr1 + " " + item.addr2;
+						 }
+                         if (item.firstimage == null || item.firstimage === "" || item.firstimage === " ") {
+                             img1 = null;
+						 } else {
+							 img1 = item.firstimage;
+						 }
+                         if (item.firstimage2 == null || item.firstimage2 === "" || item.firstimage2 === " ") {
+							 img2 = null;
+                         } else {
+                             img2 = item.firstimage2;
+                         }
+                        if (!(item.mapx == 0 || item.mapy == 0)) {
+                            informationMarker.getSource().addFeatures([
+                                new ol.Feature({
+                                    geometry: new ol.geom.Point(EPSGChg(item.mapx, item.mapy)),
+                                    name: item.title,
+                                    emoji: emojiConvert(content),
+                                    addr: addr,
+                                    img1: img1,
+                                    img2: img2,
+                                    tel: item.tel
+                                })
+                            ])
+                        }
+                    })
                 },
 	            complete: function() {
                     $("#loading").hide();
+                    var featureCollection = new ol.Collection();
+                    var features = informationMarker.getSource().getFeatures();
+                    features.forEach(function(feature) {
+                        featureCollection.push(feature);
+                    });
+                    var extent = ol.extent.createEmpty();
+                    featureCollection.forEach(function(feature) {
+                        ol.extent.extend(extent, feature.getGeometry().getExtent());
+                    });
+                    Map.getView().fit(extent, Map.getSize());
                 }
             });
         };
@@ -337,6 +294,7 @@
                 if (middleImage) {
                     var altText = middleImage.alt;
                     $("#locSido").text(altText);
+                    areaCode = middleImage.getAttribute("data-id");
                 }
 
                 window.clearTimeout(isScrolling);
