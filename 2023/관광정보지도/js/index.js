@@ -16,6 +16,10 @@ let Map = new ol.Map({
     })
 })
 
+Map.setOptions({maxResolution: 15625});
+Map.setOptions({isMobile: true});
+
+
 function EPSGChg(x, y) {
     return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
 }
@@ -170,7 +174,7 @@ Map.addInteraction(selectInteraction);
 
 var emojiid;
 window.onload = function () {
-    var isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+    var NowisMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
     /*
     🗽0x1F5FD
     🏛0x1F3DB
@@ -192,7 +196,7 @@ window.onload = function () {
         39: String.fromCodePoint(0x1F35D),
     }
     dataload();
-    if (!isMobile) {
+    if (!NowisMobile) {
         $("#alrt").css("display", "block");
     }
 }
