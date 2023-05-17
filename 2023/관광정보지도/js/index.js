@@ -193,7 +193,7 @@ window.onload = function () {
     }
     dataload();
     if (!isMobile) {
-        $("#mobileplz").css("display", "block");
+        $("#alrt").css("display", "block");
     }
 }
 
@@ -237,7 +237,7 @@ function dataload() {
         },
         beforeSend: function () {
             informationMarker.getSource().clear();
-            $("#loading").show();
+            $("#loadingdiv").show();
         },
         success: function (data) {
             let addr;
@@ -289,7 +289,7 @@ function dataload() {
                         complete: function () {
                             window.clearTimeout(mapextent);
                             mapextent = setTimeout(function () {
-                                $("#loading").hide();
+                                $("#loadingdiv").hide();
                                 var featureCollection = new ol.Collection();
                                 var features = informationMarker.getSource().getFeatures();
                                 features.forEach(function (feature) {
@@ -375,7 +375,7 @@ function infoSel(i){
                 contentTypeId: content
             },
             beforeSend: function () {
-                $("#loading").show();
+                $("#loadingdiv").show();
             },
             success: function (data) {
                 var html = "<table>"
@@ -1021,7 +1021,7 @@ function infoSel(i){
                 $("#info_table").html(html);
             },
             complete: function () {
-                $("#loading").hide();
+                $("#loadingdiv").hide();
                 $("#info_one").css("display", "none");
                 $("#info_two").css("display", "block");
             }
