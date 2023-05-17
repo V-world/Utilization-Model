@@ -13,12 +13,10 @@ let Map = new ol.Map({
         zoom: 10,
         minZoom: 5,
         maxZoom: 18,
-    })
+    }),
+    isMobile: true,
+    maxResolution: 15625,
 })
-
-Map.setOptions({maxResolution: 15625});
-Map.setOptions({isMobile: true});
-
 
 function EPSGChg(x, y) {
     return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
