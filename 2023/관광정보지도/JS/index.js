@@ -1,3 +1,10 @@
+
+const ToruConfig = {
+    serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+    MobileApp: "VWORLD",
+    MobileOS: "ETC"
+}
+
 let Map = new ol.Map({
     target: "map",
     layers: [Satellite],
@@ -210,11 +217,6 @@ function emojiConvert(uniemoji) {
 
 let content = 12;
 let areaCode = 1;
-const ToruConfig = {
-    serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
-    MobileApp: "VWORLD",
-    MobileOS: "ETC"
-}
 var mapextent;
 
 function dataload() {
