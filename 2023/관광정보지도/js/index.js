@@ -206,10 +206,10 @@ window.onload = function () {
 function emojiConvert(uniemoji) {
     emoji = emojiid[uniemoji];
     var canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
+    canvas.width = 96;
+    canvas.height = 96;
     var ctx = canvas.getContext('2d');
-    ctx.font = '64px serif';
+    ctx.font = '96px serif';
     ctx.fillText(emoji, 0, 64);
     return canvas.toDataURL();
 }
