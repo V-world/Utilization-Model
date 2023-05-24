@@ -227,7 +227,7 @@ function dataload() {
     $.ajax({
         url: "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?",
         data: {
-            numOfRows: 100,
+            numOfRows: 70,
             pageNo: 1,
             MobileOS: ToruConfig.MobileOS,
             MobileApp: ToruConfig.MobileApp,
