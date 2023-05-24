@@ -5,7 +5,9 @@ const ToruConfig = {
     MobileOS: "ETC"
 }
 
-let Map = new ol.Map({
+const EPSGChg = (x, y) => ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
+
+const Map = new ol.Map({
     target: "map",
     layers: [Satellite],
     view: new ol.View({
@@ -16,28 +18,45 @@ let Map = new ol.Map({
     }),
     isMobile: true,
     maxResolution: 15625,
-})
+    updateWhileAnimating: true,
+});
 
-function EPSGChg(x, y) {
-    return ol.proj.transform([x, y], "EPSG:4326", "EPSG:3857");
-}
+let emojiid, content = 12, areaCode = 1, mapextent;
 
 Map.on("movestart", function () {
     $('#info').addClass('hide');
-})
+});
 
+
+/**
+ * 유니코드를 이모지로 변환
+ * @uniemoji 이모지
+ * @returns 이모지 임의의 URL 주소
+ */
+function emojiConvert(uniemoji) {
+    emoji = emojiid[uniemoji];
+    var canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 96;
+    var ctx = canvas.getContext('2d');
+    ctx.font = '96px serif';
+    ctx.fillText(emoji, 0, 64);
+    return canvas.toDataURL();
+}
+
+// Create a new vector layer
 var informationMarker = new ol.layer.Vector({
     source: new ol.source.Vector(),
     name: "informationMarker",
     style: function (feature) {
         return new ol.style.Style({
-            image: new ol.style.Icon(({
+            image: new ol.style.Icon({
                 anchor: [0.5, 10],
                 anchorXUnits: 'fraction',
                 anchorYUnits: 'pixels',
                 src: feature.get("emoji"),
                 scale: 1,
-            })),
+            }),
             fill: new ol.style.Fill({
                 color: 'rgba(255, 255, 255, 0.2)'
             }),
@@ -52,20 +71,22 @@ var informationMarker = new ol.layer.Vector({
 var clusterSource = new ol.source.Cluster({
     distance: 50,
     source: informationMarker.getSource(),
+    renderBuffer: 100,
 });
 
+// Create a new cluster layer
 var clusterLayer = new ol.layer.Vector({
     source: clusterSource,
     style: function (feature) {
         if (feature.get('features').length > 1) {
             return new ol.style.Style({
-                image: new ol.style.Icon(({
+                image: new ol.style.Icon({
                     anchor: [0.5, 10],
                     anchorXUnits: 'fraction',
                     anchorYUnits: 'pixels',
                     src: feature.get('features')[0].get("emoji"),
                     scale: 1,
-                })),
+                }),
                 fill: new ol.style.Fill({
                     color: 'rgba(255, 255, 255, 0.2)'
                 }),
@@ -91,13 +112,13 @@ var clusterLayer = new ol.layer.Vector({
             });
         } else {
             return new ol.style.Style({
-                image: new ol.style.Icon(({
+                image: new ol.style.Icon({
                     anchor: [0.5, 10],
                     anchorXUnits: 'fraction',
                     anchorYUnits: 'pixels',
                     src: feature.get('features')[0].get("emoji"),
                     scale: 1,
-                })),
+                }),
                 fill: new ol.style.Fill({
                     color: 'rgba(255, 255, 255, 0.2)'
                 }),
@@ -119,47 +140,20 @@ selectInteraction.on('select', function (event) {
 
     if (selectedFeatures.length > 0) {
         var firstFeature = selectedFeatures[0];
+
         if (firstFeature.get("features").length > 1) {
             var extent = ol.extent.createEmpty();
+
             firstFeature.get("features").forEach(function (feature) {
                 ol.extent.extend(extent, feature.getGeometry().getExtent());
             });
-            Map.getView().fit(extent, Map.getSize());
         } else {
-            firstFeature.setStyle(new ol.style.Style({
-                image: new ol.style.Icon(({
-                    anchor: [0.5, 10],
-                    anchorXUnits: 'fraction',
-                    anchorYUnits: 'pixels',
-                    src: firstFeature.get("features")[0].get("emoji"),
-                    scale: 1,
-                })),
-                fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#ffcc33',
-                    width: 2
-                }),
-            }));
+            // Set the HTML element's text to the first feature's data
             $("#info_title").text(firstFeature.get("features")[0].get("name"))
             $("#info_addr").text(firstFeature.get("features")[0].get("addr"))
-            $("#info_img").html("<img src='" + firstFeature.get("features")[0].get("img1") + "' alt='이미지' style='width: 100%; height: 40vh;'>")
-            if (firstFeature.get("features")[0].get("tel") === "" || firstFeature.get("features")[0].get("tel") == null || firstFeature.get("features")[0].get("tel") === " "){
-                $("#info_tel").text("전화번호: 없음")
-            } else {
-                $("#info_tel").text("전화번호: " + firstFeature.get("features")[0].get("tel"))
-            }
-            if (firstFeature.get("features")[0].get("alink") === "" || firstFeature.get("features")[0].get("alink") == null || firstFeature.get("features")[0].get("alink") === " "){
-                $("#info_alink").text("홈페이지: 없음")
-            } else {
-                $("#info_alink").text("홈페이지: " + firstFeature.get("features")[0].get("alink"))
-            }
-            if ( firstFeature.get("features")[0].get("overview") === "" || firstFeature.get("features")[0].get("overview") == null || firstFeature.get("features")[0].get("overview") === " "){
-                $("#info_overview").text("설명: 없음")
-            } else {
-                $("#info_overview").text(firstFeature.get("features")[0].get("overview"))
-            }
+            $("#info_tel").text("전화번호: " + firstFeature.get("features")[0].get("tel"))
+            $("#info_alink").text("홈페이지: " + firstFeature.get("features")[0].get("alink"))
+            $("#info_overview").text(firstFeature.get("features")[0].get("overview"))
             $("#info_contentId").val(firstFeature.get("features")[0].get("contentId"))
             infoSel(1);
             $('#info').removeClass('hide');
@@ -167,65 +161,13 @@ selectInteraction.on('select', function (event) {
     }
 });
 
-// Add the select interaction to the map
 Map.addInteraction(selectInteraction);
-
-var emojiid;
-window.onload = function () {
-    var NowisMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
-    /*
-    🗽0x1F5FD
-    🏛0x1F3DB
-    🎆0x1F386
-    🛫0x1F6EB
-    🚴0x1F6B4
-    ⛺0x26FA
-    🏪0x1F3EA
-    🍝0x1F35D
-    */
-    emojiid = {
-        12: String.fromCodePoint(0x1F5FD),
-        14: String.fromCodePoint(0x1F3DB),
-        15: String.fromCodePoint(0x1F386),
-        25: String.fromCodePoint(0x1F6EB),
-        28: String.fromCodePoint(0x1F6B4),
-        32: String.fromCodePoint(0x26FA),
-        38: String.fromCodePoint(0x1F3EA),
-        39: String.fromCodePoint(0x1F35D),
-    }
-    dataload();
-    if (!NowisMobile) {
-        $("#alrt").css("display", "block");
-    }
-}
-
-
-/**
- * 유니코드를 이모지로 변환
- * @uniemoji 이모지
- * @returns 이모지 임의의 URL 주소
- */
-function emojiConvert(uniemoji) {
-    emoji = emojiid[uniemoji];
-    var canvas = document.createElement('canvas');
-    canvas.width = 96;
-    canvas.height = 96;
-    var ctx = canvas.getContext('2d');
-    ctx.font = '96px serif';
-    ctx.fillText(emoji, 0, 64);
-    return canvas.toDataURL();
-}
-
-
-let content = 12;
-let areaCode = 1;
-var mapextent;
 
 function dataload() {
     $.ajax({
         url: "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?",
         data: {
-            numOfRows: 100,
+            numOfRows: 50,
             pageNo: 1,
             MobileOS: ToruConfig.MobileOS,
             MobileApp: ToruConfig.MobileApp,
@@ -311,41 +253,6 @@ function dataload() {
         }
     });
 };
-
-$(document).ready(function () {
-    var menuContainer = $('#menu');
-    var images = menuContainer.find('img');
-    var isScrolling;
-    menuContainer.on('scroll', function () {
-        var middlePosition = menuContainer[0].scrollLeft + (menuContainer[0].clientWidth / 2);
-        var middleImage;
-        for (var i = 0; i < images.length; i++) {
-            var image = images[i];
-            var imagePosition = image.offsetLeft + (image.offsetWidth / 2);
-            if (imagePosition >= middlePosition) {
-                middleImage = image;
-                break;
-            }
-        }
-        if (middleImage) {
-            var altText = middleImage.alt;
-            $("#locSido").text(altText);
-            areaCode = middleImage.getAttribute("data-id");
-        }
-
-        window.clearTimeout(isScrolling);
-        isScrolling = setTimeout(function () {
-            dataload()
-        }, 500);
-    });
-
-    $('.menu-container img').click(function () {
-        var offset = this.offsetLeft - (menuContainer[0].offsetWidth / 2) + (this.offsetWidth / 2);
-        menuContainer.animate({
-            scrollLeft: offset
-        }, 150);
-    });
-});
 
 function contentSel(a) {
     $("#contentSel").text(a.text);
@@ -1029,4 +936,69 @@ function infoSel(i){
             }
         })
     }
+}
+
+
+init();
+
+function init() {
+    // Compute the emojiid object only once
+    emojiid = {
+        12: String.fromCodePoint(0x1F5FD),
+        14: String.fromCodePoint(0x1F3DB),
+        15: String.fromCodePoint(0x1F386),
+        25: String.fromCodePoint(0x1F6EB),
+        28: String.fromCodePoint(0x1F6B4),
+        32: String.fromCodePoint(0x26FA),
+        38: String.fromCodePoint(0x1F3EA),
+        39: String.fromCodePoint(0x1F35D),
+    };
+
+    dataload();
+    if (!/iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent)) {
+        $("#alrt").css("display", "block");
+    }
+
+    $(document).ready(function () {
+        const menuContainer = $('#menu');
+        const images = menuContainer.find('img');
+        let isScrolling;
+
+        menuContainer.on('scroll', function () {
+            const middlePosition = menuContainer[0].scrollLeft + (menuContainer[0].clientWidth / 2);
+            let middleImage;
+
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                const imagePosition = image.offsetLeft + (image.offsetWidth / 2);
+
+                if (imagePosition >= middlePosition) {
+                    middleImage = image;
+                    break;
+                }
+            }
+
+            if (middleImage) {
+                const altText = middleImage.alt;
+                $("#locSido").text(altText);
+                areaCode = middleImage.getAttribute("data-id");
+            }
+
+            clearTimeout(isScrolling);
+            isScrolling = setTimeout(function () {
+                dataload()
+            }, 500);
+        });
+
+        $('.menu-container img').click(function () {
+            const offset = this.offsetLeft - (menuContainer[0].offsetWidth / 2) + (this.offsetWidth / 2);
+            menuContainer.animate({
+                scrollLeft: offset
+            }, 150);
+        });
+
+        $("#contentSel").click(function () {
+            $(".contentItems").toggle();
+        });
+    });
 }
