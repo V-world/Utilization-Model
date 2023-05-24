@@ -1,0 +1,168 @@
+@font-face {
+    font-family: 'TheJamsil5Bold';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+    font-weight: 5;
+    font-style: normal;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: TheJamsil5Bold, sans-serif;
+}
+
+.mainDiv {
+    display: flex;
+    height: 100%;
+}
+
+.modelList {
+    flex: 20%;
+    min-width: 260px;
+    max-width: 500px;
+    height: 98%;
+    background-color: #000552;
+    display: flex;
+    flex-direction: column;
+}
+
+.modelList h2 {
+    text-align: center;
+    color: white;
+}
+
+.modelDetail {
+    margin-left: 50px;
+    flex: 80%;
+    padding: 10px;
+}
+
+.modelItem {
+    margin-top: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.modelItem:hover {
+    cursor: pointer;
+}
+
+.modelItem img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.modelItem span {
+    flex-grow: 1;
+    text-align: left;
+    margin-left: 10px;
+    font-size: 20px;
+    color: black;
+}
+
+.modelItem pre{
+    display: none;
+}
+
+#scroll {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+#scroll::-webkit-scrollbar {
+    display: none;
+}
+
+#use{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 30px;
+    transform: translate(-25%, -50%);
+}
+
+#info{
+    display: none;
+}
+
+#moveVworld{
+    height: 60px;
+}
+
+#moveVworld ul{
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    float: right;
+}
+
+#moveVworld ul li{
+    margin-left: 20px;
+    margin-right: 10px;
+}
+
+#moveVworld a{
+    text-decoration: none;
+    font-size: 20px;
+    color: black;
+}
+
+#title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+#modelLink{
+    border: 3px solid #6ff1ff;
+    border-radius: 10px;
+    height: 50px;
+    font-family: TheJamsil5Bold, sans-serif;
+    font-size: 12px;
+    color: black;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#modelLink:hover{
+    cursor: pointer;
+}
+
+#imgs img{
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+    max-height: 50vh;
+}
+
+#imgs img:hover{
+    cursor: pointer;
+}
+
+#infomation{
+    margin-top: 60px;
+}
+
+#infomation div{
+    display: flex;
+}
+
+.info_sub{
+    width: 10%;
+}
+
+.infoP{
+    margin-left: 20px;
+    width: 90%;
+}
+
+@media screen and (max-width: 850px) {
+    body{
+        background-color: #1a1a1a;
+    }
+}
