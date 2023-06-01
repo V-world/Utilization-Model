@@ -1,94 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html" lang="ko">
 <head>
 	<meta charset="UTF-8">
-	<style>
-		.title{
-			text-align: center;
-			margin: 20px
-		}
-        .modelItem {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            grid-gap: 10px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        span{
-	        font-size: 15px
-        }
-        .box a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            text-decoration: none;
-            color: #333;
-        }
-        .box a img {
-            width: 150px;
-            height: 150px;
-            margin-bottom: 10px;
-        }
-
-        .box a img:hover {
-			transform: scale(1.2);
-			transition: 0.5s;
-		}
-
-        @media (max-width: 999px) {
-            .modelItem {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                grid-gap: 10px;
-                max-width: 800px;
-            }
-            .box a img {
-                width: 300px;
-                height: 300px;
-            }
-            span{
-	            font-size: 27px
-            }
-        }
-	</style>
+	<link rel="stylesheet" href="./keys/index.css">
+	<title>브이월드 활용모델</title>
 </head>
 <body>
-<div class="title"> 브이월드 오픈API 활용모델 </div>
-<div class="container">
-	<div class="box">
-		<a href="2022/CCTV 영상 연계 표출/index.html">
-			<!-- 출처 : https://pixabay.com/ko/vectors/%ec%a7%95%ed%9b%84-cctv-%ec%b9%b4%eb%a9%94%eb%9d%bc-%ec%83%81%ec%a7%95-5422758/ -->
-			<img src="https://cdn.pixabay.com/photo/2020/07/20/11/56/sign-5422758_960_720.png" alt="CCTV 영상 연계 표출">
-			<span>CCTV 영상 연계 표출</span>
-		</a>
+<div id="topmenu">
+	<div id="vworldLogo" onclick="location.href='https://vworld.kr'">
+		<img src="./keys/imgs/V-world.png" alt="브이월드 주소">
+		<p>활용모델</p>
 	</div>
-	<div class="box">
-		<a href="2023/출입국 외국인청 활용모델/index.html">
-			<!-- 출처 : https://pixabay.com/ko/illustrations/%ed%95%ad%ea%b3%b5%ea%b8%b0-%eb%b9%84%ed%96%89%ea%b8%b0-%ea%b3%b5%ed%95%ad-%eb%8f%84%ec%b0%a9-19184/ -->
-			<img src="https://cdn.pixabay.com/photo/2012/02/29/15/49/aircraft-19184_960_720.jpg" alt="출입국 외국인청">
-			<span>출입국 외국인청</span>
-		</a>
-	</div>
-	<div class="box">
-		<a href="2023/엑셀지오코딩/index.html">
-			<!-- 출처 : https://pixabay.com/ko/vectors/%ea%bc%ac%eb%a6%ac%ed%91%9c-%ec%9c%84%ec%b9%98-%ec%83%81-%ec%83%81%ec%a7%95-%eb%b0%94%eb%8a%98-1873545/-->
-			<img src="https://cdn.pixabay.com/photo/2016/11/30/18/14/tag-1873545_960_720.png" alt="엑셀 지오코딩">
-			<span>엑셀 지오코딩</span>
-		</a>
-	</div>
-	<div class="box">
-		<a href="2023/날씨&미세먼지 지도/index.html">
-			<img src="2023/날씨&미세먼지 지도/css/sun.png" alt="날씨&미세먼지 지도">
-			<span>날씨&미세먼지 지도</span>
-		</a>
-	</div>
-	<div class="box">
-		<a href="2023/관광정보지도/index.html">
-			<!-- 출처 : https://pixabay.com/ko/images/search/%ec%a7%80%eb%8f%84/-->
-			<img src="https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_640.png" alt="관광정보지도">
-			<span>관광정보 지도</span>
-		</a>
+	<div id="linkmenu">
+		<div onclick="window.open('https://map.vworld.kr', '_blank')">
+			<img class="linkimg" src="https://www.vworld.kr/images/v4po/portal/visusal_main01.png">
+			<p class="linkP">지도</p>
+		</div>
+		<div onclick="window.open('https://api.vworld.kr', '_blank')">
+			<img class="linkimg" src="https://www.vworld.kr/images/v4po/portal/visusal_main02.png">
+			<p class="linkP">오픈API</p>
+		</div>
 	</div>
 </div>
+<div class="mainDiv">
+	<div class="modelList">
+		<div id="scroll">
+			<div class="modelItem" onclick="deatil(this)" data-link="./2022/CCTV 영상 연계 표출/index.html">
+				<img src="./keys/imgs/icon_CCTV%20영상%20연계%20표출.png" alt="CCTV 영상 연계 표출">
+				<span>CCTV 영상 연계 표출</span>
+				<vp>지능형교통시스템(ITS : 교통수단 및 교통 시설)에서 수집된 전자ㆍ제어 및 통신 등 교통정보를 브이월드 3D지도에 접목하여 교통 체계의 운영 및 관리에 효율성과 안정성을 향상</vp>
+				<vt>브이월드 WebGL API의 마커 기능과 클릭 이벤트 활용 그리고 타 교통정보 데이터 연동 및 3차원 시각화에 대하여 기술지원 기능</vt>
+			</div>
+			<div class="modelItem" onclick="deatil(this)" data-link="./2023/출입국 외국인청 활용모델/index.html">
+				<img src="./keys/imgs/icon_출입국%20외국인청%20활용모델.png" alt="출입국 외국인청">
+				<span>공간 클러스터링 및 이동경로 가시화</span>
+				<vp>GIS 어플리케이션에서 활용할 수 있는 클러스터링*, 단계구분도** 및 이동경로 표출 기능을 구현</vp>
+				<vt>오픈소스(OpenLayers)를 활용한 상기 활용 모델의 기능 구현 방법에 대해 지원</vt>
+			</div>
+			<div class="modelItem" onclick="deatil(this)" data-link="./2023/엑셀지오코딩/index.html">
+				<img src="./keys/imgs/icon_엑셀지오코딩.png" alt="엑셀 지오코딩">
+				<span>엑셀 지오코딩</span>
+				<vp>주소를 좌표로 변환하고 이를 통해 지도에서 데이터를 시각화하거나 공간분석을 통해 가맹점 관리, 보고서 등 활용</vp>
+				<vt> 오픈소스(OpenLayers)를 활용한 상기 활용모델의 기능 구현 방법 및 엑셀 자료 이외 파일을 이용한 공간분석 기술지원</vt>
+			</div>
+			<div class="modelItem" onclick="deatil(this)" data-link="./2023/날씨&미세먼지 지도/index.html">
+				<img src="./keys/imgs/icon_날씨&미세먼지%20지도.png" alt="날씨&미세먼지 지도">
+				<span>날씨&미세먼지 지도</span>
+				<vp>기상청의 날씨정보(기온, 날씨 등)와 한국환경공단의 대기오염정보(미세먼지 농도, 측정소 위치 등)를 공간정보 기반으로 지도 위에 시각화하고 속성 정보 조회 등의 기능을 함께 제공</vp>
+				<vt>오픈소스(OpenLayers)를 활용한 상기 활용모델의 기능 구현 방법 및 1시간 강수량, 풍속, 풍향 등 데이터 활용 방법에 대한 지원</vt>
+			</div>
+			<div class="modelItem" onclick="deatil(this)" data-link="./2023/관광정보지도/index.html">
+				<img src="./keys/imgs/icon_관광정보지도.png" alt="모바일 관광지도">
+				<span>관광정보 지도</span>
+				<vp>작성 중</vp>
+				<vt>작성 중</vt>
+			</div>
+		</div>
+	</div>
+	<div class="modelDetail">
+		<div id="use">
+			<h6>오픈API를 활용하여 공간정보를 다양한 분야에서 쉽게 활용할 수 있도록 다양한 샘플을 배포하는 페이지입니다.</h6>
+			<h4>좌측 활용모델 목록에서 원하는 모델을 선택해주세요.</h4>
+		</div>
+		<div id="info">
+			<div id="title">
+				<h2 id="modelName">제목</h2>
+				<button id="modelLink">활용모델 둘러보기</button>
+			</div>
+			<div id="imgs">
+				<img src="">
+				<span id="imgTitle">클릭하여 활용모델 둘러보기</span>
+			</div>
+			<div id="infomation">
+				<div>
+					<h3 class="info_sub">설명</h3>
+					<p id="subtitle" class="infoP">
+					</p>
+				</div>
+				<div>
+					<h3 class="info_sub">개발 지원</h3>
+					<p id="help" class="infoP">
+					</p>
+				</div>
+				<div>
+					<h3 class="info_sub">문의 방법</h3>
+					<p class="infoP">
+						이메일 : dy.lee@spacen.or.kr | 전화 : 1661-0115
+					</p>
+				</div>
+				<div id="download">
+					<h3 class="info_sub">다운로드</h3>
+					<p class="infoP" id="githubDownload">
+						다운로드 바로가기
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="./keys/index.js"></script>
 </body>
 </html>
