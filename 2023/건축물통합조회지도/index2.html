@@ -1,0 +1,296 @@
+<!--<!DOCTYPE html>-->
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<script src="../../keys/vworld.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<style>
+		body{
+			margin: 0;
+			padding: 0;
+		}
+		#map {
+			width: 100%;
+			height: 100vh;
+		}
+		#addrList{
+			position: absolute;
+			top: 15px;
+			left: 10px;
+			width: 300px;
+			max-height: 50vh;
+			background-color: rgba(255,255,255,0.5);
+			overflow: auto;
+			display: none;
+		}
+		ul{
+            list-style: none;
+            margin: 0px;
+            padding: 0px;
+            max-width: 900px;
+            width: 100%;
+			min-height: 365px;
+		}
+		#addrList li{
+            padding: 5px 0px 5px 5px;
+			maring-left: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3a3939;
+			border-bottom-left-radius: 10px;
+            font-size: 12px;
+		}
+		#addrList li:before{
+            content: "";
+            display: inline-block;
+            vertical-align: middle;
+            padding: 0px 5px 6px 0px;
+		}
+		#addrPapeing{
+			text-align: center;
+			margin-bottom: 5px;
+		}
+        #addrPapeing button{
+			padding: 5px 10px;
+			border: 1px solid #3a3939;
+			border-radius: 5px;
+			background-color: #fff;
+			color: #3a3939;
+			cursor: pointer;
+			margin: 3px;
+		}
+		#buildingInfo{
+			position: absolute;
+			top: 15px;
+			right: 10px;
+			width: 300px;
+			max-height: 50vh;
+			background-color: rgba(255,255,255,0.5);
+			overflow: auto;
+			display: block;
+		}
+		#buildingInfoClose{
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 20px;
+			height: 20px;
+			background-color: #fff;
+			border-radius: 50%;
+			text-align: center;
+			line-height: 20px;
+			cursor: pointer;
+		}
+        .tabcontent {
+            display: none;
+        }
+
+        .tab {
+            cursor: pointer;
+        }
+
+	</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="addrList">
+	<ul>
+	</ul>
+	<div id="addrPapeing"></div>
+</div>
+<!--<div id="popup">-->
+<!--	<div class="tabs">-->
+<!--		<button class="tab" onclick="openTab(event, 'Tab1')">연령정보</button>-->
+<!--		<button class="tab" onclick="openTab(event, 'Tab2')">안전정보</button>-->
+<!--		<button class="tab" onclick="openTab(event, 'Tab3')">준비중</button>-->
+<!--	</div>-->
+<!--	<div id="Tab1" class="tabcontent">-->
+<!--		<h2>Tab 1</h2>-->
+<!--		<p>Content for Tab 1.</p>-->
+<!--	</div>-->
+<!--	<div id="Tab2" class="tabcontent">-->
+<!--		<h2>Tab 2</h2>-->
+<!--		<p>Content for Tab 2.</p>-->
+<!--	</div>-->
+<!--	<div id="Tab3" class="tabcontent">-->
+<!--		<h2>Tab 3</h2>-->
+<!--		<p>Content for Tab 3.</p>-->
+<!--	</div>-->
+<!--</div>-->
+<script>
+
+	var tab;
+	function openTab(evt, tabName) {
+		var i, tabcontent;
+		tabcontent = document.getElementsByClassName("tabcontent");
+		for (i = 0; i < tabcontent.length; i++) {
+			tabcontent[i].style.display = "none";
+		}
+
+		tab = document.getElementsByClassName("tab");
+		for (i = 0; i < tab.length; i++) {
+			tab[i].className = tab[i].className.replace(" active", "");
+		}
+
+		document.getElementById(tabName).style.display = "block";
+		evt.currentTarget.className += " active";
+	}
+
+
+	let Map = new ol.Map({
+		target: "map",
+		layers: [Satellite],
+		view: new ol.View({
+			center: [14134400.402396256,4515846.4924247805],
+			zoom: 18,
+			minZoom: 5,
+			maxZoom: 19,
+		})
+	})
+
+
+	let draw;
+	let source = new ol.source.Vector({wrapX: false});
+	let vector = new ol.layer.Vector({
+		source: source
+	});
+	Map.addLayer(vector);
+
+
+
+	let typeSelect = 'Circle';
+	var addlists = [];
+
+	function addInteraction() {
+		let value = typeSelect;
+		if (value !== 'None') {
+			let geometryFunction;
+			if (value === 'Circle') {
+				geometryFunction = ol.interaction.Draw.createRegularPolygon();
+			} else if (value === 'Square') {
+				geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
+			}
+			draw = new ol.interaction.Draw({
+				source: source,
+				type: (value === 'Square') ? 'Circle' : value,
+				geometryFunction: geometryFunction
+			});
+			Map.addInteraction(draw);
+
+			draw.on('drawend', function(evt){
+				let area = evt.feature.getGeometry().getArea();
+				if (area / 1000000 <= 2){
+					addlists = [];
+					let format = new ol.format.WKT();
+					let wktRepresenation = format.writeGeometry(evt.feature.getGeometry());
+					let bbox = evt.feature.getGeometry().getExtent().toString();
+					// let box = "BOX(" + bbox.replace("[", "").replace("]", "") + ")";
+					$.ajax({
+						url: "https://api.vworld.kr/req/data?",
+						type: "get",
+						dataType: "jsonp",
+						data: {
+							service: "data",
+							version: "2.0",
+							request: "GetFeature",
+							data: "LP_PA_CBND_BUBUN",
+							key: apikey,
+							format: "json",
+							size: 80,
+							page: "1",
+							geomFilter: wktRepresenation,
+							crs: "EPSG:900913"
+						},
+						success: function (data) {
+							console.log(data)
+							data.response.result.featureCollection.features.forEach(function (item){
+								let coordinates = item.geometry.coordinates[0][0];
+								let polygon = new ol.geom.Polygon([coordinates]);
+								let extent = polygon.getExtent();
+								let center = ol.extent.getCenter(extent);
+								addlists.push({jibun: item.properties.addr, pnu: item.properties.pnu, xy: center})
+							})
+						},
+						complete: function (response) {
+							source.clear();
+							getPageItems(1);
+						},
+					})
+				}else{
+					alert("2㎢ 이하로 선택해주세요.")
+					setInterval(function(){
+						source.clear();
+					}, 500)
+				}
+			});
+
+		}
+	}
+	addInteraction();
+
+	var itemsPerPage = 10;
+
+	function getPageItems(pageNum){
+		$("#addrList").css("display", "block")
+		$("#addrList ul").empty();
+		$("#addrPapeing").empty();
+		var start = (pageNum - 1) * itemsPerPage;
+		var end = start + itemsPerPage;
+		addlists.slice(start, end).forEach(function (item){
+			$("#addrList ul").append("<li data-pnu='"+ item.pnu +"' data-xy='"+item.xy+"' onclick='selAddr(this)'>"+item.jibun+"</li>")
+		})
+		for (var i = 1; i <= Math.ceil(addlists.length / itemsPerPage); i++){
+			$("#addrPapeing").append("<button onclick='getPageItems("+i+")'>"+i+"</button>")
+		}
+	}
+
+	function selAddr(obj){
+		let xy = $(obj).data("xy");
+		let pnu = $(obj).data("pnu");
+		let center = xy.split(",");
+		//center 좌표에 마커 생성
+		// center를 ol point로 변환
+		let point = new ol.geom.Point(center);
+		// point 기반으로 마커 생성
+		let marker = new ol.Feature({
+			geometry: point,
+		});
+		vector.getSource().clear();
+		marker.setStyle(new ol.style.Style({
+			image: new ol.style.Icon({
+				src: "https://map.vworld.kr/images/ol3/marker_blue.png",
+				anchor: [0.5, 1],
+				scale: 1
+			})
+		}));
+		//vector 레이어에 marker 추가
+		vector.getSource().addFeature(marker);
+		// 마커 스타일 지정
+		Map.getView().setCenter(center);
+		Map.getView().setZoom(19);
+
+		$.ajax({
+			url: "http://apis.data.go.kr/1611000/nsdi/BuildingAgeService/attr/getBuildingAge?",
+			type: "get",
+			data: {
+				serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+				pageNo: "1",
+				numOfRows: "10",
+				pnu: pnu,
+				format: "json"
+			},
+			success: function (agedata) {
+				$("#buildingInfoContentBody").empty();
+				if (agedata.buildingAges.field[0] === undefined) {
+					$("#buildingInfoContentBody").append("건축물이 없는 지역입니다.")
+				}else{
+					console.log(agedata.buildingAges.field[0])
+				}
+			},
+		})
+	}
+</script>
+</body>
+</html>
