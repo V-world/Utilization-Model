@@ -59,7 +59,7 @@ vw.ws3dInitCallBack = function () {
 		maps.moveTo(mPosi);
 		maps.moveTo(mPosi);
 		var pt = new vw.geom.Point(point5Coord);
-		pt.setImage("http://map.vworld.kr/images/v4map/umap/pointer/ico-type1-05.png");
+		pt.setImage("https://map.vworld.kr/images/v4map/umap/pointer/ico-type1-05.png");
 		pt.setId("map3dMarker");
 		pt.create();
 		load3dchk = false;
@@ -70,7 +70,7 @@ vw.ws3dInitCallBack = function () {
 Map.on('click', function (evt) {
 	let coordinate = evt.coordinate;
 	$.ajax({
-		url: "http://api.vworld.kr/req/data?",
+		url: "https://api.vworld.kr/req/data?",
 		type: "get",
 		dataType: "jsonp",
 		data: {
@@ -151,7 +151,7 @@ Map.on('click', function (evt) {
 							var coord = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
 							point5Coord = new vw.Coord(coord[0], coord[1]);
 							var pt = new vw.geom.Point(point5Coord);
-							pt.setImage("http://map.vworld.kr/images/v4map/umap/pointer/ico-type1-05.png");
+							pt.setImage("https://map.vworld.kr/images/v4map/umap/pointer/ico-type1-05.png");
 							pt.setId("map3dMarker");
 							pt.create();
 
