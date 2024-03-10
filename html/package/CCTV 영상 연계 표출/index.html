@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <title>화면 내 CCTV 조회</title>
+  <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=767B7ADF-10BA-3D86-AB7E-02816B5B92E9&domain=localhost:8086"></script>
+
+</head>
+
+<body>
+<div id="vmap" style="width:99%; height: 900px;left:0px;top:0px"></div>
+<div style="position: absolute;top: 10px;background: white;width: 400px;height: 300px;">
+  <div>
+    <input type="checkbox" name="its_geo"> 교통량정보 WMTS(on/off)
+  </div>
+  <input type="button"  id="cctv" onclick="loadcctv();" value="CCTV 조회">
+  Extent:
+  <p id="cdata_code"></p>
+  <div class="search_wrap" id="anly_vid" style="display:none">
+    <span style="
+                    background: #f6f7f9;
+                    text-align: center;
+                    font-size: 14px;
+                    font-weight: 700;
+                    display: block;
+                    height: 20px;
+                    border-right: 1px solid #d5d5d5;
+                    color: #6a707e;" id="vidName">[경인선] 신월2</span>
+    <div id="result_lnbmenu7">
+      <video id="video_target" width="316px;" src="" style="margin:10px 35px;"></video>
+    </div>
+  </div>
+</div>
+<script src="js/hls.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!--<!DOCTYPE html>-->
+<html lang="ko" xmlns="http://www.w3.org/1999/html">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<script src="../../../keys/vworld.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=E5B1657B-9B6F-3A4B-91EF-98512BE931A1"></script>
+	<link rel="stylesheet" href="./css/index.css">
+	<style>
+	</style>
+</head>
+<body>
+<img id="loading" src="./css/loading.gif" alt="">
+<div id="map"></div>
+<div id="addrList">
+	<ul>
+	</ul>
+	<div id="addrPapeing"></div>
+</div>
+<div id="popup">
+	<div id="title">
+		<span id="textTitle">건축물 정보</span>
+		<button id="titleClose" onclick="$('#popup').css('display', 'none')">X</button>
+	</div>
+
+	<div class="tabs">
+		<button class="tab" onclick="openTab('Tab1')">기본정보</button>
+		<button class="tab" onclick="openTab('Tab2')">상세정보</button>
+		<button class="tab" onclick="openTab('Tab3')">토지 공시지가</button>
+	</div>
+	<div id="Tab1" class="tabcontent">
+		<div id="Tab1Left">
+			<div id="addrName">test</div>
+			<table id="buildingInfo1">
+				<thead>
+					<tr>
+						<th>건물명</th>
+						<th>건물코드명</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td id="buildingName"></td>
+						<td id="buildingCode"></td>
+					</tr>
+				</tbody>
+			</table>
+			<table id="buildingInfo2">
+				<thead>
+				<tr>
+					<th>건물높이</th>
+					<th>대지구문</th>
+					<th>층수(지하/지상)</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td id="buildingHeight"></td>
+					<td id="buildingGround"></td>
+					<td id="buildingFloor"></td>
+				</tr>
+				</tbody>
+			</table>
+			<img id="buildingImg" src="https://via.placeholder.com/629x300" alt="">
+		</div>
+		<div id="Tab1Right">
+			<div id="rMap"></div>
+		</div>
+	</div>
+	<div id="Tab2" class="tabcontent">
+		<span>&nbsp;</span>
+		<div>
+			<table id="moreBuilding">
+				<tr>
+					<th scope="row">건물나이</th>
+					<td id="buildingAge"></td>
+				</tr>
+				<tr>
+					<th scope="row">사용승인날짜</th>
+					<td id="buildingUseConfmDe"></td>
+				</tr>
+				<tr>
+					<th scope="row">대지면적</th>
+					<td id="buildingPlatArea"></td>
+				</tr>
+				<tr>
+					<th scope="row">건축면적</th>
+					<td id="buildingArchArea"></td>
+				</tr>
+				<tr>
+					<th scope="row">구조명</th>
+					<td id="buildingStrctCdNm"></td>
+				</tr>
+				<tr>
+					<th scope="row">주요용도명</th>
+					<td id="mainPrposCodeNm"></td>
+				</tr>
+				<tr>
+					<th scope="row">에너지효율등급</th>
+					<td id="buildingEngrGrade"></td>
+				</tr>
+				<tr>
+					<th scope="row">내진설계여부</th>
+					<td id="buildingRserthqkDsgnApplyYn"></td>
+				</tr>
+				<tr>
+					<th scope="row">내진능력</th>
+					<td id="buildingRserthqkAblty"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div id="Tab3" class="tabcontent">
+		<table>
+			<thead>
+				<tr>
+					<th>연도</th>
+					<th>공시일자</th>
+					<th>공시지가(원/㎡)</th>
+					<th>표준지여부</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		로딩 시간 단축을 위해 2017년 이전 데이터는 생략하였습니다. <br> 2017년 이전 데이터를 보시려면 <a href='https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15059127' target='_blank'>국토교통부 개별공시지가정보서비스</a>에서 확인해주세요.
+	</div>
+</div>
+<script src="js/index.js"></script>
+</body>
+</html>

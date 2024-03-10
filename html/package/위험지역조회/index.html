@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<script src="../../../keys/vworld.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<style>
+        #alert{
+            position: fixed;
+            right: 1vh;
+            bottom: 1vh;
+            height: 69vh;
+            width: 350px;
+            border-radius: 10px;
+            background-color: whitesmoke;
+        }
+
+        #alertTitle{
+            display: block;
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 5px;
+            padding: 5px;
+            border-radius: 10px 10px 0 0;
+        }
+        #alertTitle img{
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            position: relative;
+            top: 5px;
+            left: 3px;
+        }
+        #alertClose{
+            float: right;
+            margin-right: 10px;
+            cursor: pointer;
+            margin-top: 5px
+        }
+
+        #alertList{
+            height: 610px;
+            overflow-y: scroll;
+        }
+        #alertList::-webkit-scrollbar{
+            display: none;
+        }
+        .alerts{
+            border-radius: 10px;
+            padding: 10px;
+            background-color: white;
+            margin: 10px;
+        }
+        .alerts span{
+            /*border 굵게*/
+            border-width: 2px;
+            border: 1px solid #4BACD2;
+            padding: 5px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #4BACD2;
+            font-weight: bold;
+        }
+        .alerts p{
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+
+        #loadings{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            padding: 10000px;
+            display: none;
+			background-color: rgba(0, 0, 0, 0.4);
+		}
+
+
+        #searchDiv{
+            position: fixed;
+            bottom: 0px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4BACD2;
+            z-index: 1;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            animation: searchDiv 2s;
+        }
+
+        @keyframes searchDiv{
+            0%{
+                bottom: -100px;
+            }
+            100%{
+                bottom: 0;
+            }
+        }
+
+        #selBoxs{
+            display: none;
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            height: 370px;
+            z-index: 2;
+            width: 600px;
+            transform: translate(-50%, 40%);
+            background-color: whitesmoke;
+            border: 1px solid #4BACD2;
+            border-radius: 10px;
+            animation: selBoxs 1s;
+        }
+
+        @keyframes selBoxs {
+            0%{
+                bottom: -100px;
+            }
+            100%{
+                bottom: 50%;
+            }
+        }
+
+        #ProList{
+            height: 87%;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+
+        #ProList::-webkit-scrollbar{
+            display: none;
+        }
+
+        #ProList span{
+            width: 27%;
+            float: left;
+            text-align: center;
+			line-height: 30px;
+            cursor: pointer;
+            margin: 5px;
+            border: 1px solid #4BACD2;
+            border-radius: 10px;
+            padding: 10px;
+            font-weight: bold;
+            color: #4BACD2;
+        }
+
+		#ProList span:hover{
+			background-color: #4BACD2;
+			color: white;
+		}
+
+        #ProList span chked{
+            background-color: #4BACD2;
+        }
+
+        #ProButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #ProButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+		#ProButtons button:hover{
+			background-color: #4BACD2;
+			color: white;
+		}
+
+		#modal{
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 2;
+			width: 600px;
+			height: 400px;
+			background-color: white;
+			border-radius: 10px;
+			padding: 10px;
+			display: block;
+		}
+
+		#modalTitle{
+			height: 10%;
+			border-bottom: 1px solid #4BACD2;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		#modalTitle span{
+			float: left;
+			font-size: 20px;
+			font-weight: bold;
+			color: #4BACD2;
+		}
+
+		#modalClose{
+			font-size: 20px;
+			font-weight: bold;
+			color: #4BACD2;
+			cursor: pointer;
+		}
+
+		#modalContent{
+			height: 80%;
+			overflow-y: scroll;
+		}
+		#modalContent::-webkit-scrollbar{
+			display: none;
+		}
+
+		#modalButtons{
+			height: 10%;
+			text-align: center;
+		}
+
+		#modalButtons button{
+			width: 100px;
+			height: 30px;
+			border-radius: 10px;
+			border: 1px solid #4BACD2;
+			background-color: white;
+			color: #4BACD2;
+			font-weight: bold;
+			margin: 10px;
+			cursor: pointer;
+		}
+
+		#modalButtons button:hover{
+			background-color: #4BACD2;
+			color: white;
+		}
+
+		.modalStep.hided{
+			display: none;
+		}
+
+        .modalStepContent{
+			/*img가 가로 50% 씩 차지하고, p또한 50% 차지*/
+			display: flex;
+			justify-content: space-between;
+			height: 300px;
+			padding-left: 10px;
+			padding-right: 10px;
+			padding-top: 10px;
+		}
+
+		.modalStepContent img{
+			width: 50%;
+			height: 300px;
+		}
+
+		.modalStepContent p{
+			padding: 10px;
+			margin: 0;
+		}
+
+		strong{
+			color: #ff0000;
+			font-size: 18px;
+		}
+
+        #whereWHO {
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+			margin: 5px 10px 0 10px;
+        }
+
+		#whereWHO::-webkit-scrollbar {
+			display: none;
+        }
+
+        #whereWHO ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+			margin: 0 3px 0 3px;
+        }
+
+        #whereWHO li {
+            margin-right: 10px;
+            border: 1px solid #4BACD2;
+            border-radius: 10px;
+            padding: 5px;
+            display: inline-block;
+			cursor: pointer;
+        }
+
+		#whereWHO li:hover{
+			background-color: #4BACD2;
+			color: white;
+		}
+
+		#whereWHO li.active{
+			background-color: #4BACD2;
+			color: white;
+		}
+
+
+	</style>
+</head>
+<body style="margin: 0; padding: 0">
+<div id="loadings"><img	src="./css/loading.gif"></div>
+<!-- 서비스 사용방법안내 modal	: 상단에는 step 단계 표출 닫기 버튼이 있으며, 중간에는 해당 step별 설명이 있고, 하단에는 이전 step와 다음 step 버튼이 존재-->
+<div id="modal">
+	<div id="modalTitle">
+		<span>서비스 사용방법 안내</span>
+		<span id="modalClose" onclick="$('#modal').css('display', 'none')">X</span>
+	</div>
+	<div id="modalContent">
+		<div class="modalStep">
+			<div class="modalStepContent">
+				<img src="./css/spet1.png" style="width: 280px">
+				<p>지도에서 원하는 지역을 <strong>클릭</strong>하면 해당 지역의 재난문자를 조회할 수 있으며, 줌 레벨에 따라 선택되는 지역이 다릅니다. <br/><br/> &nbsp;6~11레벨은 광역시도 단위  <br/>  12~19레벨은 시군구 단위</p>
+			</div>
+		</div>
+		<div class="modalStep hided">
+			<div class="modalStepContent">
+				<img src="./css/step2.png" style="width: 280px">
+				<p>하단의 <strong>지역검색</strong> 메뉴를 통해 지역을 선택할 수 있으며, 지역검색을 통해 검색 시에는 시군구 단위로만 재난문자를 조회할 수 있습니다.</p>
+			</div>
+		</div>
+		<div class="modalStep hided">
+			<div class="modalStepContent">
+				<img src="./css/step3.png" style="width: 280px">
+				<p>우측하단에 재난문자 목록은 5초마다 자동으로 새로고침되며, 신규 재난문자는 상단에 추가됩니다.</p>
+			</div>
+		</div>
+	</div>
+	<div id="modalButtons">
+		<button onclick="prevStep()" hidden="hidden">이전</button>
+		<button onclick="nextStep()">다음</button>
+	</div>
+</div>
+<div id="selBoxs">
+	<div id="ProList">
+	</div>
+	<div id="ProButtons">
+		<button onclick="$('#selBoxs').hide()">닫기</button>
+	</div>
+</div>
+<div id="searchDiv" onclick="searching()"> 지역검색 </div>
+<div id="map" style="width: 100%; height: 100vh;"></div>
+<div id="alert" hidden="hidden">
+	<div id="alertTitle">
+		<img src="./css/alert.png">
+		<span>재난문자 목록</span>
+		<span id="alertClose" onclick="closeAlert()">X</span>
+	</div>
+	<div id="whereWHO">
+		<ul>
+			<li onclick="load(this)" data-whos="all">전체</li>
+			<li onclick="load(this)" data-whos="police">경찰청</li>
+			<li onclick="load(this)" data-whos="mois">행정안전부</li>
+			<li onclick="load(this)" data-whos="forest">산림청</li>
+			<li onclick="load(this)" data-whos="doChungSiGungu">지자체</li>
+		</ul>
+	</div>
+	<div id="alertList">
+		<!--			<div class="alerts">-->
+		<!--				<span>2023/08/08 13:52:19</span>-->
+		<!--				<p>[합천군] 8월 8일(화) 16시부터 합천댐 초당 300톤 이내 수문방류를 실시하여 하천수위 상승예상됩니다. 하천 주변에 계신 경우 안전한 곳으로 대피바랍니다.</p>-->
+		<!--			</div>-->
+	</div>
+</div>
+</body>
+<script>
+
+	document.getElementById('whereWHO').addEventListener('wheel', function(event) {
+		let delta = event.deltaY;
+		this.scrollLeft += delta;
+		event.preventDefault();
+	});
+
+	function load(classification){
+		$("#alertList").empty();
+		$("#whereWHO li").each(function (){
+			if ($(this).hasClass("active")){
+				$(this).removeClass("active");
+			}
+		});
+		$(classification).addClass("active");
+		switch (classification.dataset.whos){
+			case "all":
+				allList.forEach(function (item){
+					$("#alertList").prepend("<div class='alerts'><span>" + item.create_date + "</span><p>" + item.msg + "</p></div>");
+				});
+				break;
+			case "police":
+				policeList.forEach(function (item){
+					$("#alertList").prepend("<div class='alerts'><span>" + item.create_date + "</span><p>" + item.msg + "</p></div>");
+				});
+				if (policeList.length <= 5){
+					alertScroll();
+				}
+				break;
+			case "mois":
+				moisList.forEach(function (item){
+					$("#alertList").prepend("<div class='alerts'><span>" + item.create_date + "</span><p>" + item.msg + "</p></div>");
+				});
+				if (moisList.length <= 5){
+					alertScroll();
+				}
+				break;
+			case "forest":
+				forestList.forEach(function (item){
+					$("#alertList").prepend("<div class='alerts'><span>" + item.create_date + "</span><p>" + item.msg + "</p></div>");
+				});
+				if (forestList.length <= 5){
+					alertScroll();
+				}
+				break;
+			case "doChungSiGungu":
+				doChungSiGunguList.forEach(function (item) {
+					$("#alertList").prepend("<div class='alerts'><span>" + item.create_date + "</span><p>" + item.msg + "</p></div>");
+				});
+				if (doChungSiGunguList.length <= 5) {
+					alertScroll();
+				}
+				break;
+		}
+	}
+
+
+	function nextStep(){
+		$(".modalStep").each(function(){
+			if ($("#modalButtons button").eq(1).text() == "닫기"){
+				$("#modal").css("display", "none");
+				return false;
+			}
+			if ($(this).css("display") == "block"){
+				$("#modalButtons button").eq(0).show();
+				$(this).css("display", "none");
+				$(this).next().css("display", "block");
+				if ($(this).next().next().length == 0){
+					$("#modalButtons button").eq(1).text("닫기");
+				}
+				return false;
+			}
+		});
+	}
+
+	function prevStep(){
+		$(".modalStep").each(function(){
+			if ($(this).css("display") == "block" && $(this).prev().length == 0){
+				return false;
+			}
+			if ($(this).css("display") == "block"){
+				$(this).css("display", "none");
+				$(this).prev().css("display", "block");
+				$("#modalButtons button").eq(1).text("다음");
+				if ($(this).prev().prev().length == 0){
+					$("#modalButtons button").eq(0).hide();
+				}
+				return false;
+			}
+		});
+	}
+
+
+	/**
+	 * 선택된 시군구의 데이터를 검색하기 위해 좌표 가져오기
+	 * @param sel: 클릭된 시군구 span 가져오기
+	 */
+	function loadData(sel){
+
+		let where = "";
+		if ($(sel).attr("data-Area") == $(sel).text()){
+			where = "full_nm:like:"+ $(sel).text();
+		}else{
+			where = "full_nm:like:"+ $(sel).attr("data-Area") + " " + $(sel).text();
+		}
+
+		$.ajax({
+			url: "https://api.vworld.kr/req/data",
+			dataType: "jsonp",
+			data: {
+				service: "data",
+				request: "GetFeature",
+				data: "LT_C_ADSIGG_INFO",
+				size: "1000",
+				key: apikey,
+				attrFilter: where,
+				crs: "EPSG:3857",
+			},
+			beforeSend: function (){
+				$("#loadings").show();
+			},
+			success: function (data){
+				var x = (data.response.result.featureCollection.bbox[0] + data.response.result.featureCollection.bbox[2]) / 2;
+				var y = (data.response.result.featureCollection.bbox[1] + data.response.result.featureCollection.bbox[3]) / 2;
+				gwangYeogsigungu("LT_C_ADSIGG_INFO", [x, y])
+			},
+			complete: function (){
+				$("#loadings").hide();
+				$("#selBoxs").hide();
+			}
+		})
+	}
+
+	/**
+	 * 광역시도 목록에서 선택한 광역시도의 시군구 목록 가져오기
+	 * @param sel: 클릭된 광역시도 span 가져오기
+	 */
+	function selArea(sel){
+		$.ajax({
+			url: "https://api.vworld.kr/req/data",
+			dataType: "jsonp",
+			data: {
+				service: "data",
+				request: "GetFeature",
+				data: "LT_C_ADSIGG_INFO",
+				geometry: "false",
+				size: "1000",
+				key: apikey,
+				attrFilter: "full_nm:like:"+$(sel).text(),
+			},
+			beforeSend: function (){
+				$("#loadings").show();
+			},
+			success: function (data){
+				$("#ProList").empty();
+				data.response.result.featureCollection.features.forEach(function (item){
+					$("#ProList").append("<span onclick='loadData(this)' data-Area="+$(sel).text()+">" + item.properties.sig_kor_nm + "</span>");
+				})
+			},
+			complete: function (){
+				$("#loadings").hide();
+			}
+		})
+	}
+
+	function searching(){
+		$('#modal').css('display', 'none');
+		$.ajax({
+			url: "https://api.vworld.kr/req/data",
+			dataType: "jsonp",
+			data: {
+				service: "data",
+				request: "GetFeature",
+				data: "LT_C_ADSIDO_INFO",
+				key: apikey,
+				geometry: "false",
+				geomFilter: "POINT(127 36)",
+				size: "1000",
+				buffer: "1000000",
+			},
+			beforeSend: function (){
+				$("#loadings").show();
+			},
+			success: function (data){
+				$("#ProList").empty();
+				data.response.result.featureCollection.features.forEach(function (item){
+					$("#ProList").append("<span onclick='selArea(this)'>" + item.properties.ctp_kor_nm + "</span>");
+				})
+			},
+			complete: function (){
+				$("#loadings").hide();
+				$("#selBoxs").show();
+			}
+		})
+	}
+
+	function closeAlert(){
+		$("#alert").hide();
+		clearInterval(alertInterval);
+		LayergwangYeogsigungu.getSource().clear();
+	}
+
+
+	/*
+	재난문자 실시간 새로고침 변수
+	 */
+	var alertInterval;
+	let alertList = [];
+	let page = 1;
+
+	/*
+	 * 클릭된 지역을 폴리곤 그리기 위한 백터레이어
+	 */
+	let LayergwangYeogsigungu = new ol.layer.Vector({
+		source: new ol.source.Vector(),
+		style: function (feature){
+			return new ol.style.Style({
+				fill: new ol.style.Fill({
+					color: "rgba(76, 234, 157, 0.2)"
+				}),
+				stroke: new ol.style.Stroke({
+					color: "#46D891",
+					width: 2
+				}),
+				text: new ol.style.Text({
+					font: "24px Calibri,sans-serif",
+					fill: new ol.style.Fill({
+						color: "#fff"
+					}),
+					stroke: new ol.style.Stroke({
+						color: "#000",
+						width: 3
+					}),
+					text: feature.get("name")
+				})
+			})
+		}
+	})
+
+	/*
+	 * openlayers를 활용하여 div태그 중 ID가 map인 태그에 지도를 표출
+	 */
+	let Map = new ol.Map({
+		target: "map",
+		layers: [White, LayergwangYeogsigungu],
+		view: new ol.View({
+			center: [14257715.55198298, 4542817.868074291],
+			zoom: 7,
+			minZoom: 6,
+			maxZoom: 18,
+		})
+	})
+
+	function classificationList(rows){
+		let whereWHO = rows.msg.split("]");
+		if(LayergwangYeogsigungu.getSource().getFeatures().length > 0){
+			allList.unshift(rows);
+			$("#whereWHO li").each(function (){
+				if($(this).hasClass("active") && $(this).text() == "all"){
+					$("#alertList").append('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+				}
+			});
+		}else{
+			allList.push(rows);
+		}
+		if(whereWHO[0].indexOf("경찰청") != -1) {
+			if(LayergwangYeogsigungu.getSource().getFeatures().length > 0){
+				policeList.unshift(rows)
+				$("#whereWHO li").each(function (){
+					if($(this).hasClass("active") && $(this).text() == "경찰청"){
+						wheres = rows.msg.split("]");
+						if(wheres[0].indexOf("경찰청") != -1){
+							$("#alertList").append('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+						}
+					}
+				});
+			}else{
+				policeList.push(rows);
+			}
+		}else if(whereWHO[0].indexOf("안전부") != -1 || whereWHO[0].indexOf("중앙재난안전대책본부") != -1){
+			if(LayergwangYeogsigungu.getSource().getFeatures().length > 0){
+				moisList.unshift(rows)
+				$("#whereWHO li").each(function (){
+					if($(this).hasClass("active") && ($(this).text() == "안전부") || ($(this).text() == "중앙재난안전대책본부")){
+						wheres = rows.msg.split("]");
+						if(wheres[0].indexOf("안전부") != -1 || wheres[0].indexOf("중앙재난안전대책본부") != -1){
+							$("#alertList").append('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+						}
+					}
+				});
+			}else {
+				moisList.push(rows);
+			}
+		}else if(whereWHO[0].indexOf("산림청") != -1){
+			if(LayergwangYeogsigungu.getSource().getFeatures().length > 0){
+				forestList.unshift(rows)
+				$("#whereWHO li").each(function (){
+					if($(this).hasClass("active") && $(this).text() == "산림청"){
+						wheres = rows.msg.split("]");
+						if(wheres[0].indexOf("산림청") != -1){
+							$("#alertList").append('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+						}
+					}
+				});
+			}else {
+				forestList.push(rows);
+			}
+		}else if(whereWHO[0].indexOf("도") != -1 || whereWHO[0].indexOf("청") != -1 || whereWHO[0].indexOf("시") != -1 || whereWHO[0].indexOf("군") != -1 || whereWHO[0].indexOf("구") != -1){
+			if(LayergwangYeogsigungu.getSource().getFeatures().length > 0){
+				doChungSiGunguList.unshift(rows)
+				$("#whereWHO li").each(function (){
+					if($(this).hasClass("active") && ($(this).text() == "도") || ($(this).text() == "청" || ($(this).text() == "시") || ($(this).text() == "군") || ($(this).text() == "구"))){
+						wheres = rows.msg.split("]");
+						if(wheres[0].indexOf("도") != -1 || wheres[0].indexOf("청") != -1 || wheres[0].indexOf("시") != -1 || wheres[0].indexOf("군") != -1 || wheres[0].indexOf("구") != -1){
+							$("#alertList").append('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+						}
+					}
+				});
+			}else {
+				doChungSiGunguList.push(rows);
+			}
+		}
+	}
+
+
+	/**
+	 * @param layer: 주제도명[ LT_C_ADSIDO_INFO, LT_C_ADSIGG_INFO ]
+	 * @param xy: xy 좌표(구조 [x ,y])
+	 */
+	function gwangYeogsigungu(layer, xy){
+		$('#modal').css('display', 'none');
+		$("#selBoxs").hide();
+		let text = null; //광역시도 또는 시군구 명이 들어가는 변수
+		clearInterval(alertInterval);
+		$.ajax({
+			url: "https://api.vworld.kr/req/data?",
+			dataType: "jsonp",
+			data: {
+				key: apikey,
+				request: "GetFeature",
+				format: "json",
+				size: 1,
+				data: layer,
+				geomFilter: "POINT(" + xy[0] + " " + xy[1] + ")",
+				crs: "EPSG:3857"
+			},
+			beforeSend: function (){
+				$("#loadings").show();
+			},
+			success: function (data) {
+				if (data.response.status === "NOT_FOUND"){
+					closeAlert();
+					alert("검색 결과가 없습니다.");
+				}else{
+					$("#loadings").css("display", "block");
+					let polygon = new ol.geom.MultiPolygon(data.response.result.featureCollection.features[0].geometry.coordinates); // 불러온 멀티 폴리곤 좌표를 ol.geom.MultiPolygon으로 변환
+					let gwangYeogsi = data.response.result.featureCollection.features[0].properties.ctp_kor_nm; // 광역시도
+					let sigongu = data.response.result.featureCollection.features[0].properties.full_nm; // 시군구
+					text = gwangYeogsi !== undefined ? gwangYeogsi : sigongu; // 광역시도가 undefined이면 시군구로 표시
+
+					// 백터레이어(LayergwangYeogsigungu)에 폴리곤 설정[기존 값을 제거되고 추가됨]
+					LayergwangYeogsigungu.setSource(new ol.source.Vector({
+						features: [new ol.Feature({
+							geometry: polygon,
+							name: text
+						})]
+					}))
+					/*
+					폴리곤 영역에 맞게 지도 확대
+					400 = 우측 재난문자 목록에 겹치지 않게 하기 위함
+					 */
+					Map.getView().fit(polygon, {padding: [25, 400, 25, 100], constrainResolution: false});
+				}
+			},
+			complete: function () {
+				$("#alertList").empty();
+				let alertHtml = "";
+				alertList = []; // 등록된 메시지 목록
+				allList = [] //전체 목록
+				policeList = []; // 경찰철 메시지 목록( 경찰청])
+				moisList = []; // 행정안전부/중앙재난안전대책본부 메시지 목록( 안전부] , 중앙재난안전대책본부] )
+				forestList = []; // 산림청 메시지 목록( 산림청] )
+				doChungSiGunguList = []; // 도청시군구 메시지 목록 ( 도] , 청] , 시], 군], 구]] )
+				page = 1
+
+				$.ajax({
+					url: "https://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?",
+					dataType: "json",
+					data: {
+						serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+						pageNo: page,
+						numOfRows: 1000,
+						type: "json"
+					},
+					success: function (data){
+						data.DisasterMsg[1].row.forEach(function (rows){
+							switch (layer){
+								case "LT_C_ADSIDO_INFO":
+									/*
+									 * 광역시도명이 포함된 문자열이면  모두출력
+									 * 광역시의 시군구 까지
+									 */
+									if (rows.location_name.indexOf(text) !== -1){
+										alertHtml += '<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>'
+										alertList.push(rows.msg);
+										classificationList(rows)
+									}
+									break;
+								case "LT_C_ADSIGG_INFO":
+									/*
+									 * 시군구 명이 포함된 문자열이면  모두출력
+									 * 해당 시군구가 속하는 광역시 전체가 있는 경우 추가
+									 */
+									if (rows.location_name.indexOf(text) !== -1 || rows.location_name.indexOf(text.split(" ")[0] + " 전체") !== -1){
+										alertHtml += '<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>'
+										alertList.push(rows.msg);
+										classificationList(rows)
+									}
+									break;
+							}
+						})
+					},
+					complete: function (){
+						if (alertHtml != ""){
+							$("#alert").show();
+							$("#alertList").append(alertHtml);
+							setTimeout(function (){
+								$("#loadings").css("display", "none");
+							}, 1000)
+							alertInterval = setInterval(function (){
+								$.ajax({
+									url: "https://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?",
+									dataType: "json",
+									data: {
+										serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+										pageNo: 1,
+										numOfRows: 1000,
+										type: "json"
+									},
+									success: function (data){
+										data.DisasterMsg[1].row.forEach(function (rows){
+											switch (layer){
+												case "LT_C_ADSIDO_INFO":
+													if (rows.location_name.indexOf(text) !== -1){
+														if (alertList.indexOf(rows.msg) === -1){
+															alertList.unshift(rows.msg);
+															classificationList(rows)
+															$("#alertList").prepend('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+														}
+													}
+													break;
+												case "LT_C_ADSIGG_INFO":
+													if (rows.location_name.indexOf(text) !== -1 || rows.location_name.indexOf(text.split(" ")[0] + " 전체") !== -1){
+														if (alertList.indexOf(rows.msg) === -1){
+															alertList.unshift(rows.msg);
+															classificationList(rows)
+															$("#alertList").prepend('<div class="alerts"><span>' + rows.create_date + '</span><p>' + rows.msg + '</p></div>')
+														}
+													}
+													break;
+											}
+										})
+									}
+								})
+							}, 5000)
+						}
+					}
+				})
+			}
+		})
+	}
+
+	function alertScroll(){
+		// $("#alertList").append('<div id="loadings"><img src="img/loading.gif" alt="loading"></div>');
+		page++;
+		$.ajax({
+			url: "https://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?",
+			dataType: "json",
+			data: {
+				serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+				pageNo: page,
+				numOfRows: 1000,
+				type: "json"
+			},
+			beforeSend: function (){
+				$("#loadings").css("display", "block");
+			},
+			success: function (data){
+				let text = LayergwangYeogsigungu.getSource().getFeatures()[0].get("name");
+				data.DisasterMsg[1].row.forEach(function (rows){
+					if (text.indexOf(" ") !== -1){
+						//LT_C_ADSIGG_INFO(시군구)
+						if (rows.location_name.indexOf(text) !== -1 || rows.location_name.indexOf(text.split(" ")[0] + " 전체") !== -1) {
+							if (alertList.indexOf(rows.msg) === -1) {
+								alertList.push(rows.msg);
+								classificationList(rows)
+							}
+						}
+					}else{
+						//LT_C_ADSIDO_INFO(광역시도)
+						if (rows.location_name.indexOf(text) !== -1){
+							if (alertList.indexOf(rows.msg) === -1){
+								alertList.push(rows.msg);
+								classificationList(rows)
+							}
+						}
+					}
+				})
+			},
+			complete: function (){
+				$("#loadings").css("display", "none");
+			}
+		})
+	}
+
+
+	/*
+	 * 재난문자 목록이 마지막까지 스크롤 된다면
+	 */
+	$("#alertList").scroll(function (){
+		if ($(this).scrollTop() + $(this).height() >= $(this)[0].scrollHeight) {
+			alertScroll();
+		}
+	})
+
+	Map.on("click", function (evt) {
+		let xy = evt.coordinate; // 클릭한 지점의 좌표
+		$("#loadings").css("display", "block");
+		if (Map.getView().getZoom() > 11){
+			/*
+			 * 12~19레벨에서 지도 클릭 시 시군구 단위오 정보 불러오기
+			 * LT_C_ADSIGG_INFO
+			 */
+			gwangYeogsigungu("LT_C_ADSIGG_INFO", xy);
+		}else{
+			/*
+			 * ~11레벨에서 지도 클릭 시 광역시도 단위오 정보 불러오기
+			 * LT_C_ADSIDO_INFO
+			 */
+			gwangYeogsigungu("LT_C_ADSIDO_INFO", xy);
+		}
+	})
+
+	Map.on("contextmenu", function (evt) {
+		//우클릭 시 뜨는 메뉴창 무시
+		evt.preventDefault();
+	})
+
+
+</script>
+</html>

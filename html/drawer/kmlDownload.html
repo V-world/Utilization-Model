@@ -1,0 +1,49 @@
+<div id="drawer_kmlDownload" class="drawer-content select-none h-screen flex flex-col hidden">
+	<div class="pt-24 lg:pt-14">
+		<button onclick="modal_help_myland(0)" class="mt-2 w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+			사용법 안내
+		</button>
+	</div>
+	<div class="flex-grow flex flex-col">
+		<div class="w-full flex-none pt-3">
+			<label for="input-group-search" class="sr-only">Search</label>
+			<div class="relative">
+				<div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+					<svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"></path>
+					</svg>
+				</div>
+				<input type="text" id="input-group-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="주제도 검색">
+			</div>
+		</div>
+		<div id="layers_kmlDownload" class="flex-grow overflow-y-scroll max-h-[calc(100vh-200px)]">
+		</div>
+		<div class="w-full flex-none h-10">
+			<a id="btn_kmlDownload" href="#" download="download.kml">
+				<button class="w-full h-full bg-blue-500 text-white hover:bg-blue-400 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+					KML 다운로드
+				</button>
+			</a>
+		</div>
+	</div>
+</div>
+
+<script>
+
+	/*
+	주제도 목록 생성
+	*/
+	const vLayers = [["LT_C_SPBD","도로명주소건물"],["LT_L_SPRD","도로명주소도로"],["LP_PA_CBND_BUBUN","지적도 부번"],["LP_PA_CBND_BONBUN","지적도 본번"],["LT_C_ADSIDO_INFO","광역시도"],["LT_C_ADRI_INFO","리"],["LT_C_ADSIGG_INFO","시군구"],["LT_C_ADEMD_INFO","읍면동"],["LT_C_UQ113","농림지역"],["LT_C_UQ111","도시지역"],["LT_C_UQ129","개발진흥지구"],["LT_C_UQ121","경관지구"],["LT_C_UQ123","고도지구"],["LT_C_UQ122","미관지구"],["LT_C_UQ125","방재지구"],["LT_C_UQ124","방화지구"],["LT_C_UQ126","보존지구"],["LT_C_UQ127","시설보호지구"],["LT_C_UQ128","취락지구"],["LT_C_UQ130","특정용도제한지구"],["LT_C_UD801","개발제한구역"],["LT_L_FRSTCLIMB,LT_P_CLIMBALL","등산로"],["LT_C_WKMSTRM","하천망"],["LT_C_UQ141","국토계획구역"],["LT_C_UQ162","도시자연공원구역"],["LT_C_UM000","가축사육제한구역"],["LT_C_UO601","관광지"],["LT_C_UD610","국민임대주택"],["LT_C_UP401","급경사재해예방지역"],["LT_C_UM301","대기환경규제지역"],["LT_C_UF901","백두대간보호지역"],["LT_C_UH701","벤처기업육성지역"],["LT_C_UD620","보금자리주택"],["LT_C_UF151","산림보호구역"],["LT_C_UM901","습지보호지역"],["LT_C_UB901","시장정비구역"],["LT_C_UM221","야생동식물보호"],["LT_C_UJ401","온천지구"],["LT_C_UH501","유통단지"],["LT_C_UH402","자유무역지역지정및운영"],["LT_C_UD601","주거환경개선지구도"],["LT_C_UO101","학교환경위생정화구역"],["LT_C_LHZONE","사업지구경계도"],["LT_C_LHBLPN","토지이용계획도"],["LT_C_UPISUQ153","도시계획(공간시설)"],["LT_C_UPISUQ155","도시계획(공공문화체육시설)"],["LT_C_UPISUQ152","도시계획(교통시설)"],["LT_C_UPISUQ159","도시계획(기타기반시설)"],["LT_C_UPISUQ151","도시계획(도로)"],["LT_C_UPISUQ156","도시계획(방재시설)"],["LT_C_UPISUQ157","도시계획(보건위생시설)"],["LT_C_UPISUQ154","도시계획(유통공급시설)"],["LT_C_UPISUQ158","도시계획(환경기초시설)"],["LT_C_UPISUQ161","지구단위계획"],["LT_C_UPISUQ171","개발행위허가제한지역"],["LT_C_UPISUQ174","개발행위허가필지"],["LT_C_UPISUQ173","기반시설부담구역"],["LT_C_UPISUQ175","토지거래계약에관한허가구역"],["LT_P_NSNMSSITENM","국가지명"],["LT_C_KFDRSSIGUGRADE","산불위험예측지도"],["LT_C_UP201","재해위험지구"],["LT_P_EDRSE002","지진대피소"],["LT_P_ETQSHELTER","지진해일대피소"],["LT_P_MGPRTFD","기타보호시설"],["LT_P_MGPRTFB","노인복지시설"],["LT_P_MGPRTFC","아동복지시설"],["LT_P_MGPRTFA","아동안전지킴이집"],["LT_C_TDWAREA","보행우선구역"],["LT_C_USFSFFB","소방서관할구역"],["LT_C_UO301","문화재보호도"],["LT_C_UO501","전통사찰보존"],["LT_L_TRKROAD,LT_P_TRKROAD","산책로"],["LT_L_BYCLINK","자전거길"],["LT_P_BYCRACKS","자전거보관소"],["LT_P_MOCTNODE","교통노드"],["LT_L_MOCTLINK","교통링크"],["LT_L_AISROUTEU","제한고도"],["LT_L_AISPATH","항공로"],["LT_C_AISALTC","경계구역"],["LT_C_AISRFLC","공중급유구역"],["LT_C_AISACMC","공중전투기동훈련장"],["LT_C_AISCTRC","관제권"],["LT_C_AISMOAC","군작전구역"],["LT_C_AISADZC","방공식별구역"],["LT_C_AISPRHC","비행금지구역"],["LT_C_AISATZC","비행장교통구역"],["LT_C_AISFIRC","비행정보구역"],["LT_C_AISRESC","비행제한구역"],["LT_C_AISDNGC","위험구역"],["LT_C_AISTMAC","접근관제구역"],["LT_C_AISCATC","훈련구역"],["LT_L_AISSEARCHL,LT_P_AISSEARCHP","수색비행장비행구역"],["LT_L_AISVFRPATH,LT_P_AISVFRPATH","시계비행로"],["LT_L_AISCORRID_YS,LT_L_AISCORRID_GJ,LT_P_AISCORRID_YS,LT_P_AISCORRID_GJ","한강회랑"],["LT_P_AISHCSTRIP","헬기장"],["LT_P_UTISCCTV","교통CCTV"],["LT_C_DAMDAN","단지경계"],["LT_C_DAMYOJ","단지시설용지"],["LT_C_DAMYOD","단지용도지역"],["LT_C_DAMYUCH","단지유치업종"],["LT_C_ASITSOILDRA","배수등급"],["LT_C_ASITDEEPSOIL","심토토성"],["LT_C_ASITSOILDEP","유효토심"],["LT_C_ASITSURSTON","자갈함량"],["LT_P_SGISGOLF","골프장현황도"],["LT_P_SGISGWCHG","지하수측정망(오염우려지역)"],["LT_C_WKMBBSN","대권역"],["LT_C_WKMMBSN","중권역"],["LT_C_WKMSBSN","표준권역"],["LT_P_WEISPLAFACE","기타공동처리시설"],["LT_P_WEISPLAFACA","농공단지처리시설"],["LT_P_WEISPLAFACV","마을하수도"],["LT_P_WEISPLAFACL","매립장침출수처리시설"],["LT_C_UM710","상수원보호"],["LT_P_WEISTACCON","수생태계조사지점"],["LT_P_WEISSITETB","수질자동측정망측정지점"],["LT_P_WEISSITEME","수질측정망공단배수지점"],["LT_P_WEISSITEMD","수질측정망농업용수지점"],["LT_P_WEISSITEMF","수질측정망도시관류지점"],["LT_P_WEISSITEMA","수질측정망하천수지점"],["LT_P_WEISSITEMB","수질측정망호소수지점"],["LT_P_WEISPLAFACS","축산폐수공공처리시설"],["LT_P_WEISPLAFACW","하수종말처리시설"],["LT_L_GIMSFAULT","단층"],["LT_C_GIMSHYDRO","수문지질단위"],["LT_C_GIMSSTIFF","수질다이어그램"],["LT_L_GIMSEC","전기전도도"],["LT_C_GIMSLINEA","지질구조밀도"],["LT_L_GIMSLINEA","지질구조선"],["LT_L_GIMSDEPTH","지하수등수심선"],["LT_L_GIMSPOTEN","지하수등수위선"],["LT_L_GIMSDIREC","지하수유동방향"],["LT_C_GIMSSCS","토양도"],["LT_P_RIFCT","수리시설"],["LT_C_RIRSV","저수지"],["LT_C_AGRIXUE101","농업진흥지역도"],["LT_C_AGRIXUE102","영농여건불리농지도"],["LT_C_FLISFK300","산지(보안림)"],["LT_C_FLISFK100","산지(자연휴양림)"],["LT_C_FLISFK200","산지(채종림)"],["LT_C_UF602","임업 및 산촌 진흥권역"],["LT_C_FSDIFRSTS","산림입지도"],["LT_C_WGISPLTALK","개발유도연안"],["LT_C_WGISPLROW","개발조정연안"],["LT_C_WGISPLUSE","이용연안"],["LT_C_WGISPLABS","절대보전연안"],["LT_C_WGISPLJUN","준보전연안"],["LT_C_WGISRERESH","공유수면매립3차수요조사"],["LT_C_WGISREPLAN","공유수면매립기본계획"],["LT_C_WGISRECOMP","공유수면매립준공"],["LT_C_WGISIEGUG","국가산업단지"],["LT_C_WGISIENONG","농공단지"],["LT_C_WGISIEILBAN","일반산업단지"],["LT_C_WGISIEDOSI","첨단산업단지"],["LT_C_WGISFMGUL","굴양식장"],["LT_C_WGISFMKIM","김양식장"],["LT_C_WGISFMDSM","다시마양식장"],["LT_C_WGISFMMYK","미역양식장"],["LT_C_WGISFMFISH","어류양식장"],["LT_C_WGISFMJBOK","전복양식장"],["LT_C_WGISTPNEWP","무역신항만"],["LT_C_WGISTPLAND","무역항육상구역"],["LT_C_WGISTPSEA","무역항해상구역"],["LT_C_WGISCPLAND","연안항육상구역"],["LT_C_WGISCPSEA","연안항해상구역"],["LT_C_WGISARECO","생태계경관보전지역"],["LT_C_WGISARFISHER","수산자원보호구역"],["LT_C_WGISARWET","습지보호구역"],["LT_C_UMA100","국립공원용도지구"],["LT_C_WGISNPGUG","국립자연공원"],["LT_C_WGISNPGUN","군립자연공원"],["LT_C_WGISNPDO","도립자연공원"],["LT_C_CDFRS100FRQ","해안침수(100년빈도)"],["LT_C_CDFRS150FRQ","해안침수(150년빈도)"],["LT_C_CDFRS200FRQ","해안침수(200년빈도)"],["LT_C_CDFRS050FRQ","해안침수(50년빈도)"],["LT_C_CDFRSMAXFRQ","해안침수(최대범람)"],["LT_C_TFISTIDAF,LT_P_TFISTIDAFP","갯벌정보"],["LT_C_TFISMPA","해양보호구역"],["LT_L_TOISDEPCNTAH","해안선"],["LT_C_UQ112","관리지역"],["LT_P_PARKINGLOT", "주차장"],["LT_C_UQ114","자연환경보전지역"]]
+	for (i = 0; vLayers.length > i; i++) {
+		$('#layers_kmlDownload').append(
+			'<li>' +
+			'<div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">' +
+			'<input type="radio" data-thisISlayer="true" onchange="layers_kmlDownload(this)" id="layers_kmlDownoad'+vLayers[i][0]+'" name="layers_kmlDownload" value=' + vLayers[i][0] + ' class="radio checked:bg-gray-500"/>' +
+			'<label for="layers_kmlDownoad'+vLayers[i][0]+'" class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">' + vLayers[i][1] + '</label>' +
+			'</div>' +
+			'</li>'
+		)
+	}
+</script>
+
+<script src="../../js/kmlDownload.js"></script>

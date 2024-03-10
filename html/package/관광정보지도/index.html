@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Title</title>
+	<meta charset="UTF-8">
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.5/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.6/turf.js"></script>
+	<link rel="stylesheet" href="css/index.css">
+	<script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Cache-Control" content="no-cache">
+	<style>
+	</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="contentMenu">
+	<button id="contentSel" class="contentSel">관광지</button>
+	<div class="contentItems">
+		<a href="#" onclick="contentSel(this)" data-id="12">관광지</a>
+		<a href="#" onclick="contentSel(this)" data-id="14">문화시설</a>
+		<a href="#" onclick="contentSel(this)" data-id="15">행사/공연/축제</a>
+		<a href="#" onclick="contentSel(this)" data-id="25">여행코스</a>
+		<a href="#" onclick="contentSel(this)" data-id="28">레포츠</a>
+		<a href="#" onclick="contentSel(this)" data-id="32">숙박</a>
+		<a href="#" onclick="contentSel(this)" data-id="38">쇼핑</a>
+		<a href="#" onclick="contentSel(this)" data-id="39">음식점</a>
+	</div>
+</div>
+<div id="locName">
+	<span id="locSido">서울</span>
+</div>
+<div class="menu-container" id="menu">
+	<div style="flex-shrink: 0; width: 380px"></div>
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_1100000000.png" alt="서울" data-id="1">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2800000000.png" alt="인천" data-id="2">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3000000000.png" alt="대전" data-id="3">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2700000000.png" alt="대구" data-id="4">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2900000000.png" alt="광주" data-id="5">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_2600000000.png" alt="부산" data-id="6">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3100000000.png" alt="울산" data-id="7">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_3611000000.png" alt="세종" data-id="8">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4100000000.png" alt="경기" data-id="31">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4200000000.png" alt="강원" data-id="32">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4300000000.png" alt="충북" data-id="33">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4400000000.png" alt="충남" data-id="34">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4700000000.png" alt="경북" data-id="35">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4800000000.png" alt="경남" data-id="36">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4500000000.png" alt="전북" data-id="37">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_4600000000.png" alt="전남" data-id="38">
+	<img src="https://www.laiis.go.kr/images/egovframework/img_logo_5000000000.png" alt="제주" data-id="39">
+	<div style="flex-shrink: 0; width: 380px;"></div>
+</div>
+
+<div id="info" class="hide">
+	<button class="close-button" onclick="$('#info').addClass('hide');">&times;</button>
+	<h1 id="info_title">관광지</h1>
+	<div id="info_one">
+		<h3 id="info_addr"> 경기도 </h3>
+		<div id="info_img"></div>
+		<h4 id="info_overview">개요</h4>
+		<h4 id="info_homepage">홈페이지</h4>
+		<h4 id="info_tel">전화번호</h4>
+	</div>
+	<div id="info_two" style="display: none">
+		<table id="info_table"></table>
+	</div>
+	<div id="info_menu">
+		<!-- 소개, 상세정보-->
+		<button class="info_button" onclick="infoSel(1)">소개</button>
+		<button class="info_button" onclick="infoSel(2)">상세정보</button>
+		<input type="hidden" id="info_contentId">
+	</div>
+</div>
+<div id="loadingdiv">
+	<img id="loading" src="css/loading.gif"/>
+</div>
+<div id="alrt">
+	<div id="mobileplz">
+		<h1>모바일에서만 지원하는 서비스입니다.</h1>
+		<h2>PC 이용시 일부기능이 작동하지 않을 수 있습니다.</h2>
+		<button onclick="$('#alrt').css('display', 'none')">닫기</button>
+	</div>
+</div>
+
+<script src="../../../keys/vworld.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

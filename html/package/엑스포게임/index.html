@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.5&apiKey=E5B1657B-9B6F-3A4B-91EF-98512BE931A1"></script>
+	<script type="text/javascript" src="https://cesium.com/downloads/cesiumjs/releases/1.101/Build/Cesium/Cesium.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+
+
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+	<style>
+        @font-face {
+            font-family: 'NPSfontBold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/NPSfontBold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+		body{
+            padding: 0;
+			margin: 0;
+			cursor: url("aim.png"), auto;
+		}
+
+		#vmap{
+            height: 100vh;
+			width: 100%;
+		}
+
+		#endMenu{
+			position: fixed;
+			left: 50%;
+			bottom: 10px;
+			z-index: 10;
+			transform: translateX(-50%);
+
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: row;
+		}
+
+		#endMenu div{
+			width: 170px;
+			height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: black;
+            font-family: 'NPSfontBold';
+            letter-spacing: 7px;
+            cursor: pointer;
+            border: 3px solid #fdd311;
+            border-radius: 5px;
+            background-color: #efdf8d;
+
+			margin: 5px;
+		}
+
+		#startMenu{
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 100%;
+			height: 100%;
+			background-color: rgba(45, 35, 35, 0.5);
+			z-index: 20;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: row;
+		}
+
+		#startMenu div{
+			width: 300px;
+			height: 600px;
+			color: white;
+			font-size: 15px;
+			font-family: 'NPSfontBold';
+			cursor: pointer;
+
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+
+			/*배경색은 반투명하면서 노란색에 어울리는 색으로*/
+			background-color: rgba(0, 0, 0, 0.5);
+
+			margin: 15px;
+			border: 3px solid #fdd311;
+			border-radius: 10px;
+		}
+
+        #startMenu div img{
+			width: 40%;
+			height: 20%;
+			border: 3px solid #fdd311;
+			border-radius: 100%;
+			padding: 5px;
+			margin-bottom: 20px;
+		}
+
+		#resultDIV{
+			position: fixed;
+			left: 10px;
+			top: 10px;
+			z-index: 30;
+			min-width: 200px;
+			min-height: 20px;
+			padding: 5px;
+
+			background-color: whitesmoke;
+			border-radius: 10px;
+
+		}
+
+		#resultTABLE{
+			width: 100%;
+			height: 100%;
+		}
+
+        #resultTABLE tr, #resultTABLE td{
+			border: 1px solid black;
+			text-align: center;
+			padding: 5px;
+            font-family: 'NPSfontBold';
+		}
+        #resultTABLE td:nth-child(1){
+            white-space: nowrap;
+		}
+        #resultTABLE td:nth-child(2){
+			max-width: 350px;
+		}
+
+		span{
+			font-size: 20px;
+			font-family: 'NPSfontBold';
+			letter-spacing: 3px;
+			margin: 5px;
+		}
+
+        #startMenu div span:nth-child(3){
+			font-size: 18px;
+			letter-spacing: 1px;
+			color: #fdd311;
+        }
+
+	</style>
+</head>
+<body>
+	<div id="vmap"></div>
+	<div id="endMenu">
+		<div onclick="resetDart()">초기화면</div>
+		<div onclick="loadWMS()">게임종료</div>
+	</div>
+	<div id="startMenu">
+		<div onclick="layerSel(1)">
+			<img src="환경보호.png"/>
+			<span>농립ㆍ해양ㆍ수산</span>
+			<span>Easy</span>
+		</div>
+		<div onclick="layerSel(2)">
+			<img src="문화체육관광.png"/>
+			<span>체육</span>
+			<span>Normal</span>
+		</div>
+		<div onclick="layerSel(3)">
+			<img src="개발제한구역.png"/>
+			<span>국토관리</span>
+			<span>Hard</span>
+		</div>
+	</div>
+	<div id="resultDIV">
+		<table id="resultTABLE">
+		</table>
+	</div>
+	<script>
+
+
+
+//		function moveingCAM(arg){
+//			maps.getLayerElement("LT_C_FSDIFRSTS").hide()
+//			maps.getLayerElement("LT_C_AGRIXUE101").hide()
+//			maps.getLayerElement("LT_C_WGISNPGUG").hide()
+//			maps.getLayerElement("LT_C_UD801").hide()
+//
+//			switch(arg){
+//				case "1":
+//					maps.getLayerElement("LT_C_FSDIFRSTS").show()
+//					maps.getLayerElement("LT_C_AGRIXUE101").show()
+//
+//
+//					viewer.camera.setView({
+//						destination: Cesium.Cartesian3.fromDegrees(126.3, 37.5, 40000)
+//					});
+//
+//
+//					viewer.camera.flyTo({
+//						destination: Cesium.Cartesian3.fromDegrees(129, 37.7, 40000),
+//						orientation: {
+//							heading: Cesium.Math.toRadians(0.0), // 동쪽을 바라보는 방향
+//							pitch: Cesium.Math.toRadians(-90.0), // 아래로 30도 기울기
+//							roll: 0.0
+//						},
+//						duration: 10, // 이동하는 데 걸리는 시간 (초),
+//						maximumHeight: 40000,
+//						complete: function() {
+//							// 이동이 완료된 후 실행할 코드
+//							console.log('카메라 이동 완료!');
+//						},
+//						easingFunction: Cesium.EasingFunction.LINEAR_NONE // 이동하는 동안의 가속도 함수
+//					});
+//					break;
+//				case "2":
+//					maps.getLayerElement("LT_C_WGISNPGUG").show()
+//					maps.getLayerElement("LT_C_UD801").show()
+//
+//
+//					viewer.camera.setView({
+//						destination: Cesium.Cartesian3.fromDegrees(127.5, 38, 10000.0)
+//					});
+//
+//
+//					viewer.camera.flyTo({
+//						destination: Cesium.Cartesian3.fromDegrees(127.5, 35, 10000.0),
+//						orientation: {
+//							heading: Cesium.Math.toRadians(0.0), // 동쪽을 바라보는 방향
+//							pitch: Cesium.Math.toRadians(-30.0), // 아래로 30도 기울기
+//							roll: 0.0
+//						},
+//						duration: 10, // 이동하는 데 걸리는 시간 (초),
+//						complete: function() {
+//							// 이동이 완료된 후 실행할 코드
+//							console.log('카메라 이동 완료!');
+//						},
+//						easingFunction: Cesium.EasingFunction.LINEAR_NONE // 이동하는 동안의 가속도 함수
+//					});
+//					break;
+//			}
+//		}
+
+
+
+		const 산림입지도 = {
+			"name": "토양형명",
+			"toyanghyun": "토양형",
+		};
+
+		const 국립자연공원 = {
+			"park_name": "공원명칭",
+		};
+
+		const 개발제한구역 = {
+			"uname": "용도지역명",
+			"dyear": "고시년도",
+			"dnum": "고시번호",
+		};
+
+
+		vw.MapControllerOption = {
+			container : "vmap",
+			mapMode : "ws3d-map",
+			basemapType : vw.ol3.BasemapType.GRAPHIC,
+			controlDensity : vw.ol3.DensityType.EMPTY,
+			interactionDensity : vw.ol3.DensityType.BASIC,
+			controlsAutoArrange : true,
+			homePosition : vw.ol3.CameraPosition,
+			initPosition : vw.ol3.CameraPosition,
+		};
+
+		maps = new vw.MapController(vw.MapControllerOption);
+
+		let viewer = ws3d.viewer;
+		let scene = viewer.scene;
+
+
+
+
+		var wmsLayer = new vw.Layers();
+		let selectedLayer = 0;
+		function layerSel(arg){
+			document.getElementById("startMenu").style.display = "none";
+			const infoDesign = "success"
+
+			switch (arg){
+				case 1:
+					selectedLayer = "LT_C_FSDIFRSTS";
+					swal("산림입지도", "산림경영, 산지관리, 환경영향평가 등에 필요한 입지·토양환경에 대해 작도단위인 토양형을 구획단위로 조사 및 분석한 정보의 위치에 다트를 던지세요.", infoDesign);
+					break;
+				case 2:
+					selectedLayer = "LT_C_WGISNPGUG";
+					swal("국립자연공원", "우리나라의 자연생태계나 자연 및 문화경관을 대표할 만한 지역으로서 환경부장관이 지정하여 관리하는 공원 위치에 다트를 던지세요.", infoDesign);
+					break;
+				case 3:
+					selectedLayer = "LT_C_UD801";
+					swal("개발제한구역", "도시의 무질서한 확산을 방지하고 자연환경을 보전하여 도시민의 건전한 생활환경을 확보하기 위하여 도시의 개발을 제한할 필요가 있는 위치에 다트를 던지세요.", infoDesign);
+					break;
+			}
+		}
+
+
+		/*다트 날라가는 설정 */
+		var cameraSettings = [
+			{
+				"position": {
+					"x": -4333813.530971173,
+					"y": 18221495.571936306,
+					"z": 12094215.75565725
+				},
+				"direction": {
+					"x": -0.3298436850525449,
+					"y": -0.8805019929946325,
+					"z": -0.34046935803892536
+				},
+				"up": {
+					"x": 0.5,
+					// "y": -0.60001619802929444,
+					"y": -0.5,
+					"z": 0.9
+				}
+			},
+			// {
+			// 	"position": {
+			// 		"x": -16389744.638403444,
+			// 		"y": 8347716.762794138,
+			// 		"z": 13847577.322655711
+			// 	},
+			// 	"direction": {
+			// 		"x": 0.8730054556474763,
+			// 		"y": 0.1541007519555863,
+			// 		"z": -0.46272500759788776
+			// 	},
+			// 	"up": {
+			// 		"x": 0.48345880954828985,
+			// 		"y": -0.3984409444265092,
+			// 		"z": 0.7794308136548502
+			// 	}
+			// }
+		];
+
+
+		/**
+		 * 주제도 보여주기 위한 카메라 변수
+		 */
+		var wmsViewCamera = {
+			"position": {
+				"x": -4333813.530971173,
+				"y": 18221495.571936306,
+				"z": 12094215.75565725
+			},
+			"direction": {
+				"x": -0.3298436850525449,
+				"y": -0.8805019929946325,
+				"z": -0.34046935803892536
+			},
+			"up": {
+				"x": 0.5,
+				"y": -0.5,
+				"z": 0.9
+			}
+		};
+
+
+
+
+		var dartEntity;
+
+		var EarthrandomDart = Math.floor(Math.random() * cameraSettings.length)
+
+		function moveAni(x, y){
+			switch (EarthrandomDart){
+				case 0:
+					dartEntity = viewer.entities.add({
+						position: Cesium.Cartesian3.fromDegrees(x, y, 12923333.257819925),
+						billboard: {
+							image: 'dart1.png',
+							verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+							scale: 0.1,
+							rotation: Cesium.Math.toRadians(30),
+							alignedAxis: Cesium.Cartesian3.UNIT_Z
+						}
+					});
+					break;
+				case 1:
+					dartEntity = viewer.entities.add({
+						position: Cesium.Cartesian3.fromDegrees(x, y, 12923333.257819925),
+						billboard: {
+							image: 'dart1-2.png',
+							verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+							scale: 0.1,
+							rotation: Cesium.Math.toRadians(30),
+							alignedAxis: Cesium.Cartesian3.UNIT_Z
+						}
+					});
+					break;
+			}
+			var moveGoStart = cameraSettings[EarthrandomDart];
+
+			viewer.camera.setView({
+				destination: new Cesium.Cartesian3(
+					moveGoStart.position.x,
+					moveGoStart.position.y,
+					moveGoStart.position.z
+				),
+				orientation: {
+					direction: new Cesium.Cartesian3(
+						moveGoStart.direction.x,
+						moveGoStart.direction.y,
+						moveGoStart.direction.z
+					),
+					up: new Cesium.Cartesian3(
+						moveGoStart.up.x,
+						moveGoStart.up.y,
+						moveGoStart.up.z
+					)
+				}
+			});
+
+			var i = 0;
+			var targetHeight = 4500000;//6000000
+			var currentPosition = Cesium.Cartographic.fromCartesian(dartEntity.position._value);
+			var currentLongitude = Cesium.Math.toDegrees(currentPosition.longitude);
+			var currentLatitude = Cesium.Math.toDegrees(currentPosition.latitude);
+
+			var randomHeight = Math.floor(Math.random() * (40000 - 15000 + 1)) + 15000;
+
+			var updateInterval = setInterval(function() {
+				var newHeight = 12923333.257819925 - (i * randomHeight);
+				dartEntity.position = Cesium.Cartesian3.fromDegrees(
+					currentLongitude,
+					currentLatitude,
+					newHeight
+				);
+				if (newHeight <= targetHeight) {
+					clearInterval(updateInterval);
+					viewer.camera.flyTo({
+						destination: dartEntity.position.getValue(viewer.clock.currentTime),
+						duration: 0
+					});
+
+					dartEntity.position = Cesium.Cartesian3.fromDegrees(
+						currentLongitude,
+						currentLatitude,
+						5000//60000
+					);
+					dartEntity.billboard.image = 'dart2.png';
+					viewer.camera.flyTo({
+						destination: dartEntity.position.getValue(viewer.clock.currentTime),
+						duration: 5
+					});
+					dartEntity.position = Cesium.Cartesian3.fromDegrees(currentLongitude, currentLatitude, 5000);
+					setTimeout(function (){
+						dartEntity.billboard.image = 'dart3.png';
+						dartEntity.position = Cesium.Cartesian3.fromDegrees(currentLongitude, currentLatitude, 500);
+						viewer.entities.remove(dartEntity);
+
+						var point1Coord = new vw.Coord(currentLongitude, currentLatitude);
+						var pt = new vw.geom.Point( point1Coord );
+						pt.setId("point1");
+						pt.setImage("dart3.png");
+						pt.create();
+
+						document.getElementById("endMenu").style.display = "flex";
+						loadData(currentLongitude, currentLatitude)
+
+					},5000);
+				}
+				i++;
+			}, 5);
+		}
+
+		function loadWMS(){
+			maps.getLayerElement(selectedLayer).show()
+			removeAllFireworks();
+		}
+
+		function loadData(x, y){
+			$.ajax({
+				type: "get",
+				url: "https://api.vworld.kr/req/data?",
+				data: {
+					service: "data",
+					request: "GetFeature",
+					data: selectedLayer,
+					key: "E5B1657B-9B6F-3A4B-91EF-98512BE931A1",
+					crs: "EPSG:4326",
+					size: 1,
+					format: "json",
+					geomFilter: "POINT("+x+" "+y+")",
+					// buffer: 100
+				},
+				dataType: "jsonp",
+				async: false,
+				success: function (data){
+					if (data.response.record.current >= 1){
+						modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+							Cesium.Cartesian3.fromDegrees(x, y)
+						);
+
+						for (let i = 0; i < numberOfFireworks; ++i) {
+							const x = Cesium.Math.randomBetween(xMin, xMax);
+							const y = Cesium.Math.randomBetween(yMin, yMax);
+							const z = Cesium.Math.randomBetween(zMin, zMax);
+							const offset = new Cesium.Cartesian3(x, y, z);
+							const color = Cesium.Color.fromRandom(
+								colorOptions[i % colorOptions.length]
+							);
+
+							const bursts = [];
+							for (let j = 0; j < 3; ++j) {
+								bursts.push(
+									new Cesium.ParticleBurst({
+										time: Cesium.Math.nextRandomNumber() * lifetime,
+										minimum: burstSize,
+										maximum: burstSize,
+									})
+								);
+							}
+
+							createFirework(offset, color, bursts);
+						}
+
+
+						$("#resultTABLE").empty();
+						switch (selectedLayer){
+							case "LT_C_FSDIFRSTS": // 산림입지도
+								$("#resultTABLE").append("<tr><td>토양형명</td><td>"+data.response.result.featureCollection.features[0].properties.name+"</td></tr>")
+								$("#resultTABLE").append("<tr><td>토양형</td><td>"+data.response.result.featureCollection.features[0].properties.toyanghyun+"</td></tr>")
+								break;
+							case "LT_C_WGISNPGUG": // 국립자연공원
+								$("#resultTABLE").append("<tr><td>공원명칭</td><td>"+data.response.result.featureCollection.features[0].properties.park_name+"</td></tr>")
+								break;
+							case "LT_C_UD801": // 개발제한구역
+								$("#resultTABLE").append("<tr><td>용도지역명</td><td>"+data.response.result.featureCollection.features[0].properties.uname+"</td></tr>")
+								$("#resultTABLE").append("<tr><td>고시년도</td><td>"+data.response.result.featureCollection.features[0].properties.dyear+"</td></tr>")
+								$("#resultTABLE").append("<tr><td>고시번호</td><td>"+data.response.result.featureCollection.features[0].properties.dnum+"</td></tr>")
+								break;
+						}
+						document.getElementById("resultDIV").style.display = "block";
+
+					}else{
+						// alert("해당 위치에는 데이터가 없습니다.");
+						// swal("실패!", "해당 위치에는 데이터가 없습니다.", "warning");
+						swal({
+							title: "실패!",
+							text: "해당 위치에는 데이터가 없습니다.",
+							icon: "warning",
+							button: "확인",
+						}).then((isConfirm) => {
+							if (isConfirm) {
+								viewer.camera.flyTo({
+									destination: Cesium.Cartesian3.fromDegrees(127.5, 35.8, 1000000),
+									duration: 0
+								});
+							}
+						});
+					}
+				}
+			})
+		}
+
+		function resetDart(){
+			document.getElementById("startMenu").style.display = "flex";
+			document.getElementById("endMenu").style.display = "none";
+			document.getElementById("resultDIV").style.display = "none";
+
+			maps.clearAll();
+			dartEntity = true;
+			viewer.camera.flyTo({
+				destination: Cesium.Cartesian3.fromDegrees(127.5, 35.8, 1000000),
+				duration: 0
+			});
+			maps.getLayerElement("LT_C_FSDIFRSTS").hide()
+			maps.getLayerElement("LT_C_WGISNPGUG").hide()
+			maps.getLayerElement("LT_C_UD801").hide()
+
+
+			removeAllFireworks();
+		}
+
+		vw.ws3dInitCallBack = function () {
+			document.getElementById("mapToolBar").hidden = true;
+			document.getElementById("naviRotate").hidden = true;
+			document.getElementById("naviZoomPannel").hidden = true;
+			maps.getLayerElement("poi_bound").hide()
+
+
+			var wmsSource = new vw.source.TileWMS();
+			wmsSource.setParams("tilesize=256");
+			wmsSource.setLayers("LT_C_FSDIFRSTS");
+			wmsSource.setStyles("LT_C_FSDIFRSTS");
+			wmsSource.setFormat("image/png");
+			wmsSource.setID("LT_C_FSDIFRSTS")
+			wmsSource.setUrl("http://2d.vworld.kr:8895/2DCache/gis/map/WMS?Key=E5B1657B-9B6F-3A4B-91EF-98512BE931A1&");
+			wmsLayer.add(new vw.layer.Tile(wmsSource));
+
+			wmsSource = new vw.source.TileWMS();
+			wmsSource.setParams("tilesize=256");
+			wmsSource.setLayers("LT_C_WGISNPGUG");
+			wmsSource.setStyles("LT_C_WGISNPGUG");
+			wmsSource.setFormat("image/png");
+			wmsSource.setID("LT_C_WGISNPGUG")
+			wmsSource.setUrl("http://2d.vworld.kr:8895/2DCache/gis/map/WMS?Key=E5B1657B-9B6F-3A4B-91EF-98512BE931A1&");
+			wmsLayer.add(new vw.layer.Tile(wmsSource));
+
+			wmsSource = new vw.source.TileWMS();
+			wmsSource.setParams("tilesize=256");
+			wmsSource.setLayers("LT_C_UD801");
+			wmsSource.setStyles("LT_C_UD801");
+			wmsSource.setFormat("image/png");
+			wmsSource.setID("LT_C_UD801")
+			wmsSource.setUrl("http://2d.vworld.kr:8895/2DCache/gis/map/WMS?Key=E5B1657B-9B6F-3A4B-91EF-98512BE931A1&");
+			wmsLayer.add(new vw.layer.Tile(wmsSource));
+
+
+			resetDart();
+			document.getElementById("endMenu").style.display = "none";
+
+			removeAllFireworks();
+		};
+
+
+		var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+		handler.setInputAction(function(click) {
+			if (dartEntity) {
+				var height = viewer.camera.positionCartographic.height;
+				if (height > 800000){
+					document.getElementById("endMenu").style.display = "none";
+					var pickedFeature = viewer.scene.pick(click.position);
+					if (!Cesium.defined(pickedFeature)) {
+						var ray = viewer.camera.getPickRay(click.position);
+						var cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+						if (cartesian) {
+							var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+							var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+							var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+
+							moveAni(longitude, latitude);
+						}
+					}
+				}
+			}
+		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+
+
+
+		Cesium.Math.setRandomNumberSeed(315);
+
+		let particleCanvas;
+		let particleSystems = [];
+
+
+		let modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+			Cesium.Cartesian3.fromDegrees(127,36)
+		);
+		const emitterInitialLocation = new Cesium.Cartesian3(0.0, 0.0, 500.0);
+
+		function getImage() {
+			if (!Cesium.defined(particleCanvas)) {
+				particleCanvas = document.createElement("canvas");
+				particleCanvas.width = 20;
+				particleCanvas.height = 20;
+				const context2D = particleCanvas.getContext("2d");
+				context2D.beginPath();
+				context2D.arc(8, 8, 8, 0, Cesium.Math.TWO_PI, true);
+				context2D.closePath();
+				context2D.fillStyle = "rgb(255, 255, 255)";
+				context2D.fill();
+			}
+			return particleCanvas;
+		}
+
+		const minimumExplosionSize = 30.0;
+		const maximumExplosionSize = 100.0;
+		const particlePixelSize = new Cesium.Cartesian2(7.0, 7.0);
+		const burstSize = 200.0; // 폭발 크기
+		const lifetime = 10.0;
+		const numberOfFireworks = 35.0; // 폭죽 갯수
+
+		const emitterModelMatrixScratch = new Cesium.Matrix4();
+
+
+		function createFirework(offset, color, bursts) {
+			const position = Cesium.Cartesian3.add(
+				emitterInitialLocation,
+				offset,
+				new Cesium.Cartesian3()
+			);
+			const emitterModelMatrix = Cesium.Matrix4.fromTranslation(
+				position,
+				emitterModelMatrixScratch
+			);
+			const particleToWorld = Cesium.Matrix4.multiply(
+				modelMatrix,
+				emitterModelMatrix,
+				new Cesium.Matrix4()
+			);
+			const worldToParticle = Cesium.Matrix4.inverseTransformation(
+				particleToWorld,
+				particleToWorld
+			);
+
+			const size = Cesium.Math.randomBetween(
+				minimumExplosionSize,
+				maximumExplosionSize
+			);
+			const particlePositionScratch = new Cesium.Cartesian3();
+			const force = function (particle) {
+				const position = Cesium.Matrix4.multiplyByPoint(
+					worldToParticle,
+					particle.position,
+					particlePositionScratch
+				);
+				if (Cesium.Cartesian3.magnitudeSquared(position) >= size * size) {
+					Cesium.Cartesian3.clone(
+						Cesium.Cartesian3.ZERO,
+						particle.velocity
+					);
+				}
+			};
+
+			const normalSize =
+				(size - minimumExplosionSize) /
+				(maximumExplosionSize - minimumExplosionSize);
+			const minLife = 0.3;
+			const maxLife = 1.0;
+			const life = normalSize * (maxLife - minLife) + minLife;
+
+			const particleSystem = new Cesium.ParticleSystem({
+				image: getImage(),
+				startColor: color,
+				endColor: color.withAlpha(0.0),
+				particleLife: life,
+				speed: 100.0,
+				imageSize: particlePixelSize,
+				emissionRate: 0,
+				emitter: new Cesium.SphereEmitter(0.1),
+				bursts: bursts,
+				lifetime: lifetime,
+				updateCallback: force,
+				modelMatrix: modelMatrix,
+				emitterModelMatrix: emitterModelMatrix,
+			});
+
+			particleSystems.push(particleSystem);  // 배열에 파티클 시스템 추가
+			scene.primitives.add(particleSystem);
+		}
+
+		const xMin = -350.0;
+		const xMax = 350.0;
+		const yMin = -350.0;
+		const yMax = 350.0;
+		const zMin = 100.0;
+		const zMax = 300.0;
+
+		const colorOptions = [
+			{
+				minimumRed: 0.75,
+				green: 0.0,
+				minimumBlue: 0.8,
+				alpha: 1.0,
+			},
+			{
+				red: 0.0,
+				minimumGreen: 0.75,
+				minimumBlue: 0.8,
+				alpha: 1.0,
+			},
+			{
+				red: 0.0,
+				green: 0.0,
+				minimumBlue: 0.8,
+				alpha: 1.0,
+			},
+			{
+				minimumRed: 0.75,
+				minimumGreen: 0.75,
+				blue: 0.0,
+				alpha: 1.0,
+			},
+		];
+
+		// 모든 파티클 시스템 제거 함수
+		function removeAllFireworks() {
+			particleSystems.forEach(ps => {
+				scene.primitives.remove(ps);
+			});
+			particleSystems = [];  // 배열 초기화
+		}
+
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+@font-face {
+    font-family: 'TheJamsil5Bold';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+    font-weight: 5;
+    font-style: normal;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: TheJamsil5Bold, sans-serif;
+}
+
+.mainDiv {
+    display: flex;
+    height: 92%;
+}
+
+.modelList {
+    flex: 21%;
+    min-width: 260px;
+    max-width: 500px;
+    height: 100%;
+    background-color: #000552;
+    display: flex;
+    flex-direction: column;
+}
+
+.modelDetail {
+    margin-left: 30px;
+    margin-right: 30px;
+    flex: 79%;
+    padding: 10px;
+}
+
+.modelItem {
+    margin-top: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.modelItem:hover {
+    cursor: pointer;
+}
+
+.modelItem img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.modelItem span {
+    flex-grow: 1;
+    text-align: left;
+    margin-left: 10px;
+    font-size: 20px;
+    color: black;
+}
+
+.modelItem vt, .modelItem vp{
+    display: none;
+}
+
+#githubDownload{
+    cursor: pointer;
+    color: blue;
+}
+
+#scroll {
+    flex: 1;
+    overflow-y: scroll;
+    background-color: #ffffff;
+}
+
+/*#scroll::-webkit-scrollbar {*/
+/*    !*항상 스크롤 보이기*!*/
+/*    display: */
+/*}*/
+
+#use{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 30px;
+    transform: translate(-28%, -80%);
+    text-align: center;
+}
+
+#use h6{
+    color: #205aa8;
+    margin-bottom: 120px;
+}
+
+#info{
+    display: none;
+}
+
+#moveVworld{
+    height: 60px;
+}
+
+#moveVworld ul{
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    float: right;
+}
+
+#moveVworld ul li{
+    margin-left: 20px;
+    margin-right: 10px;
+}
+
+#moveVworld a{
+    text-decoration: none;
+    font-size: 20px;
+    color: black;
+}
+
+#title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+#modelLink{
+    border: 3px solid #205aa8;
+    border-radius: 10px;
+    height: 50px;
+    font-family: TheJamsil5Bold, sans-serif;
+    font-size: 14px;
+    color: black;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#modelLink:hover{
+    cursor: pointer;
+}
+
+#imgs{
+    position: relative;
+}
+
+#imgs img{
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+    max-height: 50vh;
+}
+
+#imgTitle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 50vh;
+    opacity: 0;
+    transition: opacity 0.5s;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 24px;
+}
+
+#imgs:hover #imgTitle {
+    opacity: 1;
+    cursor: pointer;
+}
+
+#infomation{
+    margin-top: 60px;
+}
+
+#infomation div{
+    display: flex;
+}
+
+.info_sub{
+    width: 10%;
+}
+
+.infoP{
+    margin-left: 20px;
+    width: 90%;
+}
+
+#topmenu{
+    display: flex;
+    justify-content: space-between;
+    border-bottom: #205aa8 3px solid;
+}
+
+#vworldLogo{
+    margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+#vworldLogo p{
+    font-size: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 35px;
+}
+
+#vworldLogo img{
+    height: 50px;
+}
+
+#linkmenu{
+    display: flex;
+}
+
+#linkmenu div{
+    border: #205aa8 2px solid;
+    border-radius: 10px;
+    margin: 5px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.linkimg{
+    width: 80px;
+}
+
+.linkP{
+    margin: 3px;
+    font-size: 12px;
+}
+
+@media screen and (max-width: 850px) {
+    body{
+        background-color: #1a1a1a;
+    }
+}
