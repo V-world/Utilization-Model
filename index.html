@@ -191,6 +191,9 @@
 			<iframe id="위험지역조회" src="./html/package/위험지역조회/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="전기차 충전소 조회" src="./html/package/전기차%20충전소%20조회/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="엑셀지오코딩" src="./html/package/엑셀지오코딩/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="출입국 외국인청 활용모델" src="./html/package/출입국 외국인청 활용모델/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="CCTV 영상 연계 표출" src="./html/package/CCTV 영상 연계 표출/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="관광정보지도" src="./html/package/관광정보지도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 		</div>
 	</div>
 </div>
@@ -505,7 +508,6 @@
 	// $.get('./html/left/dogmap.html', function(data) {
 	// 	$('#content_list').append(data);
 	// });
-
 	$.get('./html/left/날씨&미세먼지지도.html', function(data) {
 		$('#content_list').append(data);
 	});
@@ -527,7 +529,9 @@
 	$.get('./html/left/출입국 외국인청 활용모델.html', function(data) {
 		$('#content_list').append(data);
 	});
-
+	$.get('./html/left/CCTV 영상 연계 표출CCTV 영상 연계 표출.html', function(data) {
+		$('#content_list').append(data);
+	});
 	/*
 	 drawer 가져오기
 	 */
@@ -545,7 +549,8 @@
 	function leftMenuClick(id){
 		let targetId = id.getAttribute('data-target');
 		if (targetId !== 'drawer_3D-Dart' && targetId !== 'drawer_건축물통합조회지도' && targetId !== 'drawer_날씨&미세먼지지도'
-			&& targetId !== 'drawer_위험지역조회' && targetId !== 'drawer_전기차 충전소 조회' && targetId !== 'drawer_엑셀지오코딩'){
+			&& targetId !== 'drawer_위험지역조회' && targetId !== 'drawer_전기차 충전소 조회' && targetId !== 'drawer_엑셀지오코딩' && targetId !== 'drawer_출입국 외국인청 활용모델'
+			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도'){
 
 			const targetDrawer = document.getElementById(targetId);
 			toggleDrawerVisibility(targetDrawer);
@@ -658,6 +663,30 @@
 
 					iframeOFF('엑셀지오코딩');
 					document.getElementById('엑셀지오코딩').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
+					break;
+				case '출입국 외국인청 활용모델':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('출입국 외국인청 활용모델');
+					document.getElementById('출입국 외국인청 활용모델').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
+					break;
+				case 'CCTV 영상 연계 표출':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('CCTV 영상 연계 표출');
+					document.getElementById('CCTV 영상 연계 표출').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
+					break;
+				case '관광정보지도':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('관광정보지도');
+					document.getElementById('관광정보지도').hidden = false
 					document.getElementById('vMap').hidden = true
 					document.getElementById('rMap').hidden = true
 					break;
