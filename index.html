@@ -30,6 +30,50 @@
 				transform: translateY(300%);
 			}
         }
+		#mainModal{
+			z-index: 30;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: rgba(0, 0, 0, 0.7);
+			width: 100%;
+			height: 100%;
+		}
+		#modal{
+			position: absolute;
+			top: 50%;
+			left: 55%;
+			transform: translate(-50%, -50%);
+			width: 80%;
+			max-width: 600px;
+			background-color: white;
+			border-radius: 10px;
+			padding: 20px;
+		}
+
+        #modalTitle{
+            height: 10%;
+            border-bottom: 1px solid #4BACD2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #modalTitle span{
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            width: auto;
+        }
+
+        #modalClose{
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            cursor: pointer;
+        }
+
+
 	</style>
 
 
@@ -56,21 +100,37 @@
 							</div>
 						</a>
 					</div>
-					<div class="flex items-center">
-						<select id="search_category" data-category="parcel" class="rounded-l-lg border border-r-0 border-gray-500 px-2 text-black h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-medium">
-							<option class="text-lg lg:text-base font-bold lg:font-medium" value="address" data-category="parcel">지번</option>
-							<option class="text-lg lg:text-base font-bold lg:font-medium" value="address" data-category="road">도로명</option>
-							<option class="text-lg lg:text-base font-bold lg:font-medium" value="place" data-category="">건물명</option>
-						</select>
-						<input id="search_input" type="text" class="border-t border-b border-gray-500 px-2 text-black w-64 h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-base" placeholder="검색어를 입력하세요.">
-						<button id="search_submit" class="rounded-r-lg bg-blue-900 text-white w-24 lg:w-12 h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-medium">검색</button>
-					</div>
+<!--					<div class="flex items-center">-->
+<!--						<select id="search_category" data-category="parcel" class="rounded-l-lg border border-r-0 border-gray-500 px-2 text-black h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-medium">-->
+<!--							<option class="text-lg lg:text-base font-bold lg:font-medium" value="address" data-category="parcel">지번</option>-->
+<!--							<option class="text-lg lg:text-base font-bold lg:font-medium" value="address" data-category="road">도로명</option>-->
+<!--							<option class="text-lg lg:text-base font-bold lg:font-medium" value="place" data-category="">건물명</option>-->
+<!--						</select>-->
+<!--						<input id="search_input" type="text" class="border-t border-b border-gray-500 px-2 text-black w-64 h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-base" placeholder="검색어를 입력하세요.">-->
+<!--						<button id="search_submit" class="rounded-r-lg bg-blue-900 text-white w-24 lg:w-12 h-16 lg:h-8 text-2xl lg:text-base font-bold lg:font-medium">검색</button>-->
+<!--					</div>-->
 				</div>
 			</div>
-			<div class="flex items-center pr-2 hidden lg:flex">
-				<a href="https://api.vworld.kr" target="_blank">
-					<button class="h-8 rounded-lg p-1 bg-white font-semibold text-black hover:bg-gray-300">오픈API 바로가기</button>
-				</a>
+<!--			<div class="flex items-center pr-2 hidden lg:flex">-->
+<!--				<a href="https://api.vworld.kr" target="_blank">-->
+<!--					<button class="h-8 rounded-lg p-1 bg-white font-semibold text-black hover:bg-gray-300">오픈API 바로가기</button>-->
+<!--				</a>-->
+<!--			</div>-->
+		</div>
+	</div>
+
+	<div id="mainModal" hidden="hidden">
+		<div id="modal">
+			<div id="modalTitle">
+				<span>서비스 사용방법 안내</span>
+				<span id="modalClose" onclick="$('#mainModal').remove()">X</span>
+			</div>
+			<div id="modalContent">
+				<div class="modalStep">
+					<div class="modalStepContent">
+						<img src="/img/간단설명/토지이용이력조회.png">
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -115,77 +175,78 @@
 			</div>
 		</div>
 
-		<div id="topDrawer" class="absolute h-fit transform transition-transform duration-300 z-10 rounded-md bg-white drawer-top-1 border-2 border-blue-600 select-none left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-8 top-28 lg:top-16 w-full lg:w-[23.875rem] z-20 lg:z-0">
-			<ul id="search_list"></ul>
-		</div>
+<!--		<div id="topDrawer" class="absolute h-fit transform transition-transform duration-300 z-10 rounded-md bg-white drawer-top-1 border-2 border-blue-600 select-none left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-8 top-28 lg:top-16 w-full lg:w-[23.875rem] z-20 lg:z-0">-->
+<!--			<ul id="search_list"></ul>-->
+<!--		</div>-->
 
 		<div class="flex-1 relative">
 			<div class="absolute right-5 top-28 lg:top-16" id="mapChangeContainer">
-				<div id="tool_mapChange" class="relative z-10 border-2 border-black rounded-lg bg-white cursor-pointer w-16 h-16 lg:w-10 lg:h-10">
-				<label>
-						<input type="checkbox" class="hidden" id="mapChange">
-						<svg class="p-1.5" viewBox="0 0 682.66669 682.66669">
-							<defs id="defs1168"><clipPath clipPathUnits="userSpaceOnUse" id="clipPath1178">
-								<path d="M 0,512 H 512 V 0 H 0 Z" id="path1176" />
-							</clipPath>
-							</defs>
-							<g id="g1170" transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">
-								<g id="g1172">
-									<g id="g1174" clip-path="url(#clipPath1178)">
-										<g id="g1180" transform="translate(128.7422,32)">
-											<path d="m 0,0 h -57.242 c -2.21,0 -4,1.79 -4,4 v 77" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1182" />
-										</g>
-										<g id="g1184" transform="translate(474.5,318)">
-											<path d="m 0,0 h 26 c 2.21,0 4,-1.79 4,-4 v -278 c 0,-2.21 -1.79,-4 -4,-4 h -339.888" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1186" />
-										</g>
-										<g id="g1188" transform="translate(474.5,256)">
-											<path d="m 0,0 v -139 c 0,-2.209 -1.791,-4 -4,-4 h -429 c -2.209,0 -4,1.791 -4,4 v 75.41" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1190" />
-										</g>
-										<g id="g1192" ransform="translate(446.3867,399)">
-											<path d="m 0,0 h 24.113 c 2.209,0 4,-1.791 4,-4 v -105.898" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1194" />
-										</g>
-										<g id="g1196" transform="translate(444.5,194)">
-											<path d="m 0,0 v -47 c 0,-2.209 -1.791,-4 -4,-4 h -369 c -2.209,0 -4,1.791 -4,4 v 46.178" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1198" />
-										</g>
-										<g id="g1200" transform="translate(64.3325,480)">
-											<path d="m 0,0 h 376.167 c 2.209,0 4,-1.791 4,-4 v -278 c 0,-2.209 -1.791,-4 -4,-4 h -429 c -2.209,0 -4,1.791 -4,4 V -4 c 0,2.209 1.791,4 4,4 h 20.275" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1202" />
-										</g>
-										<g id="g1204" transform="translate(37.5,228)">
-											<path d="m 0,0 v 218 c 0,2.209 1.791,4 4,4 h 369 c 2.209,0 4,-1.791 4,-4 V 0 c 0,-2.209 -1.791,-4 -4,-4 H 4 C 1.791,-4 0,-2.209 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1206" />
-										</g>
-										<g id="g1208" transform="translate(275.29,450)">
-											<path d="m 0,0 c -5.97,-19.65 -20.87,-37.4 -25.87,-57.85 -2.89,-11.81 -2.41,-24.35 -6.28,-35.88 -12.09,-35.91 -59.73,-44.91 -81.7,-13.06 -7.06,10.73 -9.03,24.17 -16.03,34.93 -10.22,15.73 -29.92,23.94 -38.38,40.68 -4.83,9.55 -5.23,20.52 -3.28,31.18 z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1210" />
-										</g>
-										<g id="g1212" transform="translate(140.0273,450)">
-											<path d="m 0,0 c 2.181,-2.361 4.187,-4.879 5.845,-7.703 5.026,-8.552 6.44,-19.234 11.509,-27.762 15.774,-25.314 49.979,-18.161 58.659,10.38 2.442,8.055 2.473,16.729 3.853,25.085 z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1214" />
-										</g>
-										<g id="g1216" transform="translate(414.5,363.4897)">
-											<path d="m 0,0 v -135.49 c 0,-2.209 -1.791,-4 -4,-4 h -369 c -2.209,0 -4,1.791 -4,4 V 14.29 c 20.06,-3.2 35.77,-18.61 46.6,-38.13 9.58,-17.26 15.97,-36.28 27.03,-52.63 11.06,-16.36 28.56,-30.31 48.3,-29.8 21.26,0.55 38.79,17.27 59.66,21.38 21.31,4.19 42.599,-5.19 63.69,-10.41 21.09,-5.23 47.35,-4.44 59.659,13.45 10.991,15.98 5.721,38.27 13.411,56.07 C -49.455,-4.5 -22.547,5.273 -0.005,0.006 -0.003,0.004 -0.002,0.002 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1218" />
-										</g>
-										<g id="g1220" transform="translate(414.5,446)">
-											<path d="m 0,0 v -53.53 c -13.54,-7.32 -29.52,-9.03 -44.75,-11.96 -57.59,-10.15 -42.09,-42.92 -66.78,-48.15 -6.67,-0.66 -13.05,3.87 -16.32,9.72 -3.28,5.85 -3.99,12.78 -4.06,19.48 -0.22,20.69 5.07,41.42 15.2,59.47 5.62,10.01 12.56,19.19 18.521,28.97 L -4,4 C -1.791,4 0,2.209 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1222" />
-										</g>
-										<g id="g1224" transform="translate(84.1211,395.8516)">
-											<path d="m 0,0 c 0,0 32.697,-39.313 47.711,-71.929 15.014,-32.615 46.063,-40.241 85.415,-22.432 48.994,22.173 101.291,-3.824 101.291,-3.824" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:15, 30;stroke-dashoffset:0;stroke-opacity:1" id="path1226" />
-										</g>
-										<g id="g1228" transform="translate(474.5,159)">
-											<path d="m 0,0 v -93 c 0,-2.21 -1.79,-4 -4,-4 h -369 c -2.21,0 -4,1.79 -4,4 v 47" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1230" />
-										</g>
-									</g>
-								</g>
-							</g>
-						</svg>
-					</label>
-				</div>
-				<div id="mapChangeList" class="z-20 hidden absolute right-full top-0 mr-2 flex flex-row border rounded-md border-black bg-white cursor-pointer select-none h-16 lg:h-10">
-					<div onclick="mapToggle(Base)" class="flex items-center px-2 whitespace-nowrap hover:bg-gray-200 rounded-l-lg text-2xl lg:text-base font-bold">일반지도</div>
-					<div onclick="mapToggle(White)" class="flex items-center border-l border-black px-2 whitespace-nowrap hover:bg-gray-200 text-2xl lg:text-base font-bold">백지도</div>
-					<div onclick="mapToggle()" class="flex items-center border-l border-black px-2 whitespace-nowrap hover:bg-gray-200 rounded-r-lg text-2xl lg:text-base font-bold">3D지도</div>
-				</div>
+<!--				<div id="tool_mapChange" class="relative z-10 border-2 border-black rounded-lg bg-white cursor-pointer w-16 h-16 lg:w-10 lg:h-10">-->
+<!--				<label>-->
+<!--						<input type="checkbox" class="hidden" id="mapChange">-->
+<!--						<svg class="p-1.5" viewBox="0 0 682.66669 682.66669">-->
+<!--							<defs id="defs1168"><clipPath clipPathUnits="userSpaceOnUse" id="clipPath1178">-->
+<!--								<path d="M 0,512 H 512 V 0 H 0 Z" id="path1176" />-->
+<!--							</clipPath>-->
+<!--							</defs>-->
+<!--							<g id="g1170" transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">-->
+<!--								<g id="g1172">-->
+<!--									<g id="g1174" clip-path="url(#clipPath1178)">-->
+<!--										<g id="g1180" transform="translate(128.7422,32)">-->
+<!--											<path d="m 0,0 h -57.242 c -2.21,0 -4,1.79 -4,4 v 77" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1182" />-->
+<!--										</g>-->
+<!--										<g id="g1184" transform="translate(474.5,318)">-->
+<!--											<path d="m 0,0 h 26 c 2.21,0 4,-1.79 4,-4 v -278 c 0,-2.21 -1.79,-4 -4,-4 h -339.888" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1186" />-->
+<!--										</g>-->
+<!--										<g id="g1188" transform="translate(474.5,256)">-->
+<!--											<path d="m 0,0 v -139 c 0,-2.209 -1.791,-4 -4,-4 h -429 c -2.209,0 -4,1.791 -4,4 v 75.41" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1190" />-->
+<!--										</g>-->
+<!--										<g id="g1192" ransform="translate(446.3867,399)">-->
+<!--											<path d="m 0,0 h 24.113 c 2.209,0 4,-1.791 4,-4 v -105.898" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1194" />-->
+<!--										</g>-->
+<!--										<g id="g1196" transform="translate(444.5,194)">-->
+<!--											<path d="m 0,0 v -47 c 0,-2.209 -1.791,-4 -4,-4 h -369 c -2.209,0 -4,1.791 -4,4 v 46.178" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1198" />-->
+<!--										</g>-->
+<!--										<g id="g1200" transform="translate(64.3325,480)">-->
+<!--											<path d="m 0,0 h 376.167 c 2.209,0 4,-1.791 4,-4 v -278 c 0,-2.209 -1.791,-4 -4,-4 h -429 c -2.209,0 -4,1.791 -4,4 V -4 c 0,2.209 1.791,4 4,4 h 20.275" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1202" />-->
+<!--										</g>-->
+<!--										<g id="g1204" transform="translate(37.5,228)">-->
+<!--											<path d="m 0,0 v 218 c 0,2.209 1.791,4 4,4 h 369 c 2.209,0 4,-1.791 4,-4 V 0 c 0,-2.209 -1.791,-4 -4,-4 H 4 C 1.791,-4 0,-2.209 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1206" />-->
+<!--										</g>-->
+<!--										<g id="g1208" transform="translate(275.29,450)">-->
+<!--											<path d="m 0,0 c -5.97,-19.65 -20.87,-37.4 -25.87,-57.85 -2.89,-11.81 -2.41,-24.35 -6.28,-35.88 -12.09,-35.91 -59.73,-44.91 -81.7,-13.06 -7.06,10.73 -9.03,24.17 -16.03,34.93 -10.22,15.73 -29.92,23.94 -38.38,40.68 -4.83,9.55 -5.23,20.52 -3.28,31.18 z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1210" />-->
+<!--										</g>-->
+<!--										<g id="g1212" transform="translate(140.0273,450)">-->
+<!--											<path d="m 0,0 c 2.181,-2.361 4.187,-4.879 5.845,-7.703 5.026,-8.552 6.44,-19.234 11.509,-27.762 15.774,-25.314 49.979,-18.161 58.659,10.38 2.442,8.055 2.473,16.729 3.853,25.085 z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1214" />-->
+<!--										</g>-->
+<!--										<g id="g1216" transform="translate(414.5,363.4897)">-->
+<!--											<path d="m 0,0 v -135.49 c 0,-2.209 -1.791,-4 -4,-4 h -369 c -2.209,0 -4,1.791 -4,4 V 14.29 c 20.06,-3.2 35.77,-18.61 46.6,-38.13 9.58,-17.26 15.97,-36.28 27.03,-52.63 11.06,-16.36 28.56,-30.31 48.3,-29.8 21.26,0.55 38.79,17.27 59.66,21.38 21.31,4.19 42.599,-5.19 63.69,-10.41 21.09,-5.23 47.35,-4.44 59.659,13.45 10.991,15.98 5.721,38.27 13.411,56.07 C -49.455,-4.5 -22.547,5.273 -0.005,0.006 -0.003,0.004 -0.002,0.002 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1218" />-->
+<!--										</g>-->
+<!--										<g id="g1220" transform="translate(414.5,446)">-->
+<!--											<path d="m 0,0 v -53.53 c -13.54,-7.32 -29.52,-9.03 -44.75,-11.96 -57.59,-10.15 -42.09,-42.92 -66.78,-48.15 -6.67,-0.66 -13.05,3.87 -16.32,9.72 -3.28,5.85 -3.99,12.78 -4.06,19.48 -0.22,20.69 5.07,41.42 15.2,59.47 5.62,10.01 12.56,19.19 18.521,28.97 L -4,4 C -1.791,4 0,2.209 0,0 Z" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1222" />-->
+<!--										</g>-->
+<!--										<g id="g1224" transform="translate(84.1211,395.8516)">-->
+<!--											<path d="m 0,0 c 0,0 32.697,-39.313 47.711,-71.929 15.014,-32.615 46.063,-40.241 85.415,-22.432 48.994,22.173 101.291,-3.824 101.291,-3.824" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:15, 30;stroke-dashoffset:0;stroke-opacity:1" id="path1226" />-->
+<!--										</g>-->
+<!--										<g id="g1228" transform="translate(474.5,159)">-->
+<!--											<path d="m 0,0 v -93 c 0,-2.21 -1.79,-4 -4,-4 h -369 c -2.21,0 -4,1.79 -4,4 v 47" style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" id="path1230" />-->
+<!--										</g>-->
+<!--									</g>-->
+<!--								</g>-->
+<!--							</g>-->
+<!--						</svg>-->
+<!--					</label>-->
+<!--				</div>-->
+<!--				<div id="mapChangeList" class="z-20 hidden absolute right-full top-0 mr-2 flex flex-row border rounded-md border-black bg-white cursor-pointer select-none h-16 lg:h-10">-->
+<!--					<div onclick="mapToggle(Base)" class="flex items-center px-2 whitespace-nowrap hover:bg-gray-200 rounded-l-lg text-2xl lg:text-base font-bold">일반지도</div>-->
+<!--					<div onclick="mapToggle(White)" class="flex items-center border-l border-black px-2 whitespace-nowrap hover:bg-gray-200 text-2xl lg:text-base font-bold">백지도</div>-->
+<!--					<div onclick="mapToggle()" class="flex items-center border-l border-black px-2 whitespace-nowrap hover:bg-gray-200 rounded-r-lg text-2xl lg:text-base font-bold">3D지도</div>-->
+<!--				</div>-->
 			</div>
 			<div class="h-screen" style="overflow: hidden" id="rMap" hidden></div>
 			<div class="h-screen overflow-visible" id="vMap"></div>
 			<iframe id="expo2023game" src="./html/package/엑스포게임/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="KMLdownload" src="./html/package/kml%20내보내기/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="건축물통합조회지도" src="./html/package/건축물통합조회지도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="날씨&미세먼지지도" src="./html/package/날씨&미세먼지%20지도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="위험지역조회" src="./html/package/위험지역조회/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
@@ -280,11 +341,11 @@
 	}
 
 	function mapToggle(arg) {
-
-		if(!mapChangeList.classList.contains('hidden')){
-			mapChangeList.classList.add('hidden');
-			mapChange.checked = false;
-		}
+		//
+		// if(!mapChangeList.classList.contains('hidden')){
+		// 	mapChangeList.classList.add('hidden');
+		// 	mapChange.checked = false;
+		// }
 
 		const vMap = document.getElementById('vMap');
 		const rMap = document.getElementById('rMap');
@@ -493,52 +554,81 @@
 	/*
 	 왼쪽 메뉴 가져오기
 	 */
-	$.get('./html/left/myland.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/kmlDownload.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/3D-Dart.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/건축물통합조회지도.html', function(data) {
-		$('#content_list').append(data);
-	});
-	// $.get('./html/left/dogmap.html', function(data) {
-	// 	$('#content_list').append(data);
-	// });
-	$.get('./html/left/날씨&미세먼지지도.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/위험지역조회.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/전기차 충전소 조회.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/엑셀지오코딩.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/CCTV 영상 연계 표출.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/관광정보지도.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/출입국 외국인청 활용모델.html', function(data) {
-		$('#content_list').append(data);
-	});
-	$.get('./html/left/CCTV 영상 연계 표출CCTV 영상 연계 표출.html', function(data) {
-		$('#content_list').append(data);
-	});
+	try{
+		$.get('./html/left/kmlDownload.html', function(data) {
+			$('#content_list').append(data);
+		});
+	}finally {
+		try{
+			$.get('./html/left/3D-Dart.html', function(data) {
+				$('#content_list').append(data);
+			});
+		}finally {
+			try{
+				$.get('./html/left/건축물통합조회지도.html', function(data) {
+					$('#content_list').append(data);
+				});
+			}finally {
+				try{
+					$.get('./html/left/날씨&미세먼지지도.html', function(data) {
+						$('#content_list').append(data);
+					});
+				}finally {
+					try{
+						$.get('./html/left/위험지역조회.html', function(data) {
+							$('#content_list').append(data);
+						});
+					}finally {
+						try{
+							$.get('./html/left/전기차 충전소 조회.html', function(data) {
+								$('#content_list').append(data);
+							});
+						}finally {
+							try{
+								$.get('./html/left/엑셀지오코딩.html', function(data) {
+									$('#content_list').append(data);
+								});
+							}finally {
+								try{
+									$.get('./html/left/CCTV 영상 연계 표출.html', function(data) {
+										$('#content_list').append(data);
+									});
+								}finally {
+									try{
+										$.get('./html/left/관광정보지도.html', function(data) {
+											$('#content_list').append(data);
+										});
+									}finally {
+										try{
+											$.get('./html/left/출입국 외국인청 활용모델.html', function(data) {
+												$('#content_list').append(data);
+											});
+										}finally {
+											try{
+												$.get('./html/left/CCTV 영상 연계 표출CCTV 영상 연계 표출.html', function(data) {
+													$('#content_list').append(data);
+												});
+											}finally {
+												$.get('./html/left/myland.html', function(data) {
+													$('#content_list').append(data);
+												});
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 	/*
 	 drawer 가져오기
 	 */
 	$.get('./html/drawer/myland.html', function(data) {
-		$('#contentDrawer').append(data);
-	});
-	$.get('./html/drawer/kmlDownload.html', function(data) {
 		$('#contentDrawer').append(data);
 	});
 	$.get('./html/drawer/dogMap.html', function(data) {
@@ -548,17 +638,25 @@
 
 	function leftMenuClick(id){
 		let targetId = id.getAttribute('data-target');
+
+		if(targetId == 'drawer_myland'){
+			if (document.getElementById('mainModal') !== null){
+				document.getElementById('mainModal').hidden = false;
+			}
+		}
+
+
 		if (targetId !== 'drawer_3D-Dart' && targetId !== 'drawer_건축물통합조회지도' && targetId !== 'drawer_날씨&미세먼지지도'
 			&& targetId !== 'drawer_위험지역조회' && targetId !== 'drawer_전기차 충전소 조회' && targetId !== 'drawer_엑셀지오코딩' && targetId !== 'drawer_출입국 외국인청 활용모델'
-			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도'){
+			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도' && targetId !== 'drawer_KMLdownload'){
 
 			const targetDrawer = document.getElementById(targetId);
 			toggleDrawerVisibility(targetDrawer);
 		}
 
-		if(!topDrawer.classList.contains('drawer-top-1')){
-			topDrawer.classList.add('drawer-top-1');
-		}
+		// if(!topDrawer.classList.contains('drawer-top-1')){
+		// 	topDrawer.classList.add('drawer-top-1');
+		// }
 
 		let _beforeSelectContent = null;
 		if(selectContent !== null){
@@ -690,6 +788,13 @@
 					document.getElementById('vMap').hidden = true
 					document.getElementById('rMap').hidden = true
 					break;
+				case 'KMLdownload':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('KMLdownload');
+					document.getElementById('KMLdownload').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
 			}
 		}
 	}

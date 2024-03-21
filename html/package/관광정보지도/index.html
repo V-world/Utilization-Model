@@ -14,9 +14,116 @@
 	<meta http-equiv="Expires" content="-1">
 	<meta http-equiv="Cache-Control" content="no-cache">
 	<style>
+        #mainModal{
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #modal{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            display: block;
+        }
+
+        #modalTitle{
+            height: 10%;
+            border-bottom: 1px solid #4BACD2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #modalTitle span{
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            width: auto;
+        }
+
+        #modalClose{
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            cursor: pointer;
+        }
+
+        #modalContent{
+            height: 80%;
+            overflow-y: scroll;
+        }
+        #modalContent::-webkit-scrollbar{
+            display: none;
+        }
+
+        #modalButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #modalButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #modalButtons button:hover{
+            background-color: #4BACD2;
+            color: white;
+        }
+
+        .modalStep.hided{
+            display: none;
+        }
+
+        .modalStepContent{
+            /*img가 가로 50% 씩 차지하고, p또한 50% 차지*/
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 10px;
+        <!-- 내부 img 높이에 따라 높이 반응형 -->
+            height: auto;
+        }
+
+        .modalStepContent img{
+            width: 100%;
+            height: auto;
+        }
 	</style>
 </head>
 <body>
+<div id="mainModal">
+	<div id="modal">
+		<div id="modalTitle">
+			<span>서비스 사용방법 안내</span>
+			<span id="modalClose" onclick="$('#mainModal').css('display', 'none')">X</span>
+		</div>
+		<div id="modalContent">
+			<div class="modalStep">
+				<div class="modalStepContent">
+					<img src="../../../img/간단설명/관광%20정보%20지도.png">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 <div id="map"></div>
 <div class="contentMenu">
 	<button id="contentSel" class="contentSel">관광지</button>

@@ -48,6 +48,10 @@ vw.ws3dInitCallBack = function() {
     }
     vw.EventProcess.add( "test01", map.onMoveEnd, test01 );
 
+    document.getElementById("mapToolBar").hidden = true;
+    document.getElementById("naviRotate").hidden = true;
+    document.getElementById("naviZoomPannel").hidden = true;
+
 };
 
 var callback = function(data) {

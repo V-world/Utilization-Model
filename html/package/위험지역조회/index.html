@@ -186,94 +186,94 @@
 			color: white;
 		}
 
-		#modal{
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			z-index: 2;
-			width: 600px;
-			height: 400px;
-			background-color: white;
-			border-radius: 10px;
-			padding: 10px;
-			display: block;
-		}
+		/*#modal{*/
+		/*	position: fixed;*/
+		/*	top: 50%;*/
+		/*	left: 50%;*/
+		/*	transform: translate(-50%, -50%);*/
+		/*	z-index: 2;*/
+		/*	width: 600px;*/
+		/*	height: 400px;*/
+		/*	background-color: white;*/
+		/*	border-radius: 10px;*/
+		/*	padding: 10px;*/
+		/*	display: block;*/
+		/*}*/
 
-		#modalTitle{
-			height: 10%;
-			border-bottom: 1px solid #4BACD2;
-			display: flex;
-			justify-content: space-between;
-		}
+		/*#modalTitle{*/
+		/*	height: 10%;*/
+		/*	border-bottom: 1px solid #4BACD2;*/
+		/*	display: flex;*/
+		/*	justify-content: space-between;*/
+		/*}*/
 
-		#modalTitle span{
-			float: left;
-			font-size: 20px;
-			font-weight: bold;
-			color: #4BACD2;
-		}
+		/*#modalTitle span{*/
+		/*	float: left;*/
+		/*	font-size: 20px;*/
+		/*	font-weight: bold;*/
+		/*	color: #4BACD2;*/
+		/*}*/
 
-		#modalClose{
-			font-size: 20px;
-			font-weight: bold;
-			color: #4BACD2;
-			cursor: pointer;
-		}
+		/*#modalClose{*/
+		/*	font-size: 20px;*/
+		/*	font-weight: bold;*/
+		/*	color: #4BACD2;*/
+		/*	cursor: pointer;*/
+		/*}*/
 
-		#modalContent{
-			height: 80%;
-			overflow-y: scroll;
-		}
-		#modalContent::-webkit-scrollbar{
-			display: none;
-		}
+		/*#modalContent{*/
+		/*	height: 80%;*/
+		/*	overflow-y: scroll;*/
+		/*}*/
+		/*#modalContent::-webkit-scrollbar{*/
+		/*	display: none;*/
+		/*}*/
 
-		#modalButtons{
-			height: 10%;
-			text-align: center;
-		}
+		/*#modalButtons{*/
+		/*	height: 10%;*/
+		/*	text-align: center;*/
+		/*}*/
 
-		#modalButtons button{
-			width: 100px;
-			height: 30px;
-			border-radius: 10px;
-			border: 1px solid #4BACD2;
-			background-color: white;
-			color: #4BACD2;
-			font-weight: bold;
-			margin: 10px;
-			cursor: pointer;
-		}
+		/*#modalButtons button{*/
+		/*	width: 100px;*/
+		/*	height: 30px;*/
+		/*	border-radius: 10px;*/
+		/*	border: 1px solid #4BACD2;*/
+		/*	background-color: white;*/
+		/*	color: #4BACD2;*/
+		/*	font-weight: bold;*/
+		/*	margin: 10px;*/
+		/*	cursor: pointer;*/
+		/*}*/
 
-		#modalButtons button:hover{
-			background-color: #4BACD2;
-			color: white;
-		}
+		/*#modalButtons button:hover{*/
+		/*	background-color: #4BACD2;*/
+		/*	color: white;*/
+		/*}*/
 
-		.modalStep.hided{
-			display: none;
-		}
+		/*.modalStep.hided{*/
+		/*	display: none;*/
+		/*}*/
 
-        .modalStepContent{
-			/*img가 가로 50% 씩 차지하고, p또한 50% 차지*/
-			display: flex;
-			justify-content: space-between;
-			height: 300px;
-			padding-left: 10px;
-			padding-right: 10px;
-			padding-top: 10px;
-		}
+        /*.modalStepContent{*/
+		/*	!*img가 가로 50% 씩 차지하고, p또한 50% 차지*!*/
+		/*	display: flex;*/
+		/*	justify-content: space-between;*/
+		/*	height: 300px;*/
+		/*	padding-left: 10px;*/
+		/*	padding-right: 10px;*/
+		/*	padding-top: 10px;*/
+		/*}*/
 
-		.modalStepContent img{
-			width: 50%;
-			height: 300px;
-		}
+		/*.modalStepContent img{*/
+		/*	width: 50%;*/
+		/*	height: 300px;*/
+		/*}*/
 
-		.modalStepContent p{
-			padding: 10px;
-			margin: 0;
-		}
+		/*.modalStepContent p{*/
+		/*	padding: 10px;*/
+		/*	margin: 0;*/
+		/*}*/
 
 		strong{
 			color: #ff0000;
@@ -317,42 +317,149 @@
 			color: white;
 		}
 
+        #mainModal{
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #modal{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            display: block;
+        }
+
+        #modalTitle{
+            height: 10%;
+            border-bottom: 1px solid #4BACD2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #modalTitle span{
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+        }
+
+        #modalClose{
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            cursor: pointer;
+        }
+
+        #modalContent{
+            height: 80%;
+            overflow-y: scroll;
+        }
+        #modalContent::-webkit-scrollbar{
+            display: none;
+        }
+
+        #modalButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #modalButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #modalButtons button:hover{
+            background-color: #4BACD2;
+            color: white;
+        }
+
+        .modalStep.hided{
+            display: none;
+        }
+
+        .modalStepContent{
+            /*img가 가로 50% 씩 차지하고, p또한 50% 차지*/
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 10px;
+        <!-- 내부 img 높이에 따라 높이 반응형 -->
+            height: auto;
+        }
+
+        .modalStepContent img{
+            width: 100%;
+            height: auto;
+        }
+
 
 	</style>
 </head>
 <body style="margin: 0; padding: 0">
-<div id="loadings"><img	src="./css/loading.gif"></div>
-<!-- 서비스 사용방법안내 modal	: 상단에는 step 단계 표출 닫기 버튼이 있으며, 중간에는 해당 step별 설명이 있고, 하단에는 이전 step와 다음 step 버튼이 존재-->
-<div id="modal">
-	<div id="modalTitle">
-		<span>서비스 사용방법 안내</span>
-		<span id="modalClose" onclick="$('#modal').css('display', 'none')">X</span>
-	</div>
-	<div id="modalContent">
-		<div class="modalStep">
-			<div class="modalStepContent">
-				<img src="./css/spet1.png" style="width: 280px">
-				<p>지도에서 원하는 지역을 <strong>클릭</strong>하면 해당 지역의 재난문자를 조회할 수 있으며, 줌 레벨에 따라 선택되는 지역이 다릅니다. <br/><br/> &nbsp;6~11레벨은 광역시도 단위  <br/>  12~19레벨은 시군구 단위</p>
+<div id="mainModal">
+	<div id="modal">
+		<div id="modalTitle">
+			<span>서비스 사용방법 안내</span>
+			<span id="modalClose" onclick="$('#mainModal').css('display', 'none')">X</span>
+		</div>
+		<div id="modalContent">
+			<div class="modalStep">
+				<div class="modalStepContent">
+					<img src="../../../img/간단설명/위험지역조회.png">
+				</div>
 			</div>
 		</div>
-		<div class="modalStep hided">
-			<div class="modalStepContent">
-				<img src="./css/step2.png" style="width: 280px">
-				<p>하단의 <strong>지역검색</strong> 메뉴를 통해 지역을 선택할 수 있으며, 지역검색을 통해 검색 시에는 시군구 단위로만 재난문자를 조회할 수 있습니다.</p>
-			</div>
-		</div>
-		<div class="modalStep hided">
-			<div class="modalStepContent">
-				<img src="./css/step3.png" style="width: 280px">
-				<p>우측하단에 재난문자 목록은 5초마다 자동으로 새로고침되며, 신규 재난문자는 상단에 추가됩니다.</p>
-			</div>
-		</div>
-	</div>
-	<div id="modalButtons">
-		<button onclick="prevStep()" hidden="hidden">이전</button>
-		<button onclick="nextStep()">다음</button>
 	</div>
 </div>
+<div id="loadings"><img	src="./css/loading.gif"></div>
+<!-- 서비스 사용방법안내 modal	: 상단에는 step 단계 표출 닫기 버튼이 있으며, 중간에는 해당 step별 설명이 있고, 하단에는 이전 step와 다음 step 버튼이 존재-->
+<!--<div id="modal">-->
+<!--	<div id="modalTitle">-->
+<!--		<span>서비스 사용방법 안내</span>-->
+<!--		<span id="modalClose" onclick="$('#modal').css('display', 'none')">X</span>-->
+<!--	</div>-->
+<!--	<div id="modalContent">-->
+<!--		<div class="modalStep">-->
+<!--			<div class="modalStepContent">-->
+<!--				<img src="./css/spet1.png" style="width: 280px">-->
+<!--				<p>지도에서 원하는 지역을 <strong>클릭</strong>하면 해당 지역의 재난문자를 조회할 수 있으며, 줌 레벨에 따라 선택되는 지역이 다릅니다. <br/><br/> &nbsp;6~11레벨은 광역시도 단위  <br/>  12~19레벨은 시군구 단위</p>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="modalStep hided">-->
+<!--			<div class="modalStepContent">-->
+<!--				<img src="./css/step2.png" style="width: 280px">-->
+<!--				<p>하단의 <strong>지역검색</strong> 메뉴를 통해 지역을 선택할 수 있으며, 지역검색을 통해 검색 시에는 시군구 단위로만 재난문자를 조회할 수 있습니다.</p>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="modalStep hided">-->
+<!--			<div class="modalStepContent">-->
+<!--				<img src="./css/step3.png" style="width: 280px">-->
+<!--				<p>우측하단에 재난문자 목록은 5초마다 자동으로 새로고침되며, 신규 재난문자는 상단에 추가됩니다.</p>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--	</div>-->
+<!--	<div id="modalButtons">-->
+<!--		<button onclick="prevStep()" hidden="hidden">이전</button>-->
+<!--		<button onclick="nextStep()">다음</button>-->
+<!--	</div>-->
+<!--</div>-->
 <div id="selBoxs">
 	<div id="ProList">
 	</div>
