@@ -66,12 +66,61 @@
             width: auto;
         }
 
-        #modalClose{
+		#modalClose{
             font-size: 20px;
             font-weight: bold;
             color: #4BACD2;
             cursor: pointer;
         }
+
+        #modalContent{
+            height: 80%;
+            overflow-y: scroll;
+        }
+        #modalContent::-webkit-scrollbar{
+            display: none;
+        }
+
+        #modalButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #modalButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #modalButtons button:hover{
+            background-color: #4BACD2;
+            color: white;
+        }
+
+        .modalStep.hided{
+            display: none;
+        }
+
+        /*
+		.modalStepContent{
+			padding-left: 10px;
+			padding-right: 10px;
+			padding-top: 10px;
+			<!-- 내부 img 높이에 따라 높이 반응형 -->
+			height: auto;
+		}
+		*/
+
+		.modalStepContent img{
+			width: 100%;
+			height: auto;
+		}
 
 
 	</style>
