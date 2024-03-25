@@ -138,7 +138,7 @@
 
 
 	<!-- 사이드 메뉴 -->
-	<div id="menu_left" style="overflow: hidden" class="bottom-0 flex flex-col justify-between bg-white text-black font-semibold z-20 absolute border-r-2 lg:static w-full lg:w-44 max-h-24 lg:max-h-full lg:h-screen">
+	<div id="menu_left" style="overflow: hidden" class="bottom-0 flex flex-col justify-between bg-white text-black font-semibold z-20 absolute border-r-2 lg:static w-full lg:w-56 max-h-24 lg:max-h-full lg:h-screen">
 		<div class="w-full">
 			<div class="h-24 lg:h-14 w-full bg-blue-500 visible lg:invisible">
 				<label class="flex items-center justify-center h-full cursor-pointer select-none" for="mapToolBar">
@@ -256,6 +256,7 @@
 			<iframe id="출입국 외국인청 활용모델" src="./html/package/출입국 외국인청 활용모델/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="CCTV 영상 연계 표출" src="./html/package/CCTV 영상 연계 표출/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="관광정보지도" src="./html/package/관광정보지도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="사회과부도" src="./html/package/사회과부도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 		</div>
 	</div>
 </div>
@@ -610,9 +611,15 @@
 													$('#content_list').append(data);
 												});
 											}finally {
-												$.get('./html/left/myland.html', function(data) {
-													$('#content_list').append(data);
-												});
+												try {
+													$.get('./html/left/myland.html', function(data) {
+														$('#content_list').append(data);
+													});
+												}finally {
+													$.get('./html/left/사회과부도.html', function(data) {
+														$('#content_list').append(data);
+													});
+												}
 											}
 										}
 									}
@@ -649,7 +656,7 @@
 
 		if (targetId !== 'drawer_3D-Dart' && targetId !== 'drawer_건축물통합조회지도' && targetId !== 'drawer_날씨&미세먼지지도'
 			&& targetId !== 'drawer_위험지역조회' && targetId !== 'drawer_전기차 충전소 조회' && targetId !== 'drawer_엑셀지오코딩' && targetId !== 'drawer_출입국 외국인청 활용모델'
-			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도' && targetId !== 'drawer_KMLdownload'){
+			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도' && targetId !== 'drawer_KMLdownload' && targetId !== 'drawer_사회과부도'){
 
 			const targetDrawer = document.getElementById(targetId);
 			toggleDrawerVisibility(targetDrawer);
@@ -794,6 +801,14 @@
 
 					iframeOFF('KMLdownload');
 					document.getElementById('KMLdownload').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
+					break;
+				case '사회과부도':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('사회과부도');
+					document.getElementById('사회과부도').hidden = false
 					document.getElementById('vMap').hidden = true
 					document.getElementById('rMap').hidden = true
 			}
