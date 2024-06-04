@@ -306,6 +306,7 @@
 			<iframe id="CCTV 영상 연계 표출" src="./html/package/CCTV 영상 연계 표출/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="관광정보지도" src="./html/package/관광정보지도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 			<iframe id="사회과부도" src="./html/package/사회과부도/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
+			<iframe id="건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스" src="./html/package/건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스/index.html" class="h-screen w-full overflow-visible" hidden></iframe>
 		</div>
 	</div>
 </div>
@@ -602,84 +603,36 @@
 <script>
 
 
-	/*
-	 왼쪽 메뉴 가져오기
-	 */
-	try{
-		$.get('./html/left/kmlDownload.html', function(data) {
-			$('#content_list').append(data);
-		});
-	}finally {
-		try{
-			$.get('./html/left/3D-Dart.html', function(data) {
+	async function loadAndAppendFiles() {
+		const files = [
+			'./html/left/kmlDownload.html',
+			'./html/left/3D-Dart.html',
+			'./html/left/건축물통합조회지도.html',
+			'./html/left/날씨&미세먼지지도.html',
+			'./html/left/위험지역조회.html',
+			'./html/left/전기차 충전소 조회.html',
+			'./html/left/엑셀지오코딩.html',
+			'./html/left/CCTV 영상 연계 표출.html',
+			'./html/left/관광정보지도.html',
+			'./html/left/출입국 외국인청 활용모델.html',
+			'./html/left/CCTV 영상 연계 표출CCTV 영상 연계 표출.html',
+			'./html/left/myland.html',
+			'./html/left/건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스.html',
+			// './html/left/사회과부도.html'
+
+		];
+
+		for (let file of files) {
+			try {
+				const data = await $.get(file);
 				$('#content_list').append(data);
-			});
-		}finally {
-			try{
-				$.get('./html/left/건축물통합조회지도.html', function(data) {
-					$('#content_list').append(data);
-				});
-			}finally {
-				try{
-					$.get('./html/left/날씨&미세먼지지도.html', function(data) {
-						$('#content_list').append(data);
-					});
-				}finally {
-					try{
-						$.get('./html/left/위험지역조회.html', function(data) {
-							$('#content_list').append(data);
-						});
-					}finally {
-						try{
-							$.get('./html/left/전기차 충전소 조회.html', function(data) {
-								$('#content_list').append(data);
-							});
-						}finally {
-							try{
-								$.get('./html/left/엑셀지오코딩.html', function(data) {
-									$('#content_list').append(data);
-								});
-							}finally {
-								try{
-									$.get('./html/left/CCTV 영상 연계 표출.html', function(data) {
-										$('#content_list').append(data);
-									});
-								}finally {
-									try{
-										$.get('./html/left/관광정보지도.html', function(data) {
-											$('#content_list').append(data);
-										});
-									}finally {
-										try{
-											$.get('./html/left/출입국 외국인청 활용모델.html', function(data) {
-												$('#content_list').append(data);
-											});
-										}finally {
-											try{
-												$.get('./html/left/CCTV 영상 연계 표출CCTV 영상 연계 표출.html', function(data) {
-													$('#content_list').append(data);
-												});
-											}finally {
-												try {
-													$.get('./html/left/myland.html', function(data) {
-														$('#content_list').append(data);
-													});
-												}finally {
-													// $.get('./html/left/사회과부도.html', function(data) {
-													// 	$('#content_list').append(data);
-													// });
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+			} catch (error) {
+				console.error(`Error loading file ${file}: `, error);
 			}
 		}
 	}
+
+	loadAndAppendFiles();
 
 
 	/*
@@ -705,7 +658,8 @@
 
 		if (targetId !== 'drawer_3D-Dart' && targetId !== 'drawer_건축물통합조회지도' && targetId !== 'drawer_날씨&미세먼지지도'
 			&& targetId !== 'drawer_위험지역조회' && targetId !== 'drawer_전기차 충전소 조회' && targetId !== 'drawer_엑셀지오코딩' && targetId !== 'drawer_출입국 외국인청 활용모델'
-			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도' && targetId !== 'drawer_KMLdownload' && targetId !== 'drawer_사회과부도'){
+			&& targetId !== 'drawer_CCTV 영상 연계 표출' && targetId !== 'drawer_관광정보지도' && targetId !== 'drawer_KMLdownload' && targetId !== 'drawer_사회과부도'
+			&& targetId !=='drawer_건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스' ){
 
 			const targetDrawer = document.getElementById(targetId);
 			toggleDrawerVisibility(targetDrawer);
@@ -860,6 +814,15 @@
 					document.getElementById('사회과부도').hidden = false
 					document.getElementById('vMap').hidden = true
 					document.getElementById('rMap').hidden = true
+					break;
+				case '건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스':
+					mainDrawer.classList.add('drawer-left-1');
+
+					iframeOFF('건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스');
+					document.getElementById('건물·인근 시설 대중교통 소요 시간 및 중개업소 조회 서비스').hidden = false
+					document.getElementById('vMap').hidden = true
+					document.getElementById('rMap').hidden = true
+					break;
 			}
 		}
 	}
