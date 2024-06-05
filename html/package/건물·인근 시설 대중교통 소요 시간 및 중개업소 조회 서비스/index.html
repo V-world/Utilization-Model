@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<script src="../../../keys/vworld.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<style>
+		body, html {
+			margin: 0;
+			padding: 0;
+		}
+		#maps {
+			width: 100%;
+			height: 100vh;
+		}
+		.map-buttons {
+			position: absolute;
+			display: none;
+			flex-direction: row;
+			gap: 1px;
+			border-radius: 10px;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+		.map-buttons button {
+			display: block;
+			position: relative;
+			background-color: rgba(0, 0, 0, 0);
+			border: none;
+			margin: 0;
+			padding: 0;
+			cursor: pointer;
+		}
+		.map-buttons button span {
+			display: none;
+			position: absolute;
+			top: 50px;
+			left: 50%;
+			transform: translateX(-50%);
+			background-color: #333;
+			color: #fff;
+			padding: 5px;
+			border-radius: 3px;
+			white-space: nowrap;
+			z-index: 10;
+		}
+		.map-buttons button:hover span {
+			display: block;
+		}
+
+		.tarffic-info {
+			position: absolute;
+			display: none;
+			flex-direction: column;
+			border-radius: 22px;
+			background-color: rgb(230, 230, 230);
+			z-index: 20;
+			right: 0%;
+			top: 50%;
+			transform: translate(0%, -50%);
+			width: 200px;
+			height: 200px;
+		}
+
+		#tarffic-list {
+			height: 40px;
+			width: 100%;
+			margin-bottom: 10px;
+		}
+
+		.info {
+			flex-grow: 1;
+			overflow-y: auto;
+			padding: 10px;
+		}
+
+		.tarffic-info > div:last-child {
+			margin-top: auto;
+			padding: 10px;
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+		}
+
+		#tarffic-info{
+			height: 100%;
+		}
+
+		.tarffic-info > div:last-child svg {
+			margin-right: 8px;
+		}
+
+		.arrow-button {
+			position: absolute;
+			left: -10px;
+			top: 50%;
+			transform: translateY(-50%);
+			background-color: white;
+			border: none;
+			cursor: pointer;
+			width: 18px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+			padding: 0;
+		}
+
+		.arrow-button svg {
+			width: 16px;
+			height: 16px;
+		}
+
+		.circular-div {
+			position: relative;
+			width: 90%;
+			height: 100px;
+			border: 2px solid black;
+			border-radius: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 3px 5px 5px 10px;
+			background-color: white;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+		}
+
+		.tm-text {
+			position: absolute;
+			font-size: 24px;
+			font-weight: bold;
+		}
+
+		.ym-text {
+			position: absolute;
+			bottom: 5px;
+			right: 5px;
+			font-size: 12px;
+		}
+
+		select{
+			width: 100%;
+			height: 30px;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+			padding: 5px;
+			margin-right: 5px;
+		}
+
+		#land-info {
+			position: absolute;
+			display: none;
+			flex-direction: column;
+			z-index: 20;
+			left: 50%;
+			bottom: 20px;
+			transform: translate(-50%, 0%);
+			width: 80%;
+			height: 50px;
+			padding: 7px;
+			border-radius: 22px;
+			background-color: rgb(230, 230, 230);
+		}
+
+		#land-info table {
+			border-collapse: collapse;
+			width: 100%;
+			border: none;
+		}
+
+		#land-info table td {
+			border: none;
+			border-right: 1px solid black;
+			border-bottom: 1px solid black;
+			white-space: nowrap;
+		}
+
+		#land-info table td:last-child {
+			border-right: none;
+		}
+
+		#land-info table tr:last-child td {
+			border-bottom: none;
+		}
+
+
+		.land-info-value {
+			width: 50px;
+			text-align: center;
+		}
+
+		.land-info-long {
+			width: auto;
+		}
+
+
+
+	</style>
+</head>
+<body>
+<!--	<div id="mainModal">-->
+<!--		<div id="modal">-->
+<!--			<div id="modalTitle">-->
+<!--				<span>서비스 사용방법 안내</span>-->
+<!--				<span id="modalClose" onclick="$('#mainModal').css('display', 'none')">X</span>-->
+<!--			</div>-->
+<!--			<div id="modalContent">-->
+<!--				<div class="modalStep">-->
+<!--					<div class="modalStepContent">-->
+<!--						<img src="../../../img/간단설명/전기차충전소조회.png">-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--	</div>-->
+
+	<div id="maps"></div>
+	<div id="map-buttons" class="map-buttons">
+		<button id="button1">
+			<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" x="0" y="0" viewBox="0 0 512 478.92" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><rect width="512" height="478.92" rx="102.4" ry="102.4" fill="#cdcdcd" shape="rounded" transform="matrix(0.8,0,0,0.8,51.19999999999999,47.892001342773426)"></rect><g transform="matrix(0.7,0,0,0.7,76.80074701309206,71.83500108718874)"><g data-name="41"><path d="m499.47 207.05-44.21-39.94V83.32c0-14.67-11.94-26.61-26.61-26.61h-53.21c-10.96 0-20.4 6.67-24.47 16.16l-69.83-63.1c-6.98-6.31-16-9.78-25.41-9.78s-18.46 3.48-25.44 9.81L12.5 207.08C.79 217.69-3.1 234.06 2.58 248.8s19.56 24.27 35.36 24.27c6.42 0 12.68-1.63 18.22-4.67V439c0 22.01 17.9 39.91 39.91 39.91h319.28c22.01 0 39.91-17.9 39.91-39.91V268.4a37.9 37.9 0 0 0 18.22 4.67h.58c15.81 0 29.69-9.53 35.37-24.29 5.68-14.75 1.77-31.14-9.96-41.73zm-25.41 52.72h-.58c-5.99 0-11.77-2.19-16.27-6.15l-15.26-13.45v198.84c0 14.69-11.91 26.61-26.61 26.61H96.07c-14.69 0-26.61-11.91-26.61-26.61V240.17L54.2 253.62a24.609 24.609 0 0 1-16.27 6.15c-22.5 0-33.19-27.72-16.51-42.83l217.8-197.27c9.36-8.48 23.63-8.49 33-.02l89.92 81.25V83.33c0-7.35 5.96-13.3 13.3-13.3h53.21c7.35 0 13.3 5.96 13.3 13.3v89.69l48.59 43.91c16.71 15.1 6.03 42.85-16.49 42.85z" fill="#000000" opacity="1" data-original="#000000"></path><path d="M255.66 340.04c-8.66 0-16.24 2.94-21.93 8.51-5.77 5.65-8.83 13.04-8.83 21.39s3.07 15.78 8.88 21.39c5.69 5.49 13.25 8.4 21.88 8.4s16.3-2.9 21.99-8.4c5.81-5.62 8.88-13.01 8.88-21.39s-3.07-15.87-8.89-21.5c-5.69-5.49-13.29-8.4-21.98-8.4zm12.74 41.72c-3.22 3.11-7.47 4.66-12.74 4.66s-9.42-1.55-12.63-4.66c-3.22-3.11-4.82-7.05-4.82-11.82s1.61-8.73 4.82-11.87c3.22-3.15 7.43-4.72 12.63-4.72s9.53 1.55 12.74 4.66 4.82 7.09 4.82 11.93-1.61 8.72-4.82 11.82zm-12.75-49.54a26.66 26.66 0 0 0 26.75-25.86l2.69-79.73c.27-8.05-2.66-15.67-8.26-21.46s-13.12-8.98-21.17-8.98-15.57 3.19-21.17 8.98-8.53 13.41-8.26 21.46l2.68 79.73a26.66 26.66 0 0 0 26.75 25.86zm0-122.73c9.13 0 16.45 7.57 16.14 16.69l-2.69 79.73c-.24 7.25-6.19 13.01-13.45 13.01s-13.21-5.75-13.45-13.01l-2.69-79.73c-.31-9.13 7.01-16.69 16.14-16.69z" fill="#000000" opacity="1" data-original="#000000"></path></g></g></svg>
+			<span>건물정보 조회</span>
+		</button>
+		<button id="button4">
+			<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" x="0" y="0" viewBox="0 0 64 64" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><rect width="64" height="64" rx="12.8" ry="12.8" fill="#cdcdcd" shape="rounded" transform="matrix(0.8,0,0,0.8,6.399999999999999,6.399999999999999)"></rect><g transform="matrix(0.7,0,0,0.7,9.600122970342639,9.599700862169268)"><g fill="#343433"><path d="M62.672 42.704c-.481-.367-.963-.734-1.436-1.1-.756-.588-1.521-1.169-2.277-1.75l-6.839-5.257-1.345-1.032-6.22-4.776a3.531 3.531 0 0 0-1.077-.573c-.015-.008-.031-.008-.046-.015a4.743 4.743 0 0 0-.321-.084l-.191-.023c-.076-.008-.153-.008-.222-.008-.076 0-.153 0-.229.008l-.191.023a4.743 4.743 0 0 0-.321.084c-.015.008-.031.008-.046.015a3.423 3.423 0 0 0-1.07.573c-2.529 1.933-5.051 3.874-7.572 5.807v-2.155a.937.937 0 0 0-.94-.932h-3.561c-.52 0-.94.42-.94.94.008 2.117.023 3.912-.031 5.7-.008.313-.176.688-.405.963-1.077.833-2.155 1.658-3.24 2.491-.474.367-.955.734-1.429 1.1-.649.497-1.085 1.07-1.047 1.803-.008.382.092.756.321 1.085.543.795 1.673 1.207 2.72.902.237-.069.466-.176.688-.306v14.059c0 .069.008.138.015.199h-1.513v2.629H61.48v-2.629h-1.513c.008-.061.015-.13.015-.199V46.189c.222.13.451.237.695.306 1.039.306 2.17-.107 2.713-.902.229-.329.329-.703.321-1.085.038-.734-.39-1.307-1.039-1.804zM39.764 60.447c.076-.046.107-.138.107-.298-.008-1.673-.008-3.354-.008-5.028 0-1.528.008-3.064 0-4.6 0-.29-.023-.596-.069-.894-.367-2.254-2.697-3.79-4.921-3.232-1.903.474-3.194 2.17-3.194 4.225v9.513c0 .176 0 .275.053.313h-3.309c.008-.061.015-.13.015-.199v-11.11h.008v-5.012c0-.076.015-.153.031-.229 4.424-3.377 8.848-6.755 13.242-10.155l.458-.336c.183-.115.351-.16.52-.176.16.015.329.061.512.176l.458.336c4.401 3.4 8.818 6.778 13.249 10.155.008.076.023.153.023.229v5.012h.008v11.11c0 .069.008.138.015.199H39.764z" fill="#343433" opacity="1" data-original="#343433" class=""></path><path d="M43.547 39.09v5.772h3.237V39.09h-3.237zM38.62 39.09v5.772h3.237V39.09H38.62zM58.958 39.854l-6.838-5.257-1.345-1.031M34.738 16.911c-2.35.668-4.703 1.32-7.074 1.932-.528.136-1.136.2-1.669.102-1.085-.2-2.12-.532-3.124-.953a21.954 21.954 0 0 1-1.724-.809c-.204-.162-2.873-1.081-3.116-1.107a88.484 88.484 0 0 1-.962-.298 2.464 2.464 0 0 0-.285-.085 2.083 2.083 0 0 0-.264-.064 3.516 3.516 0 0 0-.549-.098c0 .004 0 .013-.004.021 0 .021-.004.043-.008.068-.494 3.184-1.192 6.236-2.367 9.139-.004-.026-.468-3.529-.681-5.155-.06-.472-.098-.783-.098-.813a11.219 11.219 0 0 1 .23-.528l.119-.272c.013-.021.03-.047.043-.072.004-.013.013-.026.017-.034.064-.119.132-.247.132-.4a.734.734 0 0 0-.034-.2.467.467 0 0 0-.132-.324l-.013-.026-.013-.009c-.009-.021-.009-.034-.017-.043a.338.338 0 0 0-.243-.153h-.089c-.034-.021-.064-.021-.094-.021-.14-.009-.502-.009-.953-.009-.455 0-.809 0-.949.009-.017 0-.06 0-.089.021h-.102a.383.383 0 0 0-.153.06.292.292 0 0 0-.085.094c0 .008-.013.021-.021.03l-.009.021a.483.483 0 0 0-.051.106c-.013.026-.013.034-.021.055l-.021.043c-.038.098-.089.217-.089.345 0 .153.072.281.132.4.021.034.038.077.06.106.043.085.081.183.119.272.013.021.021.043.03.064.068.149.132.302.204.464 0 .047-.175 1.422-.358 2.839a269.475 269.475 0 0 1-.421 3.116c-.26-.634-.49-1.277-.702-1.924l-.919-3.301a49.952 49.952 0 0 1-.732-3.827c-.626.085-1.251.17-1.877.226-.085.026-.17.056-.255.081-.787.247-1.579.481-2.375.715-.694.2-1.171.502-1.622 1.162-.085.123-.166.251-.247.379a5.65 5.65 0 0 0-.157 1.051C.907 21.644.473 23.964.32 26.296c-.183 2.699.447 5.329.873 7.977.017.085.03.175.043.264.179 1.141.694 1.911 1.507 2.426.26.166.553.306.877.421l-.07.065c.043.008.085.021.128.03.009.081.017.17.017.277-.004.813.196 4.137.468 8.053v.013c.004.085.004.17.017.255.013.17.026.341.034.511.311 4.354.698 9.262.979 12.191.021.196.047.396.068.579.009 1.375.413 2.418 1.124 3.039 0 .004.004.013.013.013a2.65 2.65 0 0 0 1.456.63c.541.064 1.149-.004 1.813-.217.711-.23 1.362-.69 2.103-1.085.736.396 1.388.856 2.098 1.085.664.213 1.273.281 1.813.217a2.68 2.68 0 0 0 1.46-.63c.004 0 .009-.008.009-.013.711-.621 1.115-1.664 1.124-3.039.026-.183.047-.383.068-.579.281-2.916 1.039-12.242 1.039-12.242.013-.481.026-.958.043-1.439v-.017c.06-2.026.115-4.057.175-6.087.136-4.835.264-9.671.4-14.506.004-.204.043-.409.064-.626.061-.31.123-.481.128-.549a24.874 24.874 0 0 0 5.027 1.566c.072.009.149.026.221.038.511.102 1.047.187 1.528.085.847-.187 1.69-.379 2.533-.583 1.792-.417 3.58-.864 5.368-1.303.592-.149 1.171-.366 1.745-.57 1.622-.579 2.435-2.196 1.903-3.793-.518-1.54-2.131-2.306-3.778-1.842zM16.527 5.069c-.156-1.738-.977-3.017-2.622-3.7a6.13 6.13 0 0 0-2.288-.445 6.13 6.13 0 0 0-2.288.445c-1.646.683-2.466 1.962-2.622 3.7-.023.257-.005.509-.005.766.014 1.806.422 3.525 1.132 5.18.358.825.885 1.531 1.513 2.168.651.66 1.458.977 2.269.944.811.032 1.618-.284 2.269-.944.628-.637 1.155-1.343 1.513-2.168.711-1.655 1.119-3.374 1.132-5.18.001-.257.02-.509-.003-.766z" fill="#343433" opacity="1" data-original="#343433" class=""></path></g></g></svg>
+			<span>인근 중개업소 조회</span>
+		</button>
+		<button id="button2">
+			<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><rect width="512" height="512" rx="102.4" ry="102.4" fill="#cbcbcb" shape="rounded" transform="matrix(0.8,0,0,0.8,51.19999999999999,51.19999999999999)"></rect><g transform="matrix(0.7,0,0,0.7,76.80045318603516,76.79999542236328)"><path d="M490.452 306.839h-5.284v-10.668c0-13.556-11.028-24.584-24.585-24.584H312.784c-13.556 0-24.584 11.028-24.584 24.584v10.668h-5.284c-7.471 0-13.549 6.078-13.549 13.549v24.221c0 7.471 6.078 13.549 13.549 13.549h5.284v116.051a8 8 0 0 0 8 8h1.667v5.736c0 8.853 7.202 16.055 16.055 16.055h11.096c8.854 0 16.056-7.202 16.056-16.055v-5.736h91.221v5.736c0 8.853 7.202 16.055 16.056 16.055h11.096c8.853 0 16.055-7.202 16.055-16.055v-5.736h1.668a8 8 0 0 0 8-8V358.158h5.284c7.471 0 13.549-6.078 13.549-13.549v-24.221c-.003-7.471-6.081-13.549-13.551-13.549zm-21.285-10.668v85.147h-74.484v-93.731h65.899c4.734 0 8.585 3.851 8.585 8.584zM304.2 466.209v-68.891h164.968v68.891zm8.584-178.622h65.899v93.731H304.2v-85.147c0-4.733 3.85-8.584 8.584-8.584zm-27.417 54.571V322.84h2.833v19.318zM325.017 488l-11.15-.055v-5.736h11.174zm134.428 0-11.151-.055v-5.736h11.174zM488 342.158h-2.833V322.84H488zm-157.111 67.685c-12.087 0-21.921 9.833-21.921 21.92s9.834 21.921 21.921 21.921 21.921-9.833 21.921-21.921c0-12.087-9.834-21.92-21.921-21.92zm0 27.841c-3.265 0-5.921-2.656-5.921-5.921s2.656-5.92 5.921-5.92 5.921 2.656 5.921 5.92-2.656 5.921-5.921 5.921zm111.588-27.841c-12.087 0-21.921 9.833-21.921 21.92s9.834 21.921 21.921 21.921 21.921-9.833 21.921-21.921c0-12.087-9.834-21.92-21.921-21.92zm0 27.841c-3.265 0-5.921-2.656-5.921-5.921s2.656-5.92 5.921-5.92 5.921 2.656 5.921 5.92-2.656 5.921-5.921 5.921zm-32.908-5.921a8 8 0 0 1-8 8h-29.771a8 8 0 0 1 0-16h29.771a8 8 0 0 1 8 8zM71.874 264h396.719a8 8 0 0 0 8-8v-70.295a8 8 0 0 0-5.785-7.687C339.894 140.291 300.582 104.075 266.382 41.93 254.516 20.367 233.594 8 208.983 8H85.025c-30.232 0-55.7 19.648-63.373 48.892l-11.507 43.861C8.662 106.405 8 111.533 8 117.379v82.747C8 235.346 36.654 264 71.874 264zM24 117.379c0-4.479.484-8.237 1.621-12.566l11.507-43.861C42.927 38.85 62.175 24 85.025 24h123.958c18.602 0 34.413 9.347 43.382 25.644 20.889 37.958 42.77 63.13 73.165 84.168 31.534 21.827 73.354 39.772 135.062 57.897V248H71.874C45.476 248 24 226.524 24 200.126zM364.325 220.43a1054.08 1054.08 0 0 0 29.375 8.225 7.992 7.992 0 0 0 6.928-1.394 8 8 0 0 0 3.12-6.339v-33.96a7.998 7.998 0 0 0-5.34-7.544c-10.201-3.598-19.871-7.292-28.739-10.981a8 8 0 0 0-11.073 7.387v36.936a8.001 8.001 0 0 0 5.729 7.67zm10.271-32.769a600.547 600.547 0 0 0 13.151 4.937v17.879c-4.438-1.221-8.83-2.46-13.151-3.711zm-62.262 15.649a831.238 831.238 0 0 0 31.125 10.688 8 8 0 0 0 10.449-7.616V166.58a8 8 0 0 0-4.53-7.208c-11.055-5.321-20.87-10.728-30.007-16.53a8.002 8.002 0 0 0-12.288 6.753v46.202a8.001 8.001 0 0 0 5.251 7.513zm10.749-39.6a320.008 320.008 0 0 0 14.825 7.86v23.759a814.91 814.91 0 0 1-14.825-5.145zm93.13 70.667a1321.887 1321.887 0 0 0 27.646 6.418 7.999 7.999 0 0 0 9.727-7.812v-30.218a8 8 0 0 0-5.785-7.687 1029.016 1029.016 0 0 1-27.264-8.252 8 8 0 0 0-10.428 7.622v32.156a7.997 7.997 0 0 0 6.104 7.773zm9.895-29.049c3.754 1.149 7.586 2.298 11.478 3.442v14.215c-3.862-.884-7.694-1.779-11.478-2.681zm-165.902-23.495c10.486 4.862 21.557 9.62 32.904 14.139a8 8 0 0 0 10.96-7.432v-52.37a7.998 7.998 0 0 0-3.051-6.285c-11.639-9.166-21.854-19.247-31.232-30.821a8 8 0 0 0-14.216 5.037v70.475a8 8 0 0 0 4.635 7.257zm11.365-56.809a210.077 210.077 0 0 0 16.499 14.984v36.622a628.722 628.722 0 0 1-16.499-7.188zm-214.958-8.403H208.36c4.661 0 8.892-1.957 11.91-5.511 3.016-3.551 4.265-8.039 3.518-12.639L218.6 66.557c-2.889-17.766-19.247-30.66-38.896-30.66H88.41c-18.481 0-34.05 12.022-38.738 29.916l-8.177 31.201c-1.257 4.792-.284 9.593 2.74 13.519 3.026 3.925 7.422 6.088 12.378 6.088zm8.535-46.752C68.009 58.952 77.14 51.897 88.41 51.897h91.293c10.089 0 21.265 5.917 23.104 17.227l5.119 31.497-150.836-.001zM64.9 200.225c16.612 0 30.127-13.515 30.127-30.127S81.512 139.971 64.9 139.971s-30.127 13.515-30.127 30.127 13.515 30.127 30.127 30.127zm0-44.254c7.79 0 14.127 6.337 14.127 14.127S72.69 184.225 64.9 184.225s-14.127-6.337-14.127-14.127 6.337-14.127 14.127-14.127zm128.35-16c-16.612 0-30.127 13.515-30.127 30.127s13.515 30.127 30.127 30.127 30.127-13.515 30.127-30.127-13.514-30.127-30.127-30.127zm0 44.254c-7.79 0-14.127-6.337-14.127-14.127s6.337-14.127 14.127-14.127 14.127 6.337 14.127 14.127-6.336 14.127-14.127 14.127zm46.45 107.044h-15.313v-10.226a8 8 0 0 0-8-8h-37.85a8 8 0 0 0-8 8v10.226H85.163v-10.226a8 8 0 0 0-8-8H39.314a8 8 0 0 0-8 8v10.226H16a8 8 0 0 0-8 8v26.358a8 8 0 0 0 8 8h223.7a8 8 0 0 0 8-8v-26.358a8 8 0 0 0-8-8zm-8 26.358H24v-10.358h15.314a8 8 0 0 0 8-8v-10.226h21.849v10.226a8 8 0 0 0 8 8h101.374a8 8 0 0 0 8-8v-10.226h21.85v10.226a8 8 0 0 0 8 8H231.7z" fill="#000000" opacity="1" data-original="#000000" class=""></path></g></svg>
+			<span>교통정보 조회</span>
+		</button>
+		<button id="button3">
+			<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" x="0" y="0" viewBox="0 0 32 32" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><rect width="32" height="32" rx="6.4" ry="6.4" fill="#cbcbcb" shape="rounded" transform="matrix(0.8,0,0,0.8,3.1999999999999993,3.1999999999999993)"></rect><g transform="matrix(0.7,0,0,0.7,4.800302839279176,4.800000286102296)"><path d="M21 12.46 17.41 16 21 19.54A1 1 0 0 1 21 21a1 1 0 0 1-.71.29 1 1 0 0 1-.7-.29L16 17.41 12.46 21a1 1 0 0 1-.7.29 1 1 0 0 1-.71-.29 1 1 0 0 1 0-1.41L14.59 16l-3.54-3.54a1 1 0 0 1 1.41-1.41L16 14.59l3.54-3.54A1 1 0 0 1 21 12.46zm4.9 13.44a14 14 0 1 1 0-19.8 14 14 0 0 1 0 19.8zM24.49 7.51a12 12 0 1 0 0 17 12 12 0 0 0 0-17z" data-name="Layer 22" fill="#000000" opacity="1" data-original="#000000"></path></g></svg>
+			<span>닫기</span>
+		</button>
+	</div>
+
+	<div id="tarffics" class="tarffic-info">
+		<button class="arrow-button" onclick="document.querySelector('.tarffic-info').style.display = 'none'">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/></svg>
+		</button>
+		<select id="tarffic-list">
+		</select>
+		<div id="tarffic-info">
+			장소를 선택하여 대중교통 <br/>소요시간을 확인하기
+		</div>
+		<div id="routeView"> <!--onclick="routeFind()-->
+<!--			<svg width="36" height="36" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g><g clip-rule="evenodd" fill-rule="evenodd"><path d="m256 504.536c136.869 0 248.537-111.667 248.537-248.536s-111.668-248.508-248.537-248.508-248.508 111.639-248.508 248.508 111.639 248.536 248.508 248.536z" fill="#e4f6ff"/><path d="m256 7.492c137.268 0 248.537 111.242 248.537 248.508 0 137.267-111.27 248.536-248.537 248.536-4.875 0-9.752-.171-14.57-.454 130.49-7.541 233.963-115.72 233.963-248.082s-103.473-240.541-233.963-248.082c4.818-.283 9.695-.426 14.57-.426z" fill="#d3effb"/><path d="m377.42 342.805c18.228 0 32.998 14.77 32.998 32.998 0 18.229-14.77 33.026-32.998 33.026-18.229 0-33-14.798-33-33.026 0-18.229 14.772-32.998 33-32.998zm-67.301-288.423c18.229 0 32.998 14.771 32.998 32.999s-14.77 33.026-32.998 33.026-32.998-14.799-32.998-33.026c0-18.228 14.77-32.999 32.998-32.999zm-235.666 157.876c18.229 0 32.998 14.798 32.998 33.026s-14.77 32.998-32.998 32.998-33.027-14.77-33.027-32.998 14.799-33.026 33.027-33.026zm119.407 180.64c18.229 0 33.027 14.77 33.027 32.998 0 18.229-14.799 32.999-33.027 32.999s-32.998-14.771-32.998-32.999c-.001-18.229 14.769-32.998 32.998-32.998z" fill="#aadca5"/><path d="m377.42 342.805c18.228 0 32.998 14.77 32.998 32.998 0 18.229-14.77 33.026-32.998 33.026-5.244 0-10.178-1.219-14.572-3.401 10.943-5.358 18.455-16.612 18.455-29.625 0-12.983-7.512-24.238-18.455-29.625 4.394-2.154 9.328-3.373 14.572-3.373zm-67.301-288.423c18.229 0 32.998 14.771 32.998 32.999s-14.77 33.026-32.998 33.026c-5.217 0-10.178-1.22-14.572-3.374 10.943-5.386 18.455-16.641 18.455-29.652 0-12.984-7.512-24.239-18.455-29.625 4.395-2.154 9.355-3.374 14.572-3.374zm-235.666 157.876c18.229 0 32.998 14.798 32.998 33.026s-14.77 32.998-32.998 32.998c-5.244 0-10.178-1.219-14.57-3.373 10.914-5.387 18.455-16.642 18.455-29.625 0-13.012-7.541-24.267-18.455-29.625 4.393-2.182 9.326-3.401 14.57-3.401zm119.407 180.64c18.229 0 33.027 14.77 33.027 32.998 0 18.229-14.799 32.999-33.027 32.999-5.217 0-10.148-1.22-14.543-3.374 10.914-5.387 18.428-16.641 18.428-29.625 0-13.013-7.514-24.239-18.428-29.624 4.394-2.184 9.326-3.374 14.543-3.374z" fill="#87cda0"/><path d="m377.42 150.286c45.783 0 82.893 38.414 82.893 82.865 0 44.478-48.789 94.004-77.818 124.366-3.402 3.516-6.549 3.714-10.148 0-29.228-30.191-77.818-79.888-77.818-124.366-.002-44.451 37.106-82.865 82.891-82.865z" fill="#e28086"/><path d="m377.42 150.286c45.783 0 82.893 38.414 82.893 82.865 0 44.478-48.789 94.004-77.818 124.366-3.402 3.516-6.549 3.714-10.148 0-3.006-3.118-6.209-6.406-9.525-9.894 29.027-30.531 68.348-74.529 68.348-114.473 0-39.633-29.483-74.474-68.32-81.561 4.732-.849 9.609-1.303 14.57-1.303z" fill="#dd636e"/><path d="m377.42 274.853c22.961 0 41.672-18.739 41.672-41.701 0-22.963-18.711-41.674-41.672-41.674-22.963 0-41.703 18.711-41.703 41.674 0 22.961 18.74 41.701 41.703 41.701z" fill="#ffe07d"/><path d="m377.42 191.478c23.018 0 41.672 18.654 41.672 41.674 0 23.047-18.654 41.701-41.672 41.701-5.131 0-10.037-.935-14.572-2.609 15.848-5.924 27.129-21.176 27.129-39.092 0-17.889-11.281-33.169-27.129-39.066 4.535-1.701 9.441-2.608 14.572-2.608z" fill="#ffc269"/></g><path d="m303.655 217.814c-.85 4.055-4.818 6.634-8.871 5.784-4.055-.852-6.635-4.848-5.785-8.874 4.422-20.439 15.932-38.667 31.893-51.652 15.478-12.615 35.154-20.297 56.529-20.297 24.805 0 47.256 10.319 63.586 26.648 16.527 16.528 26.789 39.292 26.789 63.73 0 39.575-34.699 81.417-63.557 112.346 3.09 2.722 5.754 5.926 7.908 9.497 3.658 6.096 5.783 13.239 5.783 20.809 0 11.198-4.537 21.318-11.877 28.661-7.314 7.313-17.465 11.851-28.633 11.851-11.199 0-21.318-4.537-28.662-11.851-7.312-7.343-11.85-17.463-11.85-28.661 0-7.569 2.098-14.685 5.756-20.779 2.125-3.544 4.789-6.748 7.852-9.47-24.408-26.052-52.898-60.07-61.119-93.777-.965-4.026 1.502-8.052 5.527-9.015 3.996-.992 8.051 1.474 9.014 5.499 7.769 31.808 37.082 65.571 61.094 90.887 4.109 4.309 8.25 8.59 12.389 12.843 3.77-3.941 7.568-7.882 11.338-11.851 27.812-29.369 64.041-70.73 64.041-106.988 0-20.327-8.561-39.293-22.395-53.127-13.637-13.635-32.348-22.254-52.984-22.254-17.832 0-34.189 6.407-47.088 16.896-13.352 10.885-22.991 26.108-26.678 43.145zm12.56 169.272c3.996-1.049 8.105 1.332 9.154 5.301 1.078 3.998-1.303 8.107-5.301 9.186l-17.859 4.819c-3.996 1.077-8.08-1.304-9.156-5.302-1.078-3.997 1.305-8.078 5.301-9.157zm-45.982 12.445c3.996-1.049 8.107 1.304 9.184 5.302 1.049 3.996-1.303 8.107-5.301 9.184l-17.859 4.82c-3.998 1.077-8.107-1.304-9.186-5.302-1.049-3.997 1.305-8.079 5.303-9.156zm56.724-58.2c3.828 1.587 5.643 5.952 4.055 9.78-1.588 3.826-5.953 5.641-9.779 4.054l-17.068-7.145c-3.826-1.588-5.641-5.981-4.053-9.808 1.588-3.8 5.982-5.614 9.809-4.026zm-43.912-18.399c3.828 1.588 5.643 5.954 4.055 9.781-1.588 3.798-5.982 5.613-9.781 4.024l-17.066-7.144c-3.826-1.587-5.641-5.953-4.053-9.78 1.588-3.826 5.982-5.642 9.779-4.054zm-43.912-18.427c3.799 1.588 5.613 5.981 4.025 9.78-1.588 3.828-5.953 5.642-9.779 4.055l-17.068-7.145c-3.797-1.588-5.611-5.981-4.023-9.78 1.586-3.827 5.953-5.641 9.779-4.054zm-43.941-18.397c3.828 1.587 5.643 5.952 4.055 9.78-1.588 3.826-5.953 5.641-9.781 4.053l-17.066-7.143c-3.826-1.588-5.641-5.982-4.053-9.81 1.588-3.798 5.982-5.612 9.809-4.024zm-43.913-18.4c3.828 1.587 5.643 5.954 4.055 9.78-1.588 3.827-5.982 5.612-9.781 4.025l-17.066-7.144c-3.826-1.587-5.641-5.953-4.053-9.78 1.586-3.827 5.98-5.613 9.779-4.055zm101.405-155.266c3.402-2.325 8.021-1.446 10.377 1.927 2.324 3.401 1.445 8.052-1.957 10.376l-15.223 10.489c-3.402 2.324-8.053 1.474-10.377-1.928s-1.475-8.051 1.928-10.376zm-39.264 26.987c3.402-2.324 8.051-1.474 10.377 1.928 2.324 3.402 1.473 8.051-1.928 10.375l-15.254 10.462c-3.4 2.354-8.049 1.475-10.373-1.928-2.326-3.402-1.447-8.052 1.926-10.376zm-39.234 26.961c3.402-2.325 8.051-1.446 10.375 1.927 2.326 3.401 1.447 8.052-1.928 10.376l-15.252 10.489c-3.4 2.324-8.051 1.445-10.375-1.928-2.324-3.402-1.475-8.051 1.928-10.376zm-39.264 26.987c3.402-2.353 8.051-1.474 10.375 1.928 2.326 3.402 1.475 8.051-1.926 10.375l-15.254 10.462c-3.4 2.353-8.021 1.474-10.375-1.928-2.324-3.402-1.445-8.052 1.957-10.376zm175.197-146.478c11.197 0 21.318 4.535 28.633 11.85 7.342 7.343 11.877 17.463 11.877 28.633 0 11.197-4.535 21.318-11.877 28.66-7.314 7.314-17.436 11.85-28.633 11.85-11.199 0-21.318-4.535-28.633-11.85-7.342-7.342-11.879-17.463-11.879-28.66 0-11.17 4.537-21.29 11.879-28.633 7.315-7.315 17.434-11.85 28.633-11.85zm18.03 22.452c-4.621-4.621-10.998-7.456-18.029-7.456s-13.41 2.835-18.031 7.456c-4.619 4.62-7.482 10.999-7.482 18.03 0 7.059 2.863 13.437 7.482 18.058 4.621 4.593 11 7.456 18.031 7.456s13.408-2.863 18.029-7.456c4.621-4.621 7.484-10.999 7.484-18.058 0-7.031-2.863-13.41-7.484-18.03zm-253.696 135.423c11.17 0 21.291 4.536 28.633 11.85 7.344 7.343 11.879 17.463 11.879 28.661 0 11.17-4.535 21.29-11.879 28.633-7.342 7.342-17.463 11.85-28.633 11.85-11.197 0-21.318-4.508-28.66-11.85-7.314-7.343-11.85-17.463-11.85-28.633 0-11.198 4.535-21.318 11.85-28.661 7.342-7.314 17.463-11.85 28.66-11.85zm18.032 22.452c-4.621-4.593-11-7.455-18.031-7.455-7.059 0-13.438 2.862-18.059 7.455-4.592 4.621-7.455 10.999-7.455 18.059 0 7.031 2.863 13.408 7.455 18.03 4.621 4.62 11 7.455 18.059 7.455 7.031 0 13.41-2.835 18.031-7.455 4.619-4.622 7.455-10.999 7.455-18.03 0-7.06-2.836-13.438-7.455-18.059zm301.463 129.158-6.068 6.294c-3.088 3.26-6.463 4.96-10.289 5.017-4.99.086-8.193-2.466-11.482-5.867-1.701-1.758-3.457-3.573-5.272-5.443-2.1 1.786-3.885 3.941-5.33 6.322-2.297 3.799-3.6 8.278-3.6 13.097 0 7.06 2.861 13.438 7.482 18.059 4.594 4.592 10.971 7.455 18.031 7.455 7.029 0 13.408-2.863 18.029-7.455 4.621-4.621 7.484-10.999 7.484-18.059 0-4.818-1.332-9.327-3.629-13.125-1.417-2.383-3.259-4.509-5.356-6.295zm-200.088 29.001c11.197 0 21.318 4.536 28.66 11.85 7.314 7.343 11.852 17.464 11.852 28.661 0 11.17-4.537 21.318-11.852 28.633-7.342 7.343-17.463 11.878-28.66 11.878-11.17 0-21.291-4.535-28.633-11.878-7.342-7.314-11.85-17.463-11.85-28.633 0-11.197 4.508-21.318 11.85-28.661 7.342-7.314 17.463-11.85 28.633-11.85zm18.058 22.481c-4.621-4.622-11-7.485-18.059-7.485-7.029 0-13.408 2.863-18.029 7.485-4.621 4.592-7.457 10.971-7.457 18.029 0 7.03 2.836 13.409 7.457 18.03s11 7.483 18.029 7.483c7.059 0 13.438-2.862 18.059-7.483 4.592-4.621 7.455-11 7.455-18.03 0-7.058-2.863-13.437-7.455-18.029zm202.467 29.824c3.121-2.723 7.826-2.411 10.547.708 2.723 3.118 2.41 7.824-.709 10.546-50.461 44.083-114.047 65.062-177.01 62.906-62.596-2.154-124.51-27.073-172.25-74.812-47.738-47.741-72.658-109.655-74.812-172.25-2.154-62.935 18.824-126.55 62.906-177.011 2.723-3.119 7.428-3.431 10.547-.709s3.43 7.428.707 10.545c-41.502 47.485-61.232 107.415-59.191 166.722 1.984 58.852 25.486 117.138 70.447 162.1 44.963 44.961 103.246 68.463 162.1 70.475 59.306 2.013 119.235-17.718 166.718-59.22zm-316.77-363.379c-3.119 2.723-7.824 2.411-10.545-.708-2.723-3.118-2.412-7.823.707-10.546 50.461-44.083 114.077-65.062 177.012-62.906 62.594 2.154 124.508 27.073 172.248 74.812 47.74 47.74 72.658 109.654 74.812 172.249 2.154 62.963-18.822 126.55-62.906 177.011-2.721 3.119-7.428 3.431-10.545.709-3.119-2.722-3.432-7.428-.709-10.546 41.502-47.484 61.232-107.414 59.221-166.721-2.014-58.852-25.514-117.138-70.475-162.1-44.963-44.961-103.248-68.463-162.1-70.447-59.306-2.041-119.235 17.691-166.72 59.193zm279.805 109.654c13.578 0 25.881 5.5 34.783 14.402 8.902 8.901 14.402 21.205 14.402 34.784 0 13.578-5.5 25.882-14.402 34.783-8.902 8.902-21.205 14.43-34.783 14.43-13.58 0-25.883-5.527-34.785-14.43-8.902-8.901-14.4-21.205-14.4-34.783 0-13.579 5.498-25.883 14.4-34.784 8.902-8.902 21.205-14.402 34.785-14.402zm24.182 25.032c-6.209-6.208-14.742-10.035-24.182-10.035-9.441 0-18.002 3.827-24.182 10.035-6.182 6.18-10.008 14.714-10.008 24.154 0 9.439 3.826 18.002 10.008 24.181 6.18 6.181 14.74 10.008 24.182 10.008 9.439 0 17.973-3.827 24.182-10.008 6.18-6.179 10.006-14.741 10.006-24.181s-3.827-17.974-10.006-24.154z"/></g></svg>-->
+<!--			<span>경로보기</span>-->
+			소요시간은 대중교통 이용시 예상되는 시간
+		</div>
+	</div>
+
+	<div id="land-info">
+		<table>
+			<tr>
+				<td>
+					건물명
+				</td>
+				<td class="land-info-long" id="land-info_BULD_NM">
+					텐즈힐
+				</td>
+				<td>
+					층수(지하/지상)
+				</td>
+				<td class="land-info-value" id="land-info_floor">
+					0/25
+				</td>
+				<td>
+					주차공간(실외/실내)
+				</td>
+				<td class="land-info-value" id="land-info_parking">
+					0/0
+				</td>
+				<td>
+					승강기 수
+				</td>
+				<td class="land-info-value" id="land-info_elevator">
+					0
+				</td>
+			</tr>
+			<tr>
+				<td>
+					상세주소
+				</td>
+				<td colspan="5" id="land-info_address">
+					~~~~~
+				</td>
+				<td>
+					우편주소
+				</td>
+				<td class="land-info-value" id="land-info_zipcode">
+					14211
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<script>
+		let wms = new ol.layer.Tile({
+			source: new ol.source.TileWMS({
+				url: "http://moonlight.one:18777/geoserver/spacen/wms",
+				params: {
+					"LAYERS": "spacen:nab3di",
+					"FORMAT": "image/png",
+					"VERSION": "1.1.0",
+					"STYLES": "",
+					"CRS": "EPSG:3857"
+				}
+			})
+		});
+
+		//선택 영역을 보여주기 위한 백터
+		let selectLocationSource = new ol.source.Vector();
+		let selectLocationLayer = new ol.layer.Vector({
+			source: selectLocationSource
+		});
+		//부동산 위치를 보여주기 위한 포인트 백터
+		let realtyLocationSource = new ol.source.Vector();
+		let realtyLocationLayer = new ol.layer.Vector({
+			source: realtyLocationSource,
+			style: function(feature) {
+				return new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 8,
+						fill: new ol.style.Fill({ color: 'yellow' }),
+						stroke: new ol.style.Stroke({
+							color: 'black',
+							width: 2
+						})
+					}),
+					text: new ol.style.Text({
+						text: feature.get('realtyName') || '', // feature의 realtyName 속성 가져오기
+						fill: new ol.style.Fill({
+							color: 'black'
+						}),
+						stroke: new ol.style.Stroke({
+							color: 'white',
+							width: 2
+						}),
+						offsetY: 18,
+						font: 'bold 13px sans-serif'
+					})
+				});
+			}
+		});
+
+		let maps = new ol.Map({
+			target: "maps",
+			layers: [Base, wms, selectLocationLayer, realtyLocationLayer],
+			view: new ol.View({
+				center: [14134035.447100226, 4521801.900968456],
+				zoom: 18,
+				minZoom: 10,
+				maxZoom: 19,
+				extent: [14103313.04968372, 4498095.797846249, 14167002.346659765, 4538978.017257244]
+			})
+		});
+
+		maps.on("click", function(e) {
+
+			//만약 클릭된게 realtyLocationSource라면
+			if (maps.hasFeatureAtPixel(e.pixel)) {
+				let features = maps.getFeaturesAtPixel(e.pixel);
+				let feature = features[0];
+				let properties = feature.getProperties();
+				if (properties.realtyName) {
+					window.open('https://www.vworld.kr/dtld/broker/dtld_list_s001.do?sidoCd='+properties.sido+'&sigunguCd='+properties.sigungu+'&v_ra_regno='+properties.realtyId, 'new', 'width=850, height=920');
+				}
+				return;
+			}
+
+			document.getElementById('land-info').style.display = 'none';
+			document.getElementById('tarffics').style.display = 'none';
+			selectLocationSource.clear();
+			realtyLocationSource.clear();
+
+
+
+			let coord = e.coordinate;
+			//부동산/교통정보를 쉽게 가져오기위해 버터를 통해 영역으로 데이터 불러오기
+			let bufferSize = 10;
+			let extent = [
+				coord[0] - bufferSize, coord[1] - bufferSize,
+				coord[0] + bufferSize, coord[1] + bufferSize
+			];
+
+			let box = new ol.Feature({
+				geometry: new ol.geom.Polygon([[
+					[extent[0], extent[1]],
+					[extent[0], extent[3]],
+					[extent[2], extent[3]],
+					[extent[2], extent[1]],
+					[extent[0], extent[1]]
+				]])
+			});
+			selectLocationSource.clear();
+			selectLocationSource.addFeature(box);
+			box.setStyle(new ol.style.Style({
+				stroke: new ol.style.Stroke({
+					color: 'blue',
+					width: 2
+				}),
+				fill: new ol.style.Fill({
+					color: 'rgba(0, 0, 255, 0.1)'
+				})
+			}));
+
+
+
+			let bbox = extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3];
+			var callbackName = "myJSONPCallback" + Date.now() + Math.floor(Math.random() * 100000); // 콜백 함수 이름 생성
+			$.ajax({
+				url: "http://moonlight.one:18777/geoserver/spacen/ows?",
+				type: "GET",
+				dataType: "jsonp",
+				data: {
+					service: "WFS",
+					version: "1.0.0",
+					request: "GetFeature",
+					typeName: "spacen:nab3di",
+					maxFeatures: 50,
+					outputFormat: "text/javascript",
+					srsName: "EPSG:3857",
+					bbox: bbox+",EPSG:3857",
+					format_options: "callback:" + callbackName
+				},
+				jsonp: false,
+				jsonpCallback: callbackName,
+				success: function(nab3di) {
+
+					if (!nab3di.features && !nab3di.features.length > 0) {
+						alert("해당 건물은 데이터가 없습니다.");
+						return;
+					}
+
+					let feature = nab3di.features[0];
+					let properties = feature?.properties;
+
+					if (!properties) {
+						return;
+					}
+
+					var sido, sigungu;
+
+
+					$.ajax({
+						url: "https://moonlight.one/api/vworld/ptat.php",
+						type: "GET",
+						dataType: "json",
+						data: {
+							pnu: properties.BD_MGT_SN.substring(0, 19)
+						},
+						success: function(ptat) {
+
+							sido = properties.BD_MGT_SN.substring(0, 2);
+							sigungu = properties.BD_MGT_SN.substring(0, 5);
+
+							let pixel = maps.getEventPixel(e.originalEvent);
+
+							let buttonContainer = document.getElementById('map-buttons');
+							buttonContainer.style.left = `${pixel[0] - buttonContainer.offsetWidth / 4}px`;
+							buttonContainer.style.top = `${pixel[1]}px`;
+							buttonContainer.style.display = 'flex';
+
+							// Optional: Add event listeners to the buttons
+							document.getElementById('button1').onclick = function() {
+								document.getElementById('land-info_BULD_NM').textContent = properties.buld_nm_1;
+								document.getElementById('land-info_floor').textContent = properties.udgr_flct + '/' + properties.grnd_nof_1;
+								document.getElementById('land-info_parking').textContent = properties.houpk_ecct + '/' + properties.hinpk_ecct;
+								document.getElementById('land-info_elevator').textContent = properties.elvt_ecct;
+								document.getElementById('land-info_address').textContent = properties.lnno_adres + ' ' + properties.dt_buld_nm;
+								document.getElementById('land-info_zipcode').textContent = properties.mail_no;
+
+
+								document.getElementById('land-info').style.display = 'block';
+
+							};
+							document.getElementById('button2').onclick = function() {
+
+								if(ptat.message == "NOT FOUND"){
+									document.getElementById('button2').style.display = 'none';
+									return;
+								}else{
+
+									document.getElementById('button2').style.display = 'block';
+
+									//div(routeView)에 data-x data-y로 coord 좌표값 저장
+									document.getElementById('routeView').dataset.x = coord[0];
+									document.getElementById('routeView').dataset.y = coord[1];
+
+
+									//장소를 선택해주세요. option 생성
+									document.getElementById('tarffic-list').innerHTML = '';
+									let option = document.createElement('option');
+									option.textContent = '장소를 선택해주세요.';
+									option.selected = true;
+									option.disabled = true;
+									document.getElementById('tarffic-list').appendChild(option);
+
+									ptat.forEach((item, index) => {
+										//option 생성
+
+										console.log(item)
+
+										let option = document.createElement('option');
+										option.textContent = item.NERST_POI_NM;
+										option.dataset.ym = item.DATA_STRD_YM;//데이터 기준 년월
+										option.dataset.tm = item.REPRSNT_PBTS_APRC_TM;//추정시간
+										option.value = item.NERST_POI_NM;
+										document.getElementById('tarffic-list').appendChild(option);
+									});
+								}
+
+
+								document.getElementsByClassName('tarffic-info')[0].style.display = 'flex';
+							};
+							document.getElementById('button3').onclick = function() {
+								document.getElementById('map-buttons').style.display = 'none';
+								selectLocationSource.clear();
+							};
+							document.getElementById('button4').onclick = function() {
+
+								//근처 부동산을 찾기위한 wfs 영역 설정
+								let realtyBuffer = 500;
+								let realtyExtent = [
+									coord[0] - realtyBuffer, coord[1] - realtyBuffer,
+									coord[0] + realtyBuffer, coord[1] + realtyBuffer
+								];
+
+								realtyLocationSource.clear();
+
+								//dt_d170
+								var callbackNames = "myJSONPCallback" + Date.now() + Math.floor(Math.random() * 100000); // 콜백 함수 이름 생성
+								$.ajax({
+									url: "https://api.vworld.kr/req/wfs?",
+									type: "GET",
+									dataType: "jsonp",
+									data: {
+										service: "WFS",
+										request: "GetFeature",
+										TYPENAME: "dt_d170",
+										bbox: realtyExtent.join(","),
+										version: "1.1.0",
+										output: "text/javascript",
+										key: apikey,
+										format_options: "callback:" + callbackNames,
+										crs: "EPSG:3857"
+									},
+									jsonp: false,
+									jsonpCallback: callbackNames,
+									success: function(find) {
+										find.features.forEach((feature, index) => {
+											let geometry = feature.geometry.coordinates;
+											let properties = feature.properties;
+											let realtyId = properties.brkpg_regist_no;
+
+											// realtyId로 이미 존재하는 피처인지 확인
+											let existingFeature = realtyLocationSource.getFeatures().find(f => f.get('realtyId') === realtyId);
+
+											if (!existingFeature) {
+												let point = new ol.Feature({
+													geometry: new ol.geom.Point(geometry),
+													realtyName: properties.bsnm_cmpnm,
+													realtyId: realtyId,
+													sido: sido,
+													sigungu: sigungu
+												});
+												realtyLocationSource.addFeature(point);
+											}
+										});
+									}
+								});
+
+							}
+
+						},
+						error: function(xhr, status, error) {
+							console.error('교통정보 불러오기 실패: ', error);
+						}
+					});
+
+				},
+				error: function(xhr, status, error) {
+					console.error('wfs 불러오기 실패: ', error);
+				}
+			});
+		});
+
+		document.getElementById('tarffic-list').addEventListener('change', function() {
+			let index = this.selectedIndex;
+			let option = this.options[index];
+
+			//<option data-ym="202212" data-tm="15">롯데슈퍼</option>
+
+			let ym = option.dataset.ym; // data-ym
+			let tm = option.dataset.tm; // data-tm
+
+
+			let circularDiv = document.createElement('div');
+			circularDiv.classList.add('circular-div');
+
+			let tmSpan = document.createElement('span');
+			tmSpan.classList.add('tm-text');
+			tmSpan.style.fontWeight = 'bold';
+			tmSpan.textContent = '약 ' + tm + '분 소요';
+			circularDiv.appendChild(tmSpan);
+
+
+			//parseInt(tm) 0~12 초록 12~19 연초록 19~25 노랑 25~30 주황 30~ 빨강
+			if(parseInt(tm) <= 12){
+				circularDiv.style.backgroundColor = 'green';
+			}else if(parseInt(tm) <= 19){
+				circularDiv.style.backgroundColor = 'yellowgreen';
+			}else if(parseInt(tm) <= 25){
+				circularDiv.style.backgroundColor = 'yellow';
+				tmSpan.style.color = 'black';
+			}else if(parseInt(tm) <= 30){
+				circularDiv.style.backgroundColor = 'orange';
+			}else{
+				circularDiv.style.backgroundColor = 'red';
+			}
+
+
+			let ymSpan = document.createElement('span');
+			ymSpan.classList.add('ym-text');
+			tmSpan.style.color = 'white';
+			ymSpan.textContent = '데이터 기준일 ' + ym;
+			circularDiv.appendChild(ymSpan);
+
+			// Clear previous circular divs if needed
+			document.querySelector('#tarffic-info').innerHTML = '';
+			document.querySelector('#tarffic-info').appendChild(circularDiv);
+		});
+
+
+		maps.on('movestart', function() {
+			document.getElementById('map-buttons').style.display = 'none';
+		});
+
+		/*
+			한국교통연구원 POI 기초데이터에 누락된 데이터가 있어 기능 개발중단 대책 마련 후 활성화 예정
+		*/
+		function routeFind(){
+			let x = document.getElementById('routeView').dataset.x;
+			let y = document.getElementById('routeView').dataset.y;
+			let index = document.getElementById('tarffic-list').selectedIndex;
+			let option = document.getElementById('tarffic-list').options[index];
+			console.log(x, y)
+			console.log(option.value);
+
+
+			//https://api.vworld.kr/req/search?service=search&request=search&version=2.0&crs=EPSG:3857&center=14140071.146077,4494339.6527027&size=1&page=1&query=%ED%8C%90%EA%B5%90%EC%B6%A9%EC%A0%84%EC%86%8C&type=place&format=json&errorformat=json&key=E5B1657B-9B6F-3A4B-91EF-98512BE931A1
+			$.ajax({
+				url: "https://api.vworld.kr/req/search?",
+				type: "GET",
+				dataType: "jsonp",
+				data: {
+					service: "search",
+					request: "search",
+					version: "2.0",
+					crs: "EPSG:3857",
+					size: 1,
+					page: 1,
+					query: option.value,
+					type: "place",
+					format: "json",
+					errorformat: "json",
+					key: apikey
+				},
+				success: function (findSearch){
+					console.log(findSearch)
+				}
+			})
+
+		}
+
+
+	</script>
+</body>
+</html>
