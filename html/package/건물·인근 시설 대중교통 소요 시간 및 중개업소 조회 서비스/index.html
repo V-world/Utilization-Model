@@ -301,7 +301,7 @@
 	<script>
 		let wms = new ol.layer.Tile({
 			source: new ol.source.TileWMS({
-				url: "http://moonlight.one:18777/geoserver/spacen/wms",
+				url: "https://geoserver.moonlight.one/geoserver/spacen/wms",
 				params: {
 					"LAYERS": "spacen:nab3di",
 					"FORMAT": "image/png",
@@ -413,7 +413,7 @@
 			let bbox = extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3];
 			var callbackName = "myJSONPCallback" + Date.now() + Math.floor(Math.random() * 100000); // 콜백 함수 이름 생성
 			$.ajax({
-				url: "http://moonlight.one:18777/geoserver/spacen/ows?",
+				url: "https://geoserver.moonlight.one/geoserver/spacen/ows?",
 				type: "GET",
 				dataType: "jsonp",
 				data: {
