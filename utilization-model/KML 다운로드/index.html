@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.4.4/proj4.js"></script>
+	<link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
+	<script src="https://openlayers.org/en/v5.3.0/build/ol.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+
+	<link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+	<script src="../../vworld.js"></script>
+
+	<style>
+        #mainModal{
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #modal{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            display: block;
+        }
+
+        #modalTitle{
+            height: 10%;
+            border-bottom: 1px solid #4BACD2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #modalTitle span{
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            width: auto;
+        }
+
+        #modalClose{
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            cursor: pointer;
+        }
+
+        #modalContent{
+            height: 80%;
+            overflow-y: scroll;
+        }
+        #modalContent::-webkit-scrollbar{
+            display: none;
+        }
+
+        #modalButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #modalButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #modalButtons button:hover{
+            background-color: #4BACD2;
+            color: white;
+        }
+
+        .modalStep.hided{
+            display: none;
+        }
+
+        /*
+		.modalStepContent{
+			padding-left: 10px;
+			padding-right: 10px;
+			padding-top: 10px;
+			<!-- 내부 img 높이에 따라 높이 반응형 -->
+			height: auto;
+		}
+		*/
+
+		.modalStepContent img{
+			width: 100%;
+			height: auto;
+		}
+	</style>
+
+</head>
+<body>
+	<div id="mainModal">
+		<div id="modal">
+			<div id="modalTitle">
+				<span>서비스 사용방법 안내</span>
+				<span id="modalClose" onclick="$('#mainModal').css('display', 'none')">X</span>
+			</div>
+			<div id="modalContent">
+				<div class="modalStep">
+					<div class="modalStepContent">
+						<img src="../../../img/간단설명/KMLdownload.png">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="drawer">
+		<input id="my-drawer" type="checkbox" class="drawer-toggle" />
+		<div class="static drawer-content">
+			<div class="absolute z-10 left-3 top-2 tooltip tooltip-open tooltip-right" data-tip="주제도 선택하기">
+				<label for="my-drawer" class="btn btn-circle swap swap-rotate">
+					<input type="checkbox" />
+					<svg class="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z"/></svg>
+					<svg class="swap-on fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"/></svg>
+				</label>
+			</div>
+			<div class="absolute z-10 right-3 top-2 flex flex-col items-center">
+				<a id="downl" href="#" onclick="javascript:downl(this);" download="download.kml">
+					<button class="btn">KML 다운로드</button>
+				</a>
+				<div class="tooltip tooltip-left" data-tip="다운로드시 다운로도되는 객체를 표시합니다.">
+					<input id="thousand" type="checkbox" class="mt-1 toggle toggle-warning" checked/>
+				</div>
+			</div>
+			<div id="twodMap" class="w-full h-screen"></div>
+		</div>
+		<div class="z-20 drawer-side">
+			<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+			<ul id="layersList" class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+				<div class="form-control">
+					<label class="label cursor-pointer">
+						<span class="label-text">선택 없음</span>
+						<input type="radio" name="radio-10" value="none" class="radio checked:bg-red-500" checked/>
+					</label>
+				</div>
+			</ul>
+		</div>
+	</div>
+	<script>
+
+		/*
+		주제도 목록 생성
+		 */
+		const vLayers = [["LT_C_SPBD","도로명주소건물"],["LT_L_SPRD","도로명주소도로"],["LT_C_UQ112","관리지역"],["LT_C_UQ113","농림지역"],["LT_C_UQ111","도시지역"],["LT_C_UQ114","자연환경보전지역"],["LT_P_PARKINGLOT", "주차장"],["LT_C_UQ129","개발진흥지구"],["LT_C_UQ121","경관지구"],["LT_C_UQ123","고도지구"],["LT_C_UQ122","미관지구"],["LT_C_UQ125","방재지구"],["LT_C_UQ124","방화지구"],["LT_C_UQ126","보존지구"],["LT_C_UQ127","시설보호지구"],["LT_C_UQ128","취락지구"],["LT_C_UQ130","특정용도제한지구"],["LT_C_UD801","개발제한구역"],["LP_PA_CBND_BUBUN,LP_PA_CBND_BONBUN","지적도 통합"],["LP_PA_CBND_BUBUN","지적도 부번"],["LP_PA_CBND_BONBUN","지적도 본번"],["LT_C_ADSIDO_INFO","광역시도"],["LT_C_ADRI_INFO","리"],["LT_C_ADSIGG_INFO","시군구"],["LT_C_ADEMD_INFO","읍면동"],["LT_L_FRSTCLIMB,LT_P_CLIMBALL","등산로"],["LT_C_WKMSTRM","하천망"],["LT_C_UQ141","국토계획구역"],["LT_C_UQ162","도시자연공원구역"],["LT_C_UM000","가축사육제한구역"],["LT_C_UO601","관광지"],["LT_C_UD610","국민임대주택"],["LT_C_UP401","급경사재해예방지역"],["LT_C_UM301","대기환경규제지역"],["LT_C_UF901","백두대간보호지역"],["LT_C_UH701","벤처기업육성지역"],["LT_C_UD620","보금자리주택"],["LT_C_UF151","산림보호구역"],["LT_C_UM901","습지보호지역"],["LT_C_UB901","시장정비구역"],["LT_C_UM221","야생동식물보호"],["LT_C_UJ401","온천지구"],["LT_C_UH501","유통단지"],["LT_C_UH402","자유무역지역지정및운영"],["LT_C_UD601","주거환경개선지구도"],["LT_C_UO101","학교환경위생정화구역"],["LT_C_LHZONE","사업지구경계도"],["LT_C_LHBLPN","토지이용계획도"],["LT_C_UPISUQ153","도시계획(공간시설)"],["LT_C_UPISUQ155","도시계획(공공문화체육시설)"],["LT_C_UPISUQ152","도시계획(교통시설)"],["LT_C_UPISUQ159","도시계획(기타기반시설)"],["LT_C_UPISUQ151","도시계획(도로)"],["LT_C_UPISUQ156","도시계획(방재시설)"],["LT_C_UPISUQ157","도시계획(보건위생시설)"],["LT_C_UPISUQ154","도시계획(유통공급시설)"],["LT_C_UPISUQ158","도시계획(환경기초시설)"],["LT_C_UPISUQ161","지구단위계획"],["LT_C_UPISUQ171","개발행위허가제한지역"],["LT_C_UPISUQ174","개발행위허가필지"],["LT_C_UPISUQ173","기반시설부담구역"],["LT_C_UPISUQ175","토지거래계약에관한허가구역"],["LT_P_NSNMSSITENM","국가지명"],["LT_C_KFDRSSIGUGRADE","산불위험예측지도"],["LT_C_UP201","재해위험지구"],["LT_P_EDRSE002","지진대피소"],["LT_P_ETQSHELTER","지진해일대피소"],["LT_P_MGPRTFD","기타보호시설"],["LT_P_MGPRTFB","노인복지시설"],["LT_P_MGPRTFC","아동복지시설"],["LT_P_MGPRTFA","아동안전지킴이집"],["LT_C_TDWAREA","보행우선구역"],["LT_C_USFSFFB","소방서관할구역"],["LT_C_UO301","문화재보호도"],["LT_C_UO501","전통사찰보존"],["LT_L_TRKROAD,LT_P_TRKROAD","산책로"],["LT_L_BYCLINK","자전거길"],["LT_P_BYCRACKS","자전거보관소"],["LT_P_MOCTNODE","교통노드"],["LT_L_MOCTLINK","교통링크"],["LT_L_AISROUTEU","제한고도"],["LT_L_AISPATH","항공로"],["LT_C_AISALTC","경계구역"],["LT_C_AISRFLC","공중급유구역"],["LT_C_AISACMC","공중전투기동훈련장"],["LT_C_AISCTRC","관제권"],["LT_C_AISMOAC","군작전구역"],["LT_C_AISADZC","방공식별구역"],["LT_C_AISPRHC","비행금지구역"],["LT_C_AISATZC","비행장교통구역"],["LT_C_AISFIRC","비행정보구역"],["LT_C_AISRESC","비행제한구역"],["LT_C_AISDNGC","위험구역"],["LT_C_AISTMAC","접근관제구역"],["LT_C_AISCATC","훈련구역"],["LT_L_AISSEARCHL,LT_P_AISSEARCHP","수색비행장비행구역"],["LT_L_AISVFRPATH,LT_P_AISVFRPATH","시계비행로"],["LT_L_AISCORRID_YS,LT_L_AISCORRID_GJ,LT_P_AISCORRID_YS,LT_P_AISCORRID_GJ","한강회랑"],["LT_P_AISHCSTRIP","헬기장"],["LT_P_UTISCCTV","교통CCTV"],["LT_C_DAMDAN","단지경계"],["LT_C_DAMYOJ","단지시설용지"],["LT_C_DAMYOD","단지용도지역"],["LT_C_DAMYUCH","단지유치업종"],["LT_C_ASITSOILDRA","배수등급"],["LT_C_ASITDEEPSOIL","심토토성"],["LT_C_ASITSOILDEP","유효토심"],["LT_C_ASITSURSTON","자갈함량"],["LT_P_SGISGOLF","골프장현황도"],["LT_P_SGISGWCHG","지하수측정망(오염우려지역)"],["LT_C_WKMBBSN","대권역"],["LT_C_WKMMBSN","중권역"],["LT_C_WKMSBSN","표준권역"],["LT_P_WEISPLAFACE","기타공동처리시설"],["LT_P_WEISPLAFACA","농공단지처리시설"],["LT_P_WEISPLAFACV","마을하수도"],["LT_P_WEISPLAFACL","매립장침출수처리시설"],["LT_C_UM710","상수원보호"],["LT_P_WEISTACCON","수생태계조사지점"],["LT_P_WEISSITETB","수질자동측정망측정지점"],["LT_P_WEISSITEME","수질측정망공단배수지점"],["LT_P_WEISSITEMD","수질측정망농업용수지점"],["LT_P_WEISSITEMF","수질측정망도시관류지점"],["LT_P_WEISSITEMA","수질측정망하천수지점"],["LT_P_WEISSITEMB","수질측정망호소수지점"],["LT_P_WEISPLAFACS","축산폐수공공처리시설"],["LT_P_WEISPLAFACW","하수종말처리시설"],["LT_L_GIMSFAULT","단층"],["LT_C_GIMSHYDRO","수문지질단위"],["LT_C_GIMSSTIFF","수질다이어그램"],["LT_L_GIMSEC","전기전도도"],["LT_C_GIMSLINEA","지질구조밀도"],["LT_L_GIMSLINEA","지질구조선"],["LT_L_GIMSDEPTH","지하수등수심선"],["LT_L_GIMSPOTEN","지하수등수위선"],["LT_L_GIMSDIREC","지하수유동방향"],["LT_C_GIMSSCS","토양도"],["LT_P_RIFCT","수리시설"],["LT_C_RIRSV","저수지"],["LT_C_AGRIXUE101","농업진흥지역도"],["LT_C_AGRIXUE102","영농여건불리농지도"],["LT_C_FLISFK300","산지(보안림)"],["LT_C_FLISFK100","산지(자연휴양림)"],["LT_C_FLISFK200","산지(채종림)"],["LT_C_UF602","임업 및 산촌 진흥권역"],["LT_C_FSDIFRSTS","산림입지도"],["LT_C_WGISPLTALK","개발유도연안"],["LT_C_WGISPLROW","개발조정연안"],["LT_C_WGISPLUSE","이용연안"],["LT_C_WGISPLABS","절대보전연안"],["LT_C_WGISPLJUN","준보전연안"],["LT_C_WGISRERESH","공유수면매립3차수요조사"],["LT_C_WGISREPLAN","공유수면매립기본계획"],["LT_C_WGISRECOMP","공유수면매립준공"],["LT_C_WGISIEGUG","국가산업단지"],["LT_C_WGISIENONG","농공단지"],["LT_C_WGISIEILBAN","일반산업단지"],["LT_C_WGISIEDOSI","첨단산업단지"],["LT_C_WGISFMGUL","굴양식장"],["LT_C_WGISFMKIM","김양식장"],["LT_C_WGISFMDSM","다시마양식장"],["LT_C_WGISFMMYK","미역양식장"],["LT_C_WGISFMFISH","어류양식장"],["LT_C_WGISFMJBOK","전복양식장"],["LT_C_WGISTPNEWP","무역신항만"],["LT_C_WGISTPLAND","무역항육상구역"],["LT_C_WGISTPSEA","무역항해상구역"],["LT_C_WGISCPLAND","연안항육상구역"],["LT_C_WGISCPSEA","연안항해상구역"],["LT_C_WGISARECO","생태계경관보전지역"],["LT_C_WGISARFISHER","수산자원보호구역"],["LT_C_WGISARWET","습지보호구역"],["LT_C_UMA100","국립공원용도지구"],["LT_C_WGISNPGUG","국립자연공원"],["LT_C_WGISNPGUN","군립자연공원"],["LT_C_WGISNPDO","도립자연공원"],["LT_C_CDFRS100FRQ","해안침수(100년빈도)"],["LT_C_CDFRS150FRQ","해안침수(150년빈도)"],["LT_C_CDFRS200FRQ","해안침수(200년빈도)"],["LT_C_CDFRS050FRQ","해안침수(50년빈도)"],["LT_C_CDFRSMAXFRQ","해안침수(최대범람)"],["LT_C_TFISTIDAF,LT_P_TFISTIDAFP","갯벌정보"],["LT_C_TFISMPA","해양보호구역"],["LT_L_TOISDEPCNTAH","해안선"]]
+		for (i = 0; vLayers.length > i; i++) {
+			$('#layersList').append(
+				'<div class="form-control">' +
+				'<label class="label cursor-pointer">' +
+				'<span class="label-text">' + vLayers[i][1] + '</span>' +
+				'<input type="radio" name="radio-10" value=' + vLayers[i][0] + ' class="radio checked:bg-gray-500"/>' +
+				'</label>' +
+				'</div>'
+			)
+		}
+
+		/*
+		주제도 선택
+		 */
+		$('#layersList').on('click', 'input', function () {
+			let layers = twodMap.getLayers().getArray()
+			layers.map(function (layer) {
+				if (layer.get('type') === 'layer'){
+					twodMap.removeLayer(layer)
+				}
+				if (layer.get('name') === 'search_result'){
+					twodMap.removeLayer(layer)
+				}
+			})
+
+			let layerName = $(this);
+			if (layerName.val() === "none") {
+				layers.map(function (layer) {
+					if (layer.get('name') === 'search_result'){
+						twodMap.removeLayer(layer)
+					}
+				})
+			}else{
+				let layerName = $(this).val();
+				let layerText = $(this).parent().find('span').text();
+
+				let layer_tile = new ol.layer.Tile({
+					id: layerName,
+					name: layerText,
+					type: 'layer',
+					projection: code,
+					extent: twodMap.getView().getProjection().getExtent(),
+					maxZoom: 18,
+					minZoom: 10,
+					tilePixelRatio: 1,
+					tileSize: [512, 512],
+					source: new ol.source.TileWMS({
+						url: "https://api.vworld.kr/req/wms?",
+						params: {
+							// LAYERS: layerName.replace("_INFO","").toLowerCase(),
+							// STYLES: layerName.replace("_INFO","").toLowerCase(),
+							layers: layerName.toLowerCase(),
+							styles: layerName.toLowerCase(),
+							CRS: code,
+							apikey: apikey,
+							title: layerName,
+							FORMAT: "image/png",
+							WIDTH:512,
+							HEIGHT:512
+						}
+					})
+				});
+				layer_tile.setZIndex(5);
+				twodMap.addLayer(layer_tile);
+
+				downloadCHG()
+			}
+		})
+
+
+		/*
+		지도 생성
+		 */
+		let twodMap = new ol.Map({
+			target: 'twodMap',
+			layers: [White],
+			view: new ol.View({
+				center: [14129753.14545472, 4513437.265041048],
+				zoom: 10,
+				minZoom: 8,
+				maxZoom: 18,
+				extent: [13777099.59306465, 3905166.284228226, 14741249.932121769, 4678800.5162876565]
+			}),
+			controls: ol.control.defaults({
+				zoom: false,
+			}),
+		})
+		let code = twodMap.getView().getProjection().getCode();
+
+		/*
+		1000개 선택 표출 기능
+		 */
+		twodMap.on('moveend', function (){
+			downloadCHG()
+		})
+
+		function downloadCHG(){
+			let bbox = twodMap.getCoordinateFromPixel([0,0])[0] + "," + twodMap.getCoordinateFromPixel(twodMap.getSize())[1] + "," + twodMap.getCoordinateFromPixel(twodMap.getSize())[0] +"," + twodMap.getCoordinateFromPixel([0,0])[1]
+			let layerName = $('input[name="radio-10"]:checked').val();
+			if (layerName !== "none") {
+				layerName = layerName.toUpperCase();
+				$.ajax({
+					type: 'get',
+					url: 'https://api.vworld.kr/req/data',
+					data: {
+						key: apikey,
+						service: 'data',
+						version: '2.0',
+						request: 'GetFeature',
+						format: 'json',
+						size: '1000',
+						page: '1',
+						data: layerName,
+						geometry: 'true',
+						attribute: 'true',
+						crs: code,
+						geomFilter: 'BOX(' + bbox + ')'
+					},
+					dataType: 'jsonp',
+					async: false,
+					success: function (data){
+
+						// console.log(data)
+
+						if (data.response.result?.featureCollection) {
+							var vectorSource = new ol.source.Vector({features: (new ol.format.GeoJSON()).readFeatures(data.response.result.featureCollection)})
+
+							let layers = twodMap.getLayers().getArray()
+							layers.map(function (layer) {
+								if (layer.get('name') === 'search_result') {
+									twodMap.removeLayer(layer)
+								}
+							})
+
+
+							var vector_layer = new ol.layer.Vector({
+								source: vectorSource,
+								style: function (feature) {
+									if ($('#thousand').is(':checked')) {
+										var style = new ol.style.Style({
+											stroke: new ol.style.Stroke({
+												color: [0, 256, 0, 1],
+												width: 5
+											}),
+											fill: new ol.style.Fill({
+												color: [256, 0, 0, .7]
+											}),
+											circle: new ol.style.Circle({
+												radius: 2,
+												fill: new ol.style.Fill({
+													color: [0, 256, 0, 1]
+												})
+											})
+										});
+										return [style];
+									}
+								}
+							})
+
+							vector_layer.set("name", "search_result");
+							twodMap.addLayer(vector_layer);
+
+							var features = (new ol.format.GeoJSON()).readFeatures(data.response.result.featureCollection);
+							// console.log(features)
+							string = new ol.format.KML().writeFeatures(features, {
+								featureProjection: twodMap.getView().getProjection()
+							});
+
+							if (layerName !== "none") {
+								var uri = 'data:application/kml;charset=UTF-8,' + encodeURIComponent(string);
+								$('#downl').attr("href", uri);
+								$('#downl').attr("downlaod", layerName + ".kml");
+							}else{
+								$('#downl').removeAttr("href");
+							}
+						}
+					}
+				})
+			}
+		}
+
+
+		//downl 클릭되면 data-href로 다운로드
+		$('#downl').on('click', function () {
+			let layerName = $('input[name="radio-10"]:checked').val();
+			if (layerName !== "none") {
+				Swal.fire({
+					title: 'kml 다운로드를 시작했습니다.',
+					html: '<div class="text-justify"> KML 파일을 업로드 방법 안내가 필요하다면 "업로드 방법 보기"를 가이드가 필요하지 않을 경우 "닫기"를 클릭하세요.</div>',
+					showCancelButton: true,
+					showDenyButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					denyButtonColor: '#8C8C8C',
+					confirmButtonText: '업로드 방법 보기',
+					cancelButtonText: '닫기',
+					denyButtonText: `브이월드 바로가기`,
+				}).then((result) => {
+					let uri = $(this).attr('data-href')
+					let download = $(this).attr('data-download')
+					$(this).attr('href', uri)
+					$(this).attr('download', download)
+					if (result.isConfirmed) {
+						guide("1")
+					} else if (result.isDenied) {
+						window.open('https://map.vworld.kr/map/dtkmap.do?mode=MAPD101', '_black')
+					}
+				})
+			}else{
+				$('#downl').removeAttr("href");
+				Swal.fire({
+					icon: 'error',
+					title: 'Oops...',
+					text: '선택된 주제가도 없습니다.',
+				})
+			}
+		})
+
+		function guide(num){
+			switch (num){
+				case "1":
+					Swal.fire({
+						text: '우측메뉴에서 KML 버튼을 클릭합니다.',
+						imageUrl: './css/guide_1.png',
+						imageHeight: 400,
+						confirmButtonColor: '#3085d6',
+						confirmButtonText: '다음',
+					}).then((result) => {
+						if (result.isConfirmed) {
+							guide("2")
+						}
+					})
+					break;
+				case "2":
+					Swal.fire({
+						text: '"파일 선택"을 선택하여 업로드할 파일을 선택합니다.',
+						imageUrl: './css/guide_2.png',
+						imageHeight: 400,
+						showCancelButton: true,
+						confirmButtonColor: '#d33',
+						cancelButtonColor: '#3085d6',
+						confirmButtonText: '이전',
+						cancelButtonText: '다음'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							guide("1")
+						}else if (result.isDismissed){
+							guide("3")
+						}
+					})
+					break;
+				case "3":
+					Swal.fire({
+						text: '"불러오기"를 클릭하여 파일을 업로드합니다.',
+						imageUrl: './css/guide_3.png',
+						imageHeight: 400,
+						showCancelButton: true,
+						confirmButtonColor: '#d33',
+						cancelButtonColor: '#3085d6',
+						confirmButtonText: '이전',
+						cancelButtonText: '다음'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							guide("2")
+						}else if (result.isDismissed){
+							guide("4")
+						}
+					})
+					break;
+				case "4":
+					Swal.fire({
+						text: '"확인"를 클릭하면 파일을 입력합니다.',
+						imageUrl: './css/guide_4.png',
+						imageHeight: 400,
+						showCancelButton: true,
+						confirmButtonColor: '#d33',
+						cancelButtonColor: '#3085d6',
+						confirmButtonText: '이전',
+						cancelButtonText: '다음'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							guide("3")
+						}else if (result.isDismissed){
+							guide("5")
+						}
+					})
+					break;
+				case "5":
+					Swal.fire({
+						text: '확인을 클릭하였다면 해당 kml 파일 위치로 이동하며, 지도에서 둘러볼 수 있습니다.',
+						showCancelButton: true,
+						showDenyButton: true,
+						confirmButtonColor: '#d33',
+						denyButtonColor: '#3085d6',
+						cancelButtonColor: '#8C8C8C',
+						confirmButtonText: '이전',
+						denyButtonText: '브이월드 바로가기',
+						cancelButtonText: '닫기'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							guide("4")
+						}else if (result.isDenied){
+							window.open('https://map.vworld.kr/map/dtkmap.do?mode=MAPD101', '_black')
+						}
+					})
+					break;
+			}
+		}
+
+
+	</script>
+</body>
+</html>

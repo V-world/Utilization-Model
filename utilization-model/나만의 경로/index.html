@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
+    <style>
+        #vmap {
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .startMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            width: 500px;
+            height: 300px;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+        }
+
+        .startMenuButton {
+            width: 220px;
+            height: 50px;
+            font-size: 20px;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            width: 220px;
+            height: 50px;
+            font-size: 20px;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .file-label:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="vmap"></div>
+    <div class="startMenu">
+        <label class="file-label" for="file">파일 선택</label>
+        <input type="file" id="file" name="file" accept=".gpx">
+        <a class="startMenuButton" href="등산경로.gpx" download="등산경로.gpx">샘플 데이터 다운로드</a>
+    </div>
+    <script type="text/javascript">
+        var options = {
+            mapId: "vmap",
+            initPosition: new vw.CameraPosition(
+                new vw.CoordZ(126.9401465303777, 37.519874413465715, 500),
+                new vw.Direction(0, -70, 0)
+            ),
+            logo: true,
+            navigation: false
+        };
+        var map = new vw.Map();
+        map.setOption(options);
+        map.start();
+
+        const viewer = ws3d.viewer;
+
+        vw.ws3dInitCallBack = function () {
+        }
+
+        document.getElementById('file').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                viewer.dataSources
+                    .add(
+                        Cesium.GpxDataSource.load(e.target.result, {
+                            clampToGround: true
+                        })
+                    )
+                    .then(function (dataSource) {
+                        viewer.zoomTo(dataSource);
+                        document.querySelector('.startMenu').style.display = 'none';
+                    });
+            }
+            reader.readAsDataURL(file);
+        });
+
+    </script>
+</body>
+</html>

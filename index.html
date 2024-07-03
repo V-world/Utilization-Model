@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>브이월드 활용모델</title>
+	<link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
+	<script src="https://openlayers.org/en/v5.3.0/build/ol.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		.main_map {
+			width: 100%;
+			height: 100vh;
+			position: absolute;
+			z-index: 0;
+		}
+
+		.utilization-model_list {
+			width: 95%;
+			height: 200px;
+			border-radius: 10px 10px 0 0;
+			background-color: rgba(89, 89, 89, 0.8);
+			overflow-x: auto;
+			overflow-y: hidden;
+			position: absolute;
+			z-index: 1;
+			left: 50%;
+			bottom: 0;
+			transform: translateX(-50%);
+			padding: 10px;
+			box-sizing: border-box;
+			user-select: none;
+		}
+
+		.utilization-model_header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 10px;
+			color: white;
+		}
+
+		.utilization-model_header .title {
+			font-size: 18px;
+			font-weight: bold;
+		}
+
+		.utilization-model_header .close-btn {
+			cursor: pointer;
+			font-size: 20px;
+			font-weight: bold;
+			transform: translateY(-5px);
+		}
+
+		.model-items {
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+			overflow-x: auto;
+			overflow-y: hidden;
+			width: 100%;
+			padding-bottom: 5px;
+		}
+
+		.model-items::-webkit-scrollbar {
+			height: 15px;
+		}
+
+		.model-items::-webkit-scrollbar-thumb {
+			border-radius: 10px;
+			background-color: rgba(18, 109, 255, 0.5);
+		}
+
+		.model-items::-webkit-scrollbar-track {
+			border-radius: 10px;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+
+		.model-items::-webkit-scrollbar-thumb:hover {
+			background-color: rgba(18, 109, 255, 1);
+		}
+
+		.model-items::-webkit-scrollbar-button {
+			display: none;
+		}
+		.model-items.active {
+			cursor: grabbing;
+			cursor: -webkit-grabbing;
+		}
+
+
+		.model-item {
+			position: relative; /* 오버레이가 해당 model-item 안에 위치하도록 설정 */
+			flex: 0 0 auto; /* 고정된 크기로 설정 */
+			width: 150px;
+			height: 130px;
+			background-color: white;
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 16px;
+			font-weight: bold;
+			color: black;
+			padding: 10px;
+			box-sizing: border-box;
+			overflow: hidden;
+		}
+
+		.model-items .model-img {
+			width: 70px;
+			height: 70px;
+		}
+
+		.model-items div {
+			text-align: center;
+			border-radius: 5px;
+			background-color: #f0f0f0;
+			padding: 5px;
+		}
+
+		.close-btn {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			cursor: pointer;
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		.model-overlay div {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			height: 50%;
+			color: #000000;
+			background-color: rgba(255, 255, 255, 0.37);
+			cursor: pointer;
+			text-align: center;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box; /* 너비 계산 시 padding 포함 */
+		}
+
+		.model-overlay div:hover {
+			background-color: rgba(143, 143, 143, 0.5);
+			color: #1bd5ff;
+			font-weight: bold;
+			font-size: 20px;
+			transition: background-color 0.3s ease, color 0.3s ease, font-size 0.3s ease;
+		}
+
+
+		.model-item:hover .model-overlay {
+			opacity: 1;
+		}
+
+
+		.model-item .model-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.6);
+			padding: 0 !important; /* padding을 확실하게 제거 */
+			color: white;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: center;
+			opacity: 0; /* 기본적으로 오버레이는 숨김 */
+			transition: opacity 0.3s ease;
+			box-sizing: border-box; /* box-sizing을 확실하게 설정 */
+
+		}
+		.model-item:hover .model-overlay {
+			opacity: 1;
+		}
+
+		.model-overlay .explore {
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
+		}
+
+		.model-overlay .source-code {
+			border-bottom-left-radius: 5px;
+			border-bottom-right-radius: 5px;
+		}
+
+
+		.model-title {
+			font-size: 16px;
+			white-space: normal; /* 여러 줄로 표시 가능 */
+			overflow: hidden; /* 넘치는 텍스트는 숨김 */
+			max-width: 100%; /* 부모 요소 크기에 맞추기 */
+			word-wrap: break-word; /* 긴 단어도 줄 바꿈 가능하게 설정 */
+			padding: 0 !important;
+		}
+
+		.model-date {
+			font-size: 14px;
+			background-color: rgb(110, 110, 110) !important;
+			width: auto;
+			padding: 0 5px 0 5px !important;;
+			height: 20px;
+			box-sizing: border-box;
+			color: white;
+		}
+
+
+
+
+	</style>
+</head>
+<body>
+<iframe class="main_map" src="http://map.vworld.kr"></iframe>
+
+<div class="utilization-model_list">
+	<div class="utilization-model_header">
+		<div class="title">활용모델 목록</div>
+		<div class="close-btn toggle-btn">
+			<div>∨</div>
+		</div>
+	</div>
+	<div class="model-items">
+		<div class="model-item" data-url="http://218.39.67.213:3005/Utilization-Model/자동차 길찾기">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/자동차 길찾기.png">
+			<div class="model-title">자동차 길찾기</div>
+			<div class="model-date">24.08</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/나만의 경로">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/나만의 경로.png">
+			<div class="model-title">나만의 경로</div>
+			<div class="model-date">24.07</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="http://218.39.67.213:3005/Utilization-Model/로드뷰">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/로드뷰.png">
+			<div class="model-title">로드뷰</div>
+			<div class="model-date">24.06</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/인근 부동산정보">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/인근 부동산정보.png">
+			<div class="model-title">인근 부동산정보</div>
+			<div class="model-date">24.05</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="http://218.39.67.213:3005/Utilization-Model/사회과 부도 통계">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/사회과 부도 통계.png">
+			<div class="model-title">사회과 부도 통계</div>
+			<div class="model-date">24.03</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/QGIS 플러그인/브이월드 QGIS 플러그인 설치방법(ver_0.22).pdf">
+			<img class="model-img" src="https://www.qgis.org/styleguide/visual/main_logo.png">
+			<div class="model-title">QGIS 플러그인</div>
+			<div class="model-date">24.02,04</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/KML 다운로드">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/KML 다운로드.png">
+			<div class="model-title">KML 다운로드</div>
+			<div class="model-date">23.12</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/3D다트게임">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/3D다트게임.png">
+			<div class="model-title">3D다트게임</div>
+			<div class="model-date">23.11</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/날씨&먼지">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/날씨&먼지.png">
+			<div class="model-title">날씨&먼지</div>
+			<div class="model-date">23.10</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/건축물통합조회">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/건축물통합조회.png">
+			<div class="model-title">건축물통합조회</div>
+			<div class="model-date">23.09</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/재난안전문자">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/재난안전문자.png">
+			<div class="model-title">재난안전문자</div>
+			<div class="model-date">23.08</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/전기차충전소">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/전기차충전소.png">
+			<div class="model-title">전기차충전소</div>
+			<div class="model-date">23.07</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/교통CCTV영상">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/교통CCTV영상.png">
+			<div class="model-title">교통CCTV영상</div>
+			<div class="model-date">23.06</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+		<div class="model-item" data-url="./utilization-model/관광정보">
+			<img class="model-img" src="http://218.39.67.213:3005/Utilization-Model/imgs/model-itme/관광정보.png">
+			<div class="model-title">관광정보</div>
+			<div class="model-date">23.05</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+
+		<div class="model-item" data-url="./utilization-model/토지이력조회">
+			<img class="model-img" src="https://via.placeholder.com/80">
+			<div class="model-title">토지이력조회</div>
+			<div class="model-date">23.04</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+
+		<div class="model-item" data-url="./utilization-model/클러스터,이동경로">
+			<img class="model-img" src="https://via.placeholder.com/80">
+			<div class="model-title">클러스터,이동경로</div>
+			<div class="model-date">23.03</div>
+			<div class="model-overlay">
+				<div class="explore">둘러보기</div>
+				<div class="source-code">소스코드</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	// 화살표를 눌러 utilization-model_list 전체를 접고 펼치기
+	$('.toggle-btn').on('click', function() {
+		var modelItems = $('.model-items'); // model-items만 선택
+		var modelList = $('.utilization-model_list'); // 전체 리스트 선택
+
+		// model-items 접고 펼침
+		modelItems.slideToggle(300); // 300ms 동안 슬라이드 애니메이션으로 model-items를 접고 펼치기
+
+		// 화살표 변경
+		var arrow = $(this).find('div:first');
+		if (arrow.text() === '∨') {
+			arrow.text('∧'); // 화살표를 위로 변경
+			modelList.animate({ height: '40px' }, 300); // 리스트 높이를 헤더만 보이도록 줄임
+		} else {
+			arrow.text('∨'); // 화살표를 아래로 변경
+			modelList.animate({ height: '200px' }, 300); // 리스트 높이를 원래대로 확장
+		}
+	});
+
+	// 헤더를 클릭했을 때 model-items가 접힌 상태라면 펼쳐지게 설정
+	$('.utilization-model_header').on('click', function() {
+		var modelItems = $('.model-items');
+		var modelList = $('.utilization-model_list');
+		var arrow = $(this).find('.toggle-btn div:first');
+
+		// model-items가 접혀있을 경우에만 다시 펼치기
+		if (modelItems.is(':hidden')) {
+			modelItems.slideDown(300); // model-items를 펼침
+			arrow.text('∨'); // 화살표를 아래로 변경
+			modelList.animate({ height: '200px' }, 300); // 전체 리스트 높이를 확장
+		}
+	});
+
+
+
+
+	// 둘러보기 버튼 클릭 이벤트
+	$('.explore').on('click', function() {
+		var modelItem = $(this).closest('.model-item');
+		var url = modelItem.data('url');
+		if (url) {
+
+			// if(url.includes('pdf')){
+			// 	window.open(url);
+			// 	return;
+			// }
+
+
+			$('.main_map').attr('src', url);
+
+			var modelItems = $('.model-items');
+			var modelList = $('.utilization-model_list');
+
+			// model-items를 펼치고, 리스트 높이를 줄임
+			modelItems.slideUp(300); // model-items를 접음
+			$('.toggle-btn div:first').text('∧'); // 화살표를 위로 변경
+			modelList.animate({ height: '40px' }, 300); // 전체 리스트 높이를 줄임
+		} else {
+			alert('활용모델을 불러오는데 실패하였습니다. \n 인터넷 환경을 확인해주세요.');
+		}
+	});
+
+
+	// 소스코드 버튼 클릭 이벤트
+	$('.source-code').on('click', function() {
+		var modelItem = $(this).closest('.model-item');
+		var url = modelItem.data('url');
+		if (url) {
+			$('.main_map').attr('src', url);
+		} else {
+			alert('활용모델을 불러오는데 실패하였습니다. \n 인터넷 환경을 확인해주세요.');
+		}
+	});
+
+
+	const modelItems = document.querySelector('.model-items');
+
+	let isDown = false;
+	let startX;
+	let scrollLeft;
+	let isDragging = false; // 드래그 여부 확인 변수
+	let clickThreshold = 5; // 드래그와 클릭을 구분하기 위한 최소 이동 거리
+
+	modelItems.addEventListener('mousedown', (e) => {
+		isDown = true;
+		isDragging = false; // 드래그 여부 초기화
+		startX = e.pageX - modelItems.offsetLeft;
+		scrollLeft = modelItems.scrollLeft;
+	});
+
+	modelItems.addEventListener('mouseleave', () => {
+		isDown = false;
+		modelItems.classList.remove('active');
+	});
+
+	modelItems.addEventListener('mouseup', (e) => {
+		if (!isDown) return;
+
+		isDown = false;
+		modelItems.classList.remove('active');
+
+		// 드래그 여부에 따라 클릭 여부 결정
+		if (!isDragging) {
+			// 드래그가 아닌 클릭일 경우에만 이벤트를 작동
+			const target = e.target.closest('.model-item');
+			if (target) {
+				const exploreButton = target.querySelector('.explore');
+				if (exploreButton) {
+					exploreButton.click(); // 둘러보기 버튼 강제로 클릭
+				}
+			}
+		}
+	});
+
+	modelItems.addEventListener('mousemove', (e) => {
+		if (!isDown) return;
+
+		const x = e.pageX - modelItems.offsetLeft;
+		const walk = (x - startX) * 2; // 드래그 속도 조절
+		modelItems.scrollLeft = scrollLeft - walk;
+
+		// 마우스 이동 거리가 일정 거리 이상이면 드래그로 간주
+		if (Math.abs(x - startX) > clickThreshold) {
+			isDragging = true; // 드래그 상태로 변경
+		}
+	});
+
+	// 드래그 중에는 클릭 이벤트 방지
+	document.querySelectorAll('.explore').forEach((button) => {
+		button.addEventListener('click', (e) => {
+			if (isDragging) {
+				e.preventDefault(); // 드래그 중에는 클릭을 방지
+			}
+		});
+	});
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

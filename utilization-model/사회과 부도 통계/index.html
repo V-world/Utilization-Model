@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+	<meta charset="UTF-8">
+	<script src="https://cdn.tailwindcss.com"></script>
+
+
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.5.2/dist/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.5.2/ol.css"/>
+
+	<!-- ol-ext -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.css" type="text/css">
+	<script src="https://cdn.jsdelivr.net/npm/ol-ext/dist/ol-ext.min.js"></script>
+
+
+
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="../../vworld.js"></script>
+<!--	<script src="../../keys/vworld.js"></script>-->
+	<style>
+		body{
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-wrap: wrap;
+		}
+		.map {
+			width: 50%;
+			height: 50lvh;
+		}
+		#mapOne, #mapTwo, #mapThree, #mapFour{
+			width: 100%;
+			height: 94%;
+			border: 1px solid #000;
+			border-bottom: none;
+		}
+        .label{
+            display: block;
+            text-align: center;
+            font-weight: bold;
+            color: #000;
+            background-color: #f1f1f1;
+			border: 1px solid #000;
+            border-radius: 0 0 10px 10px;
+			border-top: none;
+            margin: 0 auto;
+            width: 100%;
+			height: max-content;
+        }
+
+        .label {
+            position: relative; /* 툴팁을 위한 상대 위치 지정 */
+            cursor: pointer; /* 마우스 오버 시 커서 변경 */
+        }
+
+        .label:hover::before {
+            content: attr(data-tooltip); /* data-tooltip 속성의 값을 사용 */
+            position: absolute;
+            bottom: 120%; /* 라벨 위에 위치 */
+            left: 50%; /* 가운데 정렬 */
+            transform: translateX(-50%); /* 정확히 가운데 오도록 조정 */
+            white-space: nowrap; /* 텍스트가 줄바꿈 되지 않도록 설정 */
+            z-index: 100;
+            background-color: #5b5b5b; /* 배경색 */
+            color: white; /* 글자색 */
+            padding: 5px 10px; /* 패딩 */
+            border-radius: 4px; /* 테두리 둥글게 */
+            font-size: 12px; /* 글자 크기 */
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1); /* 그림자 효과 */
+        }
+
+        .label:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 90%;
+            left: 50%;
+            border: 5px solid transparent; /* 투명한 테두리 */
+            border-top-color: #5b5b5b; /* 위쪽 테두리 색상 */
+            border-bottom: 0; /* 아래쪽 테두리 없앰 */
+            margin-left: -5px; /* 위치 조정 */
+            transform: translateX(-50%);
+        }
+
+
+
+        .loading-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100vh;
+			background-color: rgba(169, 168, 168, 0.9);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 100;
+        }
+        .loading {
+            display: flex;
+            gap: 5px;
+        }
+
+        .loading li {
+            width: 10px;
+            height: 10px;
+            background-color: #000;
+            border-radius: 50%;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        .loading li:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .loading li:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .loading li:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .loading li:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .loading li:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-20px);
+            }
+        }
+
+
+	</style>
+</head>
+<body>
+
+	<div class="loading-container">
+		<ul class="loading">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+	</div>
+
+
+	<div class="map">
+		<div id="mapOne"></div>
+		<div class="label" style="color: white; background-color: #4343f5" data-tooltip="한 해 동안 해당 지역에 내린 총 비의 양을 나타냅니다.">강수량</div>
+	</div>
+	<div class="map">
+		<div id="mapTwo"></div>
+		<div>
+			<div class="label" style="color: white; background-color: #ff4545" data-tooltip="특정 시간과 장소에서의 공기 온도를 나타냅니다.">기온</div>
+		</div>
+	</div>
+	<div class="map">
+		<div id="mapThree"></div>
+		<div>
+			<div class="label" style="color: white; background-color: #129800" data-tooltip="해당 지역의 인구 중 특정 연령 그룹이 차지하는 비율을 나타냅니다.">연령비</div>
+		</div>
+	</div>
+	<div class="map">
+		<div id="mapFour"></div>
+		<div>
+			<div class="label" style="color: #000000; background-color: #ffffff" data-tooltip="전 세계의 총 인구수를 나타냅니다.">세계인구</div>
+		</div>
+	</div>
+
+	<script>
+
+
+		let mapOne = new ol.Map({
+			target: 'mapOne',
+			layers: [new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/white/{z}/{y}/{x}.png",
+				})
+			})],
+			view: view = new ol.View({
+				center: [14234837.849975416, 4277527.527126771],
+				zoom: 6.5,
+				minZoom: 6,
+				maxZoom: 18,
+				extent: [13777099.59306465, 3905166.284228226, 14741249.932121769, 4678800.5162876565]
+			}),
+			controls: []
+		})
+
+
+		let mapTwo = new ol.Map({
+			target: 'mapTwo',
+			layers: [new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/white/{z}/{y}/{x}.png"
+				})
+			})],
+			view: view = new ol.View({
+				center: [14234837.849975416, 4277527.527126771],
+				zoom: 6.5,
+				minZoom: 6,
+				maxZoom: 18,
+				extent: [13777099.59306465, 3905166.284228226, 14741249.932121769, 4678800.5162876565]
+			}),
+			controls: []
+		})
+		let mapThree = new ol.Map({
+			target: 'mapThree',
+			layers: [new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/white/{z}/{y}/{x}.png"
+				})
+			})],
+			view: view = new ol.View({
+				center: [14234837.849975416, 4277527.527126771],
+				zoom: 6.5,
+				minZoom: 6,
+				maxZoom: 12,
+				extent: [13777099.59306465, 3905166.284228226, 14741249.932121769, 4678800.5162876565]
+			}),
+			controls: []
+		})
+		let mapFour = new ol.Map({
+			target: 'mapFour',
+			layers: [
+				new ol.layer.Tile({
+					source: new ol.source.OSM()
+				})
+			],
+			view: new ol.View({
+				center: [14234837.849975416, 4277527.527126771],
+				zoom: 1,
+				minZoom: 1,
+				maxZoom: 18,
+			}),
+			controls: []
+		})
+
+
+		mapOne.addLayer(new ol.layer.Vector({
+			source: new ol.source.Vector({
+				url: './data/rain_3857.geojson',
+				format: new ol.format.GeoJSON()
+			}),
+			style: function(feature) {
+				var precipitation = feature.get('강수량');
+				var color = 'rgba(0,0,0, 0.9)'; // 초기 색상 값 설정
+				// 강수량에 따른 색상 조건 분기
+				if (precipitation <= 1315) {
+					color = 'rgba(255,255,255, 0.9)';
+				}else if (precipitation >= 1316 && precipitation <= 1415) {
+					color = 'rgba(233,239,255, 0.9)';
+				}else if (precipitation >= 1416 && precipitation <= 1515) {
+					color = 'rgba(205,219,255, 0.9)';
+				}else if (precipitation >= 1516 && precipitation <= 1615) {
+					color = 'rgba(178,199,255, 0.9)';
+				}else if (precipitation >= 1616 && precipitation <= 1715) {
+					color = 'rgba(150,179,255, 0.9)';
+				}else if (precipitation >= 1716 && precipitation <= 1815) {
+					color = 'rgba(123,159,255, 0.9)';
+				}else if (precipitation >= 1816 && precipitation <= 1915) {
+					color = 'rgba(95,139,255, 0.9)';
+				}else if (precipitation >= 1916 && precipitation <= 2015) {
+					color = 'rgba(68,119,255, 0.9)';
+				}else if (precipitation >= 2016 && precipitation <= 2115) {
+					color = 'rgba(40,99,255, 0.9)';
+				}else if (precipitation >= 2116) {
+					color = 'rgba(13,79,255, 0.9)';
+				}
+
+				return new ol.style.Style({
+					fill: new ol.style.Fill({
+						color: color
+					}),
+					stroke: new ol.style.Stroke({
+						color: 'black',
+						width: 1
+					}),
+					text: new ol.style.Text({
+						text: feature.get('SIDO_NM').toString() + '\n' + precipitation.toLocaleString() + 'mm',
+						font: '11px Calibri,sans-serif',
+						fill: new ol.style.Fill({
+							color: '#000'
+						}),
+						stroke: new ol.style.Stroke({
+							color: '#fff',
+							width: 3
+						})
+					})
+				});
+			}
+		}));
+
+		mapTwo.addLayer(
+			new ol.layer.Vector({
+				source: new ol.source.Vector({
+					url: './data/tempe_3857.geojson',
+					format: new ol.format.GeoJSON()
+				}),
+				style: function(feature){
+					var temperature = feature.get('기온');
+					color = 'rgba(255,0,0,0.9)';
+					switch (temperature){
+						case 12.4:
+							color = 'rgba(255,255,255,0.9)';
+							break;
+						case 12.7:
+							color = 'rgba(255,245,243,0.9)';
+							break;
+						case 12.9:
+							color = 'rgba(255,235,231,0.9)';
+							break;
+						case 13.4:
+							color = 'rgba(255,225,219,0.9)';``
+							break;
+						case 13.6:
+							color = 'rgba(255,200,190,0.9)';
+							break;
+						case 13.8:
+							color = 'rgba(255,171,155,0.9)';
+							break;
+						case 14:
+							color = 'rgba(252,154,138,0.9)';
+							break;
+						case 14.1:
+							color = 'rgba(255,141,119,0.9)';
+							break;
+						case 14.7:
+							color = 'rgba(255,129,103,0.9)';
+							break;
+						case 14.8:
+							color = 'rgba(255,123,96,0.9)';
+							break;
+						case 15:
+							color = 'rgba(255,115,88,0.9)';
+							break;
+						case 15.1:
+							color = 'rgba(255,94,63,0.9)';
+							break;
+						case 15.3:
+							color = 'rgba(255,70,35,0.9)';
+							break;
+						case 16:
+							color = 'rgba(255,60,22,0.9)';
+							break;
+						case 17.1:
+							color = 'rgba(255,43,0,0.9)';
+							break;
+					}
+					return new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: color
+						}),
+						stroke: new ol.style.Stroke({
+							color: 'black',
+							width: 1
+						}),
+						text: new ol.style.Text({
+							text: feature.get('SIDO_NM').toString() + '\n' + temperature.toLocaleString() + '도',
+							font: '11px Calibri,sans-serif',
+							fill: new ol.style.Fill({
+								color: '#000'
+							}),
+							stroke: new ol.style.Stroke({
+								color: '#fff',
+								width: 3
+							})
+						})
+					});
+				}
+			})
+		);
+
+		mapFour.addLayer(
+			new ol.layer.Vector({
+				source: new ol.source.Vector({
+					url: './data/world_3857.geojson',
+					format: new ol.format.GeoJSON()
+				}),
+				style: function(feature){
+					var population = feature.get('POP');
+					color = 'rgba(255,0,0,0.4)';
+					if (population <= 2388992) {
+						color = 'rgba(77,3,58,0.86';
+					}else if (population > 2388992 && population <= 6948392) {
+						color = 'rgba(255,0,184,0.4)';
+					}else if (population > 6948392 && population <= 13859341) {
+						color = 'rgba(237,0,255,0.4)';
+					}else if (population > 13859341 && population <= 20405317) {
+						color = 'rgba(160,0,255,0.4)';
+					}else if (population > 20405317 && population <= 30547580) {
+						color = 'rgba(0,52,255,0.4)';
+					}else if (population > 30547580 && population <= 38929902) {
+						color = 'rgba(0,140,255,0.4)';
+					}else if (population > 38929902 && population <= 47778340) {
+						color = 'rgba(0,206,255,0.4)';
+					}else if (population > 47778340 && population <= 59893885) {
+						color = 'rgba(0,255,205,0.4)';
+					}else if (population > 59893885 && population <= 71697030) {
+						color = 'rgba(0,255,88,0.4)';
+					}else if (population > 71697030 && population <= 98186856) {
+						color = 'rgba(152,255,0,0.4)';
+					}else if (population > 98186856 && population <= 127504125) {
+						color = 'rgba(248,255,0,0.4)';
+					}else if (population > 127504125 && population <= 171186372) {
+						color = 'rgba(255,210,0,0.4)';
+					}else if (population > 171186372 && population <= 235824862) {
+						color = 'rgba(255,140,0,0.4)';
+					}else if (population > 235824862 && population <= 333287557) {
+						color = 'rgba(255,70,0,0.4)';
+					}else if (population > 333287557) {
+						color = 'rgba(255,0,0,0.4)';
+					}
+					return new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: color
+						}),
+						stroke: new ol.style.Stroke({
+							color: 'black',
+							width: 1
+						}),
+						text: new ol.style.Text({
+							text: feature.get('COUNTRY').toString() + '\n' + population.toLocaleString() + '명',
+							font: '11px Calibri,sans-serif',
+							fill: new ol.style.Fill({
+								color: '#000'
+							}),
+							stroke: new ol.style.Stroke({
+								color: '#fff',
+								width: 3
+							})
+						})
+					});
+				}
+			})
+		)
+
+		mapThree.addLayer(new ol.layer.Vector({
+			source: new ol.source.Vector({
+				url: './data/ratio_3857.geojson',
+				format: new ol.format.GeoJSON()
+			}),
+			style: function(feature) {
+				const center = ol.extent.getCenter(feature.getGeometry().getExtent());
+				const radius = 30; // 기본 파이 차트 반지름
+				const textOffset = radius + 20; // 텍스트를 파이 외부에 배치하기 위한 추가 오프셋
+
+				// 11시 방향에 표출할 텍스트의 위치 계산
+				const text11X = center[0] + Math.cos(-Math.PI * 5 / 6) * textOffset; // 11시 방향 각도: -150도 또는 -5π/6 라디안
+				const text11Y = center[1] + Math.sin(-Math.PI * 5 / 6) * textOffset;
+
+				// 1시 방향에 표출할 텍스트의 위치 계산
+				const text1X = center[0] + Math.cos(-Math.PI / 6) * textOffset; // 1시 방향 각도: -30도 또는 -π/6 라디안
+				const text1Y = center[1] + Math.sin(-Math.PI / 6) * textOffset;
+
+				// 6시 방향에 표출할 텍스트의 위치 계산
+				const text6X = center[0] + Math.cos(Math.PI / 2) * textOffset; // 6시 방향 각도: 90도 또는 π/2 라디안
+				const text6Y = center[1] + Math.sin(Math.PI / 2) * textOffset;
+
+				// 파이 차트 스타일
+				const styles = [new ol.style.Style({
+					geometry: new ol.geom.Point(center),
+					image: new ol.style.Chart({
+						type: 'pie',
+						data: [parseFloat(feature.get('유년')), parseFloat(feature.get('중장년')), parseFloat(feature.get('노년'))],
+						radius: radius,
+						rotateWithView: true,
+						stroke: new ol.style.Stroke({ color: '#fff', width: 2 }),
+						colors: ['rgba(255,0,0,0.6)', 'rgba(0,255,0,0.6)', 'rgba(0,0,255,0.6)']
+					})
+				})];
+
+				// 11시 방향 텍스트 스타일
+				styles.push(new ol.style.Style({
+					geometry: new ol.geom.Point([text11X, text11Y]),
+					text: new ol.style.Text({
+						text: '유년 \n ' + feature.get('유년') + '%',
+						font: '12px Calibri,sans-serif',
+						offsetY: -20,
+						offsetX: 20,
+						fill: new ol.style.Fill({ color: '#333' }),
+						stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+					})
+				}));
+
+				// 6시 방향 텍스트 스타일
+				styles.push(new ol.style.Style({
+					geometry: new ol.geom.Point([text1X, text1Y]),
+					text: new ol.style.Text({
+						text: '중장년 \n ' + feature.get('중장년') + '%',
+						font: '12px Calibri,sans-serif',
+						offsetY: 20,
+						offsetX: 0,
+						fill: new ol.style.Fill({ color: '#333' }),
+						stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+					})
+				}));
+
+				// 6시 방향 텍스트 스타일
+				styles.push(new ol.style.Style({
+					geometry: new ol.geom.Point([text6X, text6Y]),
+					text: new ol.style.Text({
+						text: '노년 \n ' + feature.get('노년') + '%',
+						font: '12px Calibri,sans-serif',
+						offsetY: -20,
+						offsetX: -20,
+						fill: new ol.style.Fill({ color: '#333' }),
+						stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+					})
+				}));
+
+				return styles;
+			}
+		}));
+
+		let loaded = 0;
+		function checkLoaded(){
+			loaded++;
+			if(loaded === 4){
+				$('.loading-container').hide();
+			}
+		}
+
+		mapOne.getLayers().getArray()[1].getSource().on('change', function(){
+			if(mapOne.getLayers().getArray()[1].getSource().getState() === 'ready'){
+				checkLoaded();
+			}
+		})
+		mapTwo.getLayers().getArray()[1].getSource().on('change', function(){
+			if(mapTwo.getLayers().getArray()[1].getSource().getState() === 'ready'){
+				checkLoaded();
+			}
+		})
+		mapThree.getLayers().getArray()[1].getSource().on('change', function(){
+			if(mapThree.getLayers().getArray()[1].getSource().getState() === 'ready'){
+				checkLoaded();
+			}
+		})
+		mapFour.getLayers().getArray()[1].getSource().on('change', function(){
+			if(mapFour.getLayers().getArray()[1].getSource().getState() === 'ready'){
+				checkLoaded();
+			}
+		})
+
+	</script>
+
+</body>
+</html>

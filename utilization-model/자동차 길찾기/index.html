@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>차량 길찾기</title>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9da0505d6ddf0d4aec5beea465163647"></script>
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+    <script src="../../vworld.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #main {
+            display: grid;
+            grid-template-columns: 28% 72%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #SNB {
+            background-color: #ffffff;
+            display: grid;
+            grid-template-areas:
+                ". . . . ."
+                ". div_start div_start div_search ."
+                ". div_end div_end div_search ."
+                ". div_recommend div_distance div_time ."
+                ". div_info div_info div_info . "
+                ". main-content main-content main-content .";
+            grid-template-columns: 0.09fr 1fr 1fr 1fr 0.09fr;
+            grid-template-rows: 0.01fr auto auto auto auto 1fr;
+            height: 100%;
+            overflow: hidden;
+        }
+        #map {
+            background-color: #ffffff;
+        }
+        input[type="text"] {
+            width: 90%;
+            height: 15px;
+            border: 2px solid #12afff;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+        }
+        .div_search {
+            grid-area: div_search;
+            background-color: #12afff;
+            border-radius: 5px;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .div_start {
+            grid-area: div_start;
+        }
+        .main-content {
+            grid-area: main-content;
+            padding-left: 30px;
+            overflow-y: auto;
+            max-height: 100%;
+            margin: 0;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background-color: #12afff;
+            border-radius: 10px;
+        }
+        .main-content::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+            border-radius: 10px;
+        }
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
+        .main-content::-webkit-scrollbar-button {
+            display: none;
+        }
+
+        .main-content li {
+            padding: 5px;
+            cursor: pointer;
+            background-position: calc(100% - 10px) center;
+            background-repeat: no-repeat;
+            background-size: 20px;
+        }
+        .main-content li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .div_end {
+            grid-area: div_end;
+        }
+        .div_recommend {
+            grid-area: div_recommend;
+        }
+        .div_time {
+            grid-area: div_time;
+        }
+        .div_distance {
+            grid-area: div_distance;
+        }
+        input[type="radio"] {
+            display: none;
+        }
+        label {
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+            display: inline-block;
+            border-radius: 5px;
+            border: 2px solid #12afff;
+            margin: 5px 10px 0 10px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        input[type="radio"]:checked + label {
+            background-color: #12afff;
+            color: white;
+            border-color: #12afff;
+        }
+        label.div_recommend,
+        label.div_distance,
+        label.div_time {
+            cursor: pointer;
+            padding: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+
+
+        .div_info {
+            grid-area: div_info;
+            display: none;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .div_info div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .div_info div span {
+            font-size: 12px;
+        }
+
+        .div_info div p {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 20px;
+        }
+
+        .roadTitle{
+            font-size: 16px;
+            font-weight: bold;
+            word-break: keep-all;
+            width: 90%;
+        }
+
+        .roadDetail{
+            font-size: 12px;
+            color: #666;
+            width: 90%;
+        }
+    </style>
+
+
+</head>
+<body>
+<div id="main">
+    <div id="SNB">
+        <div class="div_search" onclick="search_submit()">검색</div>
+
+        <input type="text" id="div_start" class="div_start" placeholder="출발지명" value="서울역">
+        <input type="text" id="div_end" class="div_end" placeholder="도착지명" value="성남시청">
+
+        <input type="radio" id="recommend" name="selectRoad" value="RECOMMEND">
+        <label class="div_recommend" for="recommend">추천경로</label>
+
+        <input type="radio" id="distance" name="selectRoad" value="DISTANCE">
+        <label class="div_distance" for="distance">최단거리</label>
+
+        <input type="radio" id="time" name="selectRoad" value="TIME">
+        <label class="div_time" for="time">최단시간</label>
+
+        <div class="div_info">
+            <div>
+                <span>소요시간</span>
+                <p id="roadTime">0</p>
+            </div>
+            <div>
+                <span>택시요금</span>
+                <p id="roadTaxi">0</p>
+            </div>
+            <div>
+                <span>통행료</span>
+                <p id="roadToll">0</p>
+            </div>
+        </div>
+
+        <ol class="main-content">
+        </ol>
+    </div>
+
+
+    <div id="map"></div>
+</div>
+
+
+<script>
+
+
+    document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+
+            if (roadList && roadList[this.value] && roadList[this.value].vector) {
+                goRoad.setSource(roadList[this.value].vector.getSource());
+                changeRoadDeatil(this.value);
+            }else{
+                this.checked = false;
+                alert('경로를 검색해주세요.');
+            }
+
+        });
+    });
+
+    //초를 시 분 초 로 변환
+    function secondsToHms(d, onoff) {
+        d = Number(d);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+
+        var hDisplay = h > 0 ? h + (h == 1 ? "시간 " : "시간 ") : "";
+        var mDisplay = m > 0 ? m + (m == 1 ? "분" : "분") : "";
+        var sDisplay = s > 0 ? s + (s == 1 ? "초" : "초") : "";
+        if (onoff){
+            return hDisplay + mDisplay + sDisplay;
+        }else{
+            return hDisplay + mDisplay;
+        }
+    }
+
+    //숫자에 콤바 찍어 주는 함수
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+
+    function changeRoadDeatil(what){
+
+        document.querySelector('.main-content').innerHTML = '';
+
+        document.querySelector('.div_info').style.display = 'flex';
+
+
+        document.querySelector('#roadTime').textContent = secondsToHms(roadList[what].time, false);
+        document.querySelector('#roadTaxi').textContent = numberWithCommas(roadList[what].taxi) + '원';
+        document.querySelector('#roadToll').textContent = numberWithCommas(roadList[what].toll) + '원';
+
+
+        roadList[what].guidance.forEach(function(guide){
+            let li = document.createElement('li');
+            li.onclick = function(){
+                maps.getView().setCenter(ol.proj.transform(guide[1], "EPSG:4326", "EPSG:3857"));
+                maps.getView().setZoom(18);
+            };
+            // guide[0].includes('출발지') ? li.style.backgroundImage = 'url(./img/start.png)' :
+            // guide[0].includes('목적지') ? li.style.backgroundImage = 'url(./img/end.png)' :
+            // guide[0].includes('왼쪽 방향') ? li.style.backgroundImage = 'url(./img/upleft.png)' :
+            // guide[0].includes('오른쪽 방향') ? li.style.backgroundImage = 'url(./img/upright.png)' :
+            // guide[0].includes('좌회전') ? li.style.backgroundImage = 'url(./img/left.png)' :
+            // guide[0].includes('우회전') ? li.style.backgroundImage = 'url(./img/right.png)' :
+            // null
+
+            let div_one = document.createElement('div');
+            div_one.textContent = guide[0];
+            div_one.classList.add('roadTitle');
+            li.appendChild(div_one);
+
+            let div_two = document.createElement('div');
+            div_two.textContent = `예상 이동시간: ${secondsToHms(guide[2][1], true)} 도로 길이: ${guide[2][0]}m`;
+            div_two.classList.add('roadDetail');
+            li.appendChild(div_two);
+
+            document.querySelector('.main-content').appendChild(li);
+        });
+
+        maps.getView().fit(roadList[what].vector.getSource().getExtent(), {
+            duration: 1000,
+            size: maps.getSize(),
+            padding: [100, 100, 100, 100]
+        });
+
+    }
+
+    function getFeatureStyle(feature) {
+        var guidance = feature.get('guidance');
+        var roadState = feature.get('roadState');
+
+        //roadState 0: 정보 없음 1: 정체 2: 지체 3: 서행 4: 원할 6: 교통사고
+        if(roadState){
+            switch (roadState) {
+                case 1:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'red',
+                            width: 5
+                        })
+                    });
+                case 2:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'yellow',
+                            width: 5
+                        })
+                    });
+                case 3:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'blue',
+                            width: 5
+                        })
+                    });
+                case 4:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'green',
+                            width: 5
+                        })
+                    });
+                case 6:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'black',
+                            width: 5
+                        })
+                    });
+                default:
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'white',
+                            width: 5
+                        })
+                    });
+            }
+        }
+
+        if(guidance){
+            var iconSrc = null;
+
+            if (guidance.includes('출발지')) {
+                iconSrc = './img/start.png';
+            } else if (guidance.includes('목적지')){
+                iconSrc = './img/end.png';
+            }
+
+            // 특정 가이드라인에 대해 포인트를 표시하지 않도록 설정
+            var hideIcon = guidance.includes('좌회전') ||
+                guidance.includes('우회전') ||
+                guidance.includes('왼쪽') ||
+                guidance.includes('오른쪽') ||
+                guidance.includes('직진') ||
+                guidance.includes('입구') ||
+                guidance.includes('옆길') ||
+                guidance.includes('유턴') ||
+                guidance.includes('진입');
+
+            if (hideIcon) { return null; }
+
+            return new ol.style.Style({
+                image: iconSrc ?
+                    new ol.style.Icon({
+                        src: iconSrc,
+                    }) :
+                    new ol.style.Circle({
+                        radius: 5,
+                        fill: new ol.style.Fill({ color: 'black' })
+                    }),
+                stroke: new ol.style.Stroke({
+                    color: 'black',
+                    width: 5
+                })
+            });
+        }
+    }
+
+
+
+    let goRoad = new ol.layer.Vector({
+        name: "goRoad",
+        source: new ol.source.Vector({}),
+        style: getFeatureStyle // 스타일 함수를 레이어에 할당
+    });
+
+
+    let maps = new ol.Map({
+        target: "map",
+        layers: [Base, goRoad],
+        view: new ol.View({
+            projection: "EPSG:3857",
+            center: ol.proj.transform([127.11015314141542,37.39472714688412], "EPSG:4326", "EPSG:3857"),
+            zoom: 18,
+            minZoom: 6,
+            maxZoom: 19,
+        })
+    });
+
+    const vworld_key = 'E5B1657B-9B6F-3A4B-91EF-98512BE931A1';
+    const REST_API_KEY = '카카오인증키';
+    var roadList;
+
+    async function search_submit() {
+        try {
+            const startPlace = await vAPI_place($('#div_start').val());
+            const endPlace = await vAPI_place($('#div_end').val());
+
+            await getRoadList(startPlace, endPlace);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            if (roadList && roadList.RECOMMEND && roadList.RECOMMEND.vector) {
+                const source = roadList.RECOMMEND.vector.getSource();
+                if (source) {
+
+                    document.querySelector('input[type="radio"]').checked = true;
+
+                    goRoad.setSource(source);
+                    // 맵의 뷰를 해당 소스의 extent에 맞추어 조정
+                    maps.getView().fit(source.getExtent(), {
+                        duration: 1000,
+                        size: maps.getSize(),
+                        padding: [100, 100, 100, 100]
+                    });
+
+
+                    changeRoadDeatil('RECOMMEND');
+
+                } else {
+                    console.error('비어있습니다.');
+                }
+            } else {
+                console.error('비어있습니다.');
+            }
+        }
+    }
+
+    function vAPI_place(keyword) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                url: 'https://api.vworld.kr/req/search?',
+                type: 'GET',
+                dataType: 'jsonp',
+                data: {
+                    service: 'search',
+                    request: 'search',
+                    version: '2.0',
+                    crs: 'EPSG:4326',
+                    page: 1,
+                    size: 1,
+                    query: keyword,
+                    type: 'place',
+                    format: 'json',
+                    key: vworld_key
+                },
+                success: function(data) {
+                    if (data.response.status === 'OK') {
+                        resolve(data.response.result.items[0].point);
+                    } else {
+                        vAPI_adderss(keyword).then(resolve).catch(reject);
+                    }
+                },
+                error: function(error) {
+                    console.error('Place:', error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    function vAPI_adderss(keyword) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                url: 'https://api.vworld.kr/req/search?',
+                type: 'GET',
+                dataType: 'jsonp',
+                data: {
+                    service: 'search',
+                    request: 'search',
+                    version: '2.0',
+                    crs: 'EPSG:4326',
+                    page: 1,
+                    size: 1,
+                    query: keyword,
+                    type: 'address',
+                    category: 'parcel',
+                    format: 'json',
+                    key: vworld_key
+                },
+                success: function(data) {
+                    if (data.response.status === 'OK') {
+                        resolve(data.response.result.items[0].point);
+                    } else {
+                        alert('검색 결과가 없습니다.');
+                        reject('No results found');
+                    }
+                },
+                error: function(error) {
+                    console.error('Address error:', error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+
+
+    async function getRoadList(start, end) {
+        roadList = {
+            RECOMMEND: { guidance: [], vector: null, time: null, taxi: null, toll: null, trafficStats: []},
+            TIME: { guidance: [], vector: null, time: null, taxi: null, toll: null, trafficStats: [] },
+            DISTANCE: { guidance: [], vector: null, time: null, taxi: null, toll: null, trafficStats: [] }
+        };
+
+        const priorities = ['RECOMMEND', 'TIME', 'DISTANCE'];
+        const promises = priorities.map(priority => findLoad(priority, start, end));
+
+        await Promise.all(promises); // 모든 비동기 요청이 완료될 때까지 대기
+    }
+
+    function findLoad(priority, start, end) {
+        return new Promise((resolve, reject) => {
+            goRoad.getSource().clear();
+
+            let _geoData = new ol.layer.Vector({
+                source: new ol.source.Vector({})
+            });
+
+            const params = {
+                origin: `${start.x},${start.y}`, // 출발지 좌표
+                destination: `${end.x},${end.y}`, // 도착지 좌표
+                waypoints: '',
+                priority: priority, // RECOMMEND : 추천경로 / TIME : 최단경로 / DISTANCE : 최단거리
+                road_details: 'true', // 도로 상세정보,
+                alternatives: 'true',
+                summary: 'false', // 내용 요약하기
+            };
+
+            $.ajax({
+                url: 'https://apis-navi.kakaomobility.com/v1/directions?',
+                type: 'GET',
+                headers: {
+                    'Authorization': `KakaoAK ${REST_API_KEY}`
+                },
+                data: params,
+                success: function(data) {
+
+                    roadList[priority].time = data.routes[0].summary.duration;
+                    roadList[priority].taxi = data.routes[0].summary.fare.taxi;
+                    roadList[priority].toll = data.routes[0].summary.fare.toll;
+
+
+                    data.routes[0].sections[0].guides.forEach(roadGuide => {
+                        roadList[priority].guidance.push([roadGuide.guidance, [roadGuide.x, roadGuide.y], [roadGuide.distance, roadGuide.duration]]);
+
+                        // console.log(roadGuide)
+
+                        let point = ol.proj.transform([roadGuide.x, roadGuide.y], "EPSG:4326", "EPSG:3857");
+                        let guidance = roadGuide.guidance;
+                        let feature = new ol.Feature({
+                            geometry: new ol.geom.Point(point)
+                        });
+                        feature.set('guidance', guidance);
+                        _geoData.getSource().addFeature(feature);
+                    });
+
+
+                    let roadline = [];
+
+                    let feature = new ol.Feature({});
+
+                    // console.log(data.routes[0].sections[0].roads.length + '개')
+
+                    data.routes[0].sections[0].roads.forEach(road => {
+                        let coordinates = [];
+
+                        // console.log(road)
+
+                        // vertexes 배열을 순회하면서 좌표를 추가합니다.
+                        for (let i = 0; i < road.vertexes.length; i += 2) {
+                            // 각 좌표 쌍을 변환하여 coordinates 배열에 추가
+                            coordinates.push(
+                                ol.proj.transform([road.vertexes[i], road.vertexes[i + 1]], "EPSG:4326", "EPSG:3857")
+                            );
+                        }
+
+                        // LineString을 생성하여 feature로 추가
+                        _geoData.getSource().addFeature(
+                            new ol.Feature({
+                                geometry: new ol.geom.LineString(coordinates),
+                                roadState: road.traffic_state
+                            })
+                        );
+                    });
+
+                    roadList[priority].vector = _geoData;
+
+                    resolve();
+                },
+                error: function(error) {
+                    console.error(error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+
+
+
+    maps.on('click', function(evt){
+        let feature = maps.forEachFeatureAtPixel(evt.pixel, function(feature){
+            return feature;
+        });
+
+        if(feature){
+            console.log(feature);
+            //라인 좌표 출력
+            console.log(feature.getGeometry().getCoordinates());
+        }
+    });
+
+
+</script>
+</body>
+</html>

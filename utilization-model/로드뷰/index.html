@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>로드뷰 생성하기</title>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=[인증키]"></script>
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #main{
+            display: flex;
+        }
+        #roadview{
+            width: 50%;
+            height: 100vh;
+        }
+        #map{
+            width: 50%;
+            height: 100vh;
+        }
+    </style>
+
+</head>
+<body>
+<div id="main">
+    <div id="map"></div>
+    <div id="roadview"></div>
+</div>
+
+
+<script>
+
+    var sld = `<StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd">
+<NamedLayer>
+<Name>sop:lt_l_sprd</Name>
+<UserStyle>
+<Name>도로명주소도로</Name>
+<FeatureTypeStyle>
+<Name>도로명주소도로</Name>
+<Rule>
+<Title>도로명주소도로</Title>
+<MaxScaleDenominator>80000.0</MaxScaleDenominator>
+<PolygonSymbolizer>
+<Fill>
+<CssParameter name="fill">#FFFFFF</CssParameter>
+<CssParameter name="fill-opacity">0</CssParameter>
+</Fill>
+<Stroke>
+<CssParameter name="stroke">#2642F5</CssParameter>
+<CssParameter name="stroke-width">5</CssParameter>
+</Stroke>
+</PolygonSymbolizer>
+</Rule>
+</FeatureTypeStyle>
+</UserStyle>
+</NamedLayer>
+</StyledLayerDescriptor>`;
+
+    let wms = new ol.layer.Tile({
+        name : "WMS_LAYER",
+        source : new ol.source.TileWMS({
+            url : "https://api.vworld.kr/req/wms?",
+            params : {
+                LAYERS : "lt_l_sprd",
+                CRS : "EPSG:3857",
+                apikey : "CEB52025-E065-364C-9DBA-44880E3B02B8",
+                FORMAT : "image/png",
+                SLD_BODY : sld
+            }
+        })
+    });
+
+
+
+    let markerPoint = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: [
+                new ol.Feature({geometry: new ol.geom.Point([14134035.447100226, 4521801.900968456])})
+            ],
+        }),
+        style: new ol.style.Style({
+            image: new ol.style.Icon({
+                src: 'https://map.vworld.kr/images/dtkmap/icon/marker/gpsmarker.png',
+                scale: 1,
+                size: [64, 64],
+                offset: [0, 0],
+                anchor: [0, 1],
+            })
+        })
+    });
+	
+	let Satellite = new ol.layer.Tile({
+    name: "Satellite",
+    type: "tile",
+    source: new ol.source.XYZ({
+        url: "https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Satellite/{z}/{y}/{x}.jpeg"
+		})
+	});
+
+
+    let maps = new ol.Map({
+        target: "map",
+        layers: [Satellite, wms, markerPoint],
+        view: new ol.View({
+            center: [14134045.842690086, 4519577.181386823],
+            zoom: 18,
+            minZoom: 10,
+            maxZoom: 19,
+        })
+    });
+
+    var roadviewContainer = document.getElementById('roadview'); //로드뷰를 표시할 div
+    var roadview = new kakao.maps.Roadview(roadviewContainer); //로드뷰 객체
+    var roadviewClient = new kakao.maps.RoadviewClient(); //좌표로부터 로드뷰 파노ID를 가져올 로드뷰 helper객체
+    var initposition = ol.proj.toLonLat([14134045.842690086, 4519577.181386823]);
+
+
+    var position = new kakao.maps.LatLng(initposition[1], initposition[0]);
+    roadviewClient.getNearestPanoId(position, 50, function(panoId) {
+        roadview.setPanoId(panoId, position); //panoId와 중심좌표를 통해 로드뷰 실행
+    });
+
+
+    /*
+     * 지도를 클릭하면 클릭한 위치의 좌표로 로드뷰를 이동시키는 이벤트
+     */
+    maps.on('click', function(evt){
+        var coord = evt.coordinate;
+        var transCoord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+        var lon = transCoord[0];
+        var lat = transCoord[1];
+        var position = new kakao.maps.LatLng(lat, lon);
+        roadviewClient.getNearestPanoId(position, 50, function(panoId) {
+            roadview.setPanoId(panoId, position); //panoId와 중심좌표를 통해 로드뷰 실행
+        });
+        markerMove(coord)
+
+    });
+	
+	function roatationImage(arg){
+		var currentStyle = markerPoint.getStyle();
+		var currentImage = currentStyle.getImage();
+		currentImage.setRotation(arg * (Math.PI/180));
+		markerPoint.setStyle(currentStyle);
+	}
+
+
+    /*
+     * 로드뷰의 위치가 변경되면 지도의 중심을 변경하는 이벤트
+     */
+    kakao.maps.event.addListener(roadview, 'position_changed', function() {
+        var roadviewPosition = roadview.getPosition();
+        var transRoadviewPosition = ol.proj.transform([roadviewPosition.getLng(), roadviewPosition.getLat()], 'EPSG:4326', 'EPSG:3857');
+        maps.getView().setCenter(transRoadviewPosition);
+        markerMove(transRoadviewPosition)
+		roatationImage(0)
+    });
+	
+	/*
+     * 로드뷰의 회전감지
+     */
+    kakao.maps.event.addListener(roadview, 'viewpoint_changed', function() {
+		roatationImage(roadview.getViewpointWithPanoId().pan)
+    });
+	
+
+
+    /**
+     * 지도와 로드뷰의 마커를 이동시키는 함수
+     * @param coord {ol.Coordinate} - 이동할 좌표
+     */
+    function markerMove(coord){
+        markerPoint.getSource().clear();
+        markerPoint.getSource().addFeature(new ol.Feature({geometry: new ol.geom.Point(coord)}));
+
+        maps.getView().setZoom(19);
+    }
+
+</script>
+</body>
+</html>

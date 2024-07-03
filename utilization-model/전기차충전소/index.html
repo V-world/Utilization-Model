@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+	<script src="../../vworld.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+	<style>
+		body, html {
+			margin: 0;
+			padding: 0;
+		}
+		#maps {
+			width: 100%;
+			height: 100vh;
+		}
+		#evList{
+            position: fixed;
+			top: 0px;
+            left: 0px;
+			width: 335px;
+			max-width: 335px;
+			height: 92%;
+			background-color: rgba(255,255,255,0.8);
+			overflow-y: scroll;
+			border: 1px solid #000000;
+			border-radius: 0 21px 21px 0;
+			padding: 15px 0 7px 18px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+            grid-gap: 0;
+			align-content: start;
+			cursor: pointer;
+		}
+
+        ul {
+            list-style: none;
+            border-radius: 10px;
+            border: 1px solid #000000;
+            width: 150px;
+            height: 126px;
+            margin: 0;
+            padding: 0px;
+            margin-bottom: 7px;
+            overflow: hidden;
+        }
+
+        li {
+            margin: 6px;
+        }
+
+        li:nth-child(1) {
+            font-weight: bold;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+
+		#evList::-webkit-scrollbar {
+			display: block;
+		}
+
+		span{
+            display: inline-block;
+            padding: 1px 15px;
+            border-radius: 25px;
+			font-weight: 900;
+			color: #000000;
+			width: 65px;
+			text-align: center;
+			margin-right: 20px;
+		}
+
+		.evOK{
+            border: 1px solid #2aff34;
+			background-color: #5fff66;
+			margin-right: 0;
+		}
+
+		.evWAIT{
+            border: 1px solid #fff42a;
+			background-color: #eaff5f;
+            margin-right: 0;
+		}
+
+		.evFAIL{
+            border: 1px solid #ff2a2a;
+			background-color: #ff5f5f;
+            margin-right: 0;
+		}
+
+
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid black;
+            bottom: 12px;
+            left: -50px;
+            min-width: 410px;
+        }
+
+		#popup-content {
+			max-height: 300px;
+			overflow-y: scroll;
+        }
+
+		#popup-content::-webkit-scrollbar {
+			display: block;
+        }
+
+        #popup-content div{
+			padding-bottom: 5px;
+			margin-bottom: 10px;
+			border-bottom: 1px solid #000000;
+		}
+
+
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+
+		#popup-content td:nth-child(1){
+			width: 95px;
+			text-align: center;
+		}
+
+		#popup-content td:nth-child(2){
+			padding-left: 2px;
+		}
+
+		#qjafP{
+            position: fixed;
+			bottom: 10px;
+			left: 380px;
+			width: 409px;
+			height: 30px;
+			background-color: whitesmoke;
+			border: 1px solid #000000;
+			border-radius: 10px;
+			padding: 5px 5px 0 5px;
+		}
+
+        .circle {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0;
+            padding: 0;
+            vertical-align: middle;
+			margin-left: 5px;
+			margin-right: 5px;
+        }
+
+		#loadingdiv{
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(255,255,255,0.8);
+			z-index: 9999;
+		}
+
+		#loadingdiv img{
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+        #mainModal{
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #modal{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            display: block;
+        }
+
+        #modalTitle{
+            height: 10%;
+            border-bottom: 1px solid #4BACD2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #modalTitle span{
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+			width: auto;
+        }
+
+        #modalClose{
+            font-size: 20px;
+            font-weight: bold;
+            color: #4BACD2;
+            cursor: pointer;
+        }
+
+        #modalContent{
+            height: 80%;
+            overflow-y: scroll;
+        }
+        #modalContent::-webkit-scrollbar{
+            display: none;
+        }
+
+        #modalButtons{
+            height: 10%;
+            text-align: center;
+        }
+
+        #modalButtons button{
+            width: 100px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid #4BACD2;
+            background-color: white;
+            color: #4BACD2;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #modalButtons button:hover{
+            background-color: #4BACD2;
+            color: white;
+        }
+
+        .modalStep.hided{
+            display: none;
+        }
+
+         /*
+		.modalStepContent{
+			padding-left: 10px;
+			padding-right: 10px;
+			padding-top: 10px;
+			<!-- 내부 img 높이에 따라 높이 반응형 -->
+			height: auto;
+		}
+		*/
+
+		.modalStepContent img{
+			width: 100%;
+			height: auto;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="mainModal">
+		<div id="modal">
+			<div id="modalTitle">
+				<span>서비스 사용방법 안내</span>
+				<span id="modalClose" onclick="$('#mainModal').css('display', 'none')">X</span>
+			</div>
+			<div id="modalContent">
+				<div class="modalStep">
+					<div class="modalStepContent">
+						<img src="../../../img/간단설명/전기차충전소조회.png">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="popup" class="ol-popup">
+		<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+		<div id="popup-content"></div>
+	</div>
+	<div id="maps"></div>
+	<div id="evList">
+		<ul>
+			<li>용머리해안</li>
+			<li><span class="evOK">충전가능</span> 2대</li>
+			<li><span class="evWAIT">사용중 </span> 2대</li>
+			<li><span class="evFAIL">사용불가</span> 2대</li>
+		</ul>
+		<ul>
+			<li>진흥원</li>
+			<li><span class="evOK">충전가능</span> 2대</li>
+			<li><span class="evWAIT">사용중 </span> 2대</li>
+			<li><span class="evFAIL">사용불가</span> 2대</li>
+		</ul>
+		<ul>
+			<li>판교역</li>
+			<li><span class="evOK">충전가능</span> 2대</li>
+			<li><span class="evWAIT">사용중 </span> 2대</li>
+			<li><span class="evFAIL">사용불가</span> 2대</li>
+		</ul>
+	</div>
+	<div id="qjafP">
+		<span class="circle" style="background-color: greenyellow;"></span>충전가능
+		<span class="circle" style="background-color: yellow;"></span> 사용중
+		<span class="circle" style="background-color: red;"></span>충전불가
+		&nbsp;|&nbsp;<span class="circle" style="background-color: blue; color: white">?</span>충전기 수
+	</div>
+	<div id="loadingdiv">
+		<img src="css/loading.gif">
+	</div>
+	<script>
+		function moveTo(x, y){
+			maps.getView().animate({
+				zoom: 18,
+				duration: 1000,
+				center: [x, y],
+			})
+		}
+
+
+
+		let clusterSource = new ol.source.Cluster({
+			distance: 30,
+			source: new ol.source.Vector({
+				features: []
+			})
+		});
+
+		let evChargingStation = new ol.layer.Vector({
+			source: clusterSource,  // 위에서 생성한 클러스터링 소스를 사용
+			style: function (feature) {
+				let features = feature.get('features');
+				let size = features.length;
+
+				// 클러스터링된 포인트가 여러 개인 경우
+				if (size > 1) {
+					return new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 10,
+							fill: new ol.style.Fill({
+								color: 'rgb(14,81,255)'
+							}),
+							stroke: new ol.style.Stroke({
+								color: 'rgb(14,81,255)', width: 2
+							})
+						}),
+						text: new ol.style.Text({
+							text: size.toString(),
+							fill: new ol.style.Fill({
+								color: '#fff'
+							})
+						})
+					});
+				}
+
+				// 클러스터링된 포인트가 하나만 있는 경우
+				let stats = features[0].get("cpStat");
+				switch (stats) {
+					case "충전가능":
+						return new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: 5,
+								fill: new ol.style.Fill({
+									color: 'rgb(26,255,0)'
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgb(0,0,0)'
+								})
+							})
+						});
+					case "사용중":
+						return new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: 5,
+								fill: new ol.style.Fill({
+									color: 'rgb(255,255,0)'
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgb(0,0,0)'
+								})
+							})
+						});
+					case "예약대기":
+						return new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: 5,
+								fill: new ol.style.Fill({
+									color: 'rgb(255,255,0)'
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgb(0,0,0)'
+								})
+							})
+						});
+					default:
+						return new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: 5,
+								fill: new ol.style.Fill({
+									color: 'rgb(255,0,0)'
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgb(0,0,0)'
+								})
+							})
+						});
+				}
+			}
+		});
+
+
+		let maps = new ol.Map({
+			target: "maps",
+			layers: [White, evChargingStation],
+			view: new ol.View({
+				// center: [14234930.662497984, 4344633.24331285],
+				center: [14129753.14545472, 4513437.265041048],
+				zoom: 10,
+				minZoom: 10,
+				maxZoom: 18,
+				extent: [13777099.59306465, 3905166.284228226, 14741249.932121769, 4678800.5162876565]
+			})
+		})
+
+		var container = document.getElementById('popup');
+		var closer = document.getElementById('popup-closer');
+
+		var overlay = new ol.Overlay({
+			element: container,
+			autoPan: true,
+			autoPanAnimation: {
+				duration: 250
+			}
+		});
+		maps.addOverlay(overlay);
+
+		closer.onclick = function() {
+			overlay.setPosition(undefined);
+			closer.blur();
+			return false;
+		};
+
+
+		//줌 16 레벨 이상일 때 클러스터링 해제
+		maps.getView().on("change:resolution", function (e){
+			if (maps.getView().getZoom() > 14){
+				clusterSource.setDistance(0);
+			}else{
+				clusterSource.setDistance(30);
+			}
+		})
+
+		let evLists = {};
+		$.ajax({
+			url: "https://api.odcloud.kr/api/EvInfoServiceV2/v1/getEvSearchList?",
+			type: "get",
+			data: {
+				page: 1,
+				perPage: 10000000,
+				serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA=="
+			},
+			success: function (datas){
+				datas.data.forEach(function (item){
+					let geometry = new ol.geom.Point(ol.proj.transform([parseFloat(item.longi), parseFloat(item.lat)], "EPSG:4326", "EPSG:3857"));
+					let cpStat;
+					switch (item.cpStat){
+						case "1":
+							cpStat = "충전가능";
+							break;
+						case "2":
+							cpStat = "사용중";
+							break;
+						case "9":
+							cpStat = "예약대기";
+							break;
+						default:
+							cpStat = "사용불가";
+							break;
+					}
+					let location = item.addr;
+					let csNm = item.csNm;
+					let cpNm = item.cpNm;
+					let cpTp;
+					switch (item.cpTp){
+						case "1":
+							cpTp = "B타입(5핀)";
+							break;
+						case "2":
+							cpTp = "C타입(5핀)";
+							break;
+						case "3":
+							cpTp = "BC타입(5핀)";
+							break;
+						case "4":
+							cpTp = "BC타입(7핀)";
+							break;
+						case "5":
+							cpTp = "DC차 데모";
+							break;
+						case "6":
+							cpTp = "AC 3상";
+							break;
+						case "7":
+							cpTp = "DC콤보";
+							break;
+						case "8":
+							cpTp = "DC차데모+DC콤보";
+							break;
+						case "9":
+							cpTp = "DC차데모+AC3상";
+							break;
+						case "10":
+							cpTp = "DC차데모+DC콤보, AC3상";
+							break;
+						default:
+							cpTp = "알수없음";
+							break;
+					}
+					let chargeTp;
+					switch (item.chargeTp){
+						case "1":
+							chargeTp = "완속";
+							break;
+						case "2":
+							chargeTp = "급속";
+							break;
+					}
+					if (!evLists[String(item.longi)+','+String(item.lat)]){
+						evLists[String(item.longi)+','+String(item.lat)] = [];
+					}
+					evLists[String(item.longi)+','+String(item.lat)].push({
+						geometry: geometry,
+						cpStat: cpStat,
+						location: location,
+						csNm: csNm,
+						cpNm: cpNm,
+						cpTp: cpTp,
+						chargeTp: chargeTp,
+					})
+					clusterSource.getSource().addFeature(
+						new ol.Feature({
+							geometry: new ol.geom.Point(ol.proj.transform([parseFloat(item.longi), parseFloat(item.lat)], "EPSG:4326", "EPSG:3857")),
+							cpStat: cpStat,//충전 상태
+							location: location,//주소
+							csNm: csNm,//충전소명
+							cpNm: cpNm,//충전기명
+							cpTp: cpTp,//충전방식
+							chargeTp: chargeTp,//충전타입
+							xy: String(item.longi)+','+String(item.lat)
+						})
+					);
+				});
+			},
+			complete: function (){
+				refreshEvList();
+				$("#loadingdiv").css("display", "none");
+			}
+		})
+
+
+		//지도 움직이면 멈추면
+		maps.on("moveend", function (e){
+			refreshEvList();
+		})
+
+
+		//클러스터링 된 포인트 클릭 이벤트
+		maps.on("click", function (e) {
+			overlay.setPosition(undefined);
+			closer.blur();
+			let features = maps.getFeaturesAtPixel(e.pixel);
+			if (features && features.length > 0) {
+				let clusteredFeatures = features[0].get("features");
+				$("#popup-content").empty();
+
+				// 클러스터링 된 피처가 아닌 경우에 대한 처리
+				if (!clusteredFeatures) {
+					return;
+				}
+
+				let size = clusteredFeatures.length;
+				if (size > 1) {
+					let coordinate = e.coordinate;
+					if (maps.getView().getZoom() < 14) {
+						maps.getView().fit(features[0].getGeometry(), {
+							duration: 1000,
+							maxZoom: 14,
+						});
+					} else if (maps.getView().getZoom() === 18) {
+						// 포인트 목록 가져오기
+						var html = "";
+						clusteredFeatures.forEach(function (item) {
+							switch (item.get("cpStat")) {
+								case "충전가능":
+									html += '<div>';
+									html += '<span class="evOK">충전가능</span> ' + item.get("csNm") + ' ' + item.get("cpNm");
+									html += '<table>';
+									html += '<tr>';
+									html += '<td>충전방식</td>';
+									html += '<td>' + item.get("cpTp") + '[' + item.get("chargeTp") + ']</td>';
+									html += '</tr>';
+									html += '<tr>';
+									html += '<td>상세위치</td>';
+									html += '<td>' + item.get("location") + '</td>';
+									html += '</tr>';
+									html += '</table>';
+									html += '</div>';
+									break;
+								case "사용중":
+									html += '<div>';
+									html += '<span class="evWAIT">사용중</span> ' + item.get("csNm") + ' ' + item.get("cpNm");
+									html += '<table>';
+									html += '<tr>';
+									html += '<td>충전방식</td>';
+									html += '<td>' + item.get("cpTp") + '[' + item.get("chargeTp") + ']</td>';
+									html += '</tr>';
+									html += '<tr>';
+									html += '<td>상세위치</td>';
+									html += '<td>' + item.get("location") + '</td>';
+									html += '</tr>';
+									html += '</table>';
+									html += '</div>';
+									break;
+								case "예약대기":
+									html += '<div>';
+									html += '<span class="evWAIT">예약대기</span> ' + item.get("csNm") + ' ' + item.get("cpNm");
+									html += '<table>';
+									html += '<tr>';
+									html += '<td>충전방식</td>';
+									html += '<td>' + item.get("cpTp") + '[' + item.get("chargeTp") + ']</td>';
+									html += '</tr>';
+									html += '<tr>';
+									html += '<td>상세위치</td>';
+									html += '<td>' + item.get("location") + '</td>';
+									html += '</tr>';
+									html += '</table>';
+									html += '</div>';
+									break;
+								default:
+									html += '<div>';
+									html += '<span class="evFAIL">사용불가</span> ' + item.get("csNm") + ' ' + item.get("cpNm");
+									html += '<table>';
+									html += '<tr>';
+									html += '<td>충전방식</td>';
+									html += '<td>' + item.get("cpTp") + '[' + item.get("chargeTp") + ']</td>';
+									html += '</tr>';
+									html += '<tr>';
+									html += '<td>상세위치</td>';
+									html += '<td>' + item.get("location") + '</td>';
+									html += '</tr>';
+									html += '</table>';
+									html += '</div>';
+									break;
+							}
+							$("#popup-content").html(html);
+						});
+						overlay.setPosition(e.coordinate);
+					} else {
+						maps.getView().fit(features[0].getGeometry(), {
+							duration: 1000,
+							maxZoom: 18,
+						});
+					}
+				}else if (size === 1){
+					var html = "";
+					switch (clusteredFeatures[0].get("cpStat")) {
+						case "충전가능":
+							html += '<div>';
+							html += '<span class="evOK">충전가능</span> ' + clusteredFeatures[0].get("csNm") + ' ' + clusteredFeatures[0].get("cpNm");
+							html += '<table>';
+							html += '<tr>';
+							html += '<td>충전방식</td>';
+							html += '<td>' + clusteredFeatures[0].get("cpTp") + '[' + clusteredFeatures[0].get("chargeTp") + ']</td>';
+							html += '</tr>';
+							html += '<tr>';
+							html += '<td>상세위치</td>';
+							html += '<td>' + clusteredFeatures[0].get("location") + '</td>';
+							html += '</tr>';
+							html += '</table>';
+							html += '</div>';
+							break;
+						case "사용중":
+							html += '<div>';
+							html += '<span class="evWAIT">사용중</span> ' + clusteredFeatures[0].get("csNm") + ' ' + clusteredFeatures[0].get("cpNm");
+							html += '<table>';
+							html += '<tr>';
+							html += '<td>충전방식</td>';
+							html += '<td>' + clusteredFeatures[0].get("cpTp") + '[' + clusteredFeatures[0].get("chargeTp") + ']</td>';
+							html += '</tr>';
+							html += '<tr>';
+							html += '<td>상세위치</td>';
+							html += '<td>' + clusteredFeatures[0].get("location") + '</td>';
+							html += '</tr>';
+							html += '</table>';
+							html += '</div>';
+							break;
+						case "예약대기":
+							html += '<div>';
+							html += '<span class="evWAIT">예약대기</span> ' + clusteredFeatures[0].get("csNm") + ' ' + clusteredFeatures[0].get("cpNm");
+							html += '<table>';
+							html += '<tr>';
+							html += '<td>충전방식</td>';
+							html += '<td>' + clusteredFeatures[0].get("cpTp") + '[' + clusteredFeatures[0].get("chargeTp") + ']</td>';
+							html += '</tr>';
+							html += '<tr>';
+							html += '<td>상세위치</td>';
+							html += '<td>' + clusteredFeatures[0].get("location") + '</td>';
+							html += '</tr>';
+							html += '</table>';
+							html += '</div>';
+							break;
+						default:
+							html += '<div>';
+							html += '<span class="evFAIL">사용불가</span> ' + clusteredFeatures[0].get("csNm") + ' ' + clusteredFeatures[0].get("cpNm");
+							html += '<table>';
+							html += '<tr>';
+							html += '<td>충전방식</td>';
+							html += '<td>' + clusteredFeatures[0].get("cpTp") + '[' + clusteredFeatures[0].get("chargeTp") + ']</td>';
+							html += '</tr>';
+							html += '<tr>';
+							html += '<td>상세위치</td>';
+							html += '<td>' + clusteredFeatures[0].get("location") + '</td>';
+							html += '</tr>';
+							html += '</table>';
+							html += '</div>';
+							break;
+					}
+					$("#popup-content").html(html);
+					overlay.setPosition(e.coordinate);
+				}
+			}
+		});
+
+
+		function refreshEvList(){
+			let extent = maps.getView().calculateExtent(maps.getSize());
+			$("#evList").empty();
+			evLists = {};
+			clusterSource.getSource().forEachFeatureIntersectingExtent(extent, function(feature) {
+				let geometry = feature.getGeometry();
+				let cpStat = feature.get("cpStat");
+				let location = feature.get("location");
+				let csNm = feature.get("csNm");
+				let cpNm = feature.get("cpNm");
+				let cpTp = feature.get("cpTp");
+				let chargeTp = feature.get("chargeTp");
+				let xy = feature.get("xy");
+
+				if (!evLists[xy]){
+					evLists[xy] = [];
+				}
+				evLists[xy].push({
+					geometry: geometry,
+					cpStat: cpStat,
+					location: location,
+					csNm: csNm,
+					cpNm: cpNm,
+					cpTp: cpTp,
+					chargeTp: chargeTp,
+				})
+			});
+			Object.values(evLists).forEach(function(value){
+				let cpStat = value[0].cpStat;
+				let location = value[0].location;
+				let csNm = value[0].csNm;
+				let cpNm = value[0].cpNm;
+				let cpTp = value[0].cpTp;
+				let chargeTp = value[0].chargeTp;
+				let xy = value[0].geometry.flatCoordinates[0]+','+value[0].geometry.flatCoordinates[1];
+				let ok = 0;
+				let wait = 0;
+				let fail = 0;
+				var html = "";
+				value.forEach(function (item2){
+					switch (item2.cpStat){
+						case "충전가능":
+							ok++;
+							break;
+						case "사용중":
+							wait++;
+							break;
+						case "예약대기":
+							wait++;
+							break;
+						default:
+							fail++;
+							break;
+					}
+				})
+				html += '<ul onclick="moveTo('+xy+')">';
+				html += '<li>'+csNm+'</li>';
+				html += '<li><span class="evOK">충전가능</span> '+ok+'대</li>';
+				html += '<li><span class="evWAIT">사용중 </span> '+wait+'대</li>';
+				html += '<li><span class="evFAIL">사용불가</span> '+fail+'대</li>';
+				html += '</ul>';
+				$("#evList").append(html);
+			})
+		}
+
+
+	</script>
+</body>
+</html>
