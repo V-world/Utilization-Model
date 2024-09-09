@@ -506,10 +506,10 @@
 										console.log(item)
 
 										let option = document.createElement('option');
-										option.textContent = item.NERST_POI_NM;
-										option.dataset.ym = item.DATA_STRD_YM;//데이터 기준 년월
-										option.dataset.tm = item.REPRSNT_PBTS_APRC_TM;//추정시간
-										option.value = item.NERST_POI_NM;
+										option.textContent = item.nerstPoiNm;
+										option.dataset.ym = item.dataStrdYm;//데이터 기준 년월
+										option.dataset.tm = item.reprsntPbtsAprcTm;//추정시간
+										option.value = item.nerstPoiNm;
 										document.getElementById('tarffic-list').appendChild(option);
 									});
 								}
