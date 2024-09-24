@@ -10,7 +10,7 @@ body{
 
 .topTools {
     position: fixed;
-    top: 56px;
+    top: 0;
     left: 50%;
     padding-right: 5px;
     padding-left: 5px;
