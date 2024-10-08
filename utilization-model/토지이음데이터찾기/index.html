@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 찾기</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>순번</th>
+                <th>코드구분</th>
+                <th>레이어명</th>
+                <th>제공파일명</th>
+                <th>레이어</th>
+                <th>코드값</th>
+                <th>코드값의미</th>
+                <th>비고</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#example').DataTable({
+                ajax: {
+                    url: 'https://vworld1.moonlight.one/Utilization-Model/토지이음데이터찾기/specific_use_area.jsp',
+                    dataSrc: '' // JSON 최상위 배열에서 데이터를 가져오므로 dataSrc를 빈 문자열로 설정
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'code_breakdown' },
+                    { data: 'layer_name' },
+                    { data: 'provided_file_name' },
+                    { data: 'layer' },
+                    { data: 'code_value' },
+                    { data: 'code_value_meaning' },
+                    { data: 'remarks' }
+                ],
+                language: {
+                    emptyTable: "데이터가 없습니다.",
+                    info: "총 _TOTAL_개의 항목 중 _START_부터 _END_까지 표시",
+                    infoEmpty: "항목이 없습니다.",
+                    infoFiltered: "(총 _MAX_개의 항목에서 필터링됨)",
+                    lengthMenu: "_MENU_ 개씩 보기",
+                    loadingRecords: "로딩 중...",
+                    processing: "처리 중...",
+                    search: "검색:",
+                    zeroRecords: "일치하는 항목이 없습니다.",
+                    paginate: {
+                        first: "처음",
+                        last: "마지막",
+                        next: "다음",
+                        previous: "이전"
+                    },
+                    aria: {
+                        sortAscending: ": 오름차순으로 정렬",
+                        sortDescending: ": 내림차순으로 정렬"
+                    }
+                }
+
+            });
+        });
+    </script>
+</body>
+</html>
