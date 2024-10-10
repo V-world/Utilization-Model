@@ -7,6 +7,42 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <style>
+
+        .dataTables_filter{
+            height: 50px;
+        }
+
+        .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .dataTables_filter input[type="search"] {
+            width: 800px;
+            height: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .dataTables_filter input[type="search"] {
+                width: 300px !important;
+            }
+        }
+
+        .dataTables_length label{
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .dataTables_length label select {
+            height: 40px;
+        }
+
+    </style>
 </head>
 <body>
     <table id="example" class="display" style="width:100%">
