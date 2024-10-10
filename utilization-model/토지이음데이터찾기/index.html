@@ -25,7 +25,7 @@
             height: 40px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .dataTables_filter input[type="search"] {
                 width: 300px !important;
             }
@@ -40,6 +40,12 @@
 
         .dataTables_length label select {
             height: 40px;
+        }
+
+        #example tbody tr td:nth-child(3) {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
         }
 
     </style>
@@ -101,6 +107,29 @@
 
             });
         });
+
+
+        $(document).ready(function() {
+            $("#example").on("click", "tr td:nth-child(3)", function() {
+                var tdValue = $(this).text();
+                window.open("https://www.vworld.kr/dtmk/dtmk_ntads_s001.do?searchKeyword=" + tdValue);
+                //카탈로그 API 활용
+                // $.ajax({
+                //     url: "https://api.vworld.kr/ned/dtmk/getGidDsList.do?",
+                //     type: "GET",
+                //     data: {
+                //         format: "json",
+                //         ds_nm: tdValue
+                //     },
+                //     dataType: "jsonp",
+                //     success: function(data) {
+                //         console.log(data.data.list[0].link_url);
+                //     }
+                // });
+            });
+        });
+
+
     </script>
 </body>
 </html>
