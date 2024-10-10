@@ -537,12 +537,25 @@
 		});
 	});
 
+</script>
 
 
+<script>
+	// 현재 페이지 URL에서 쿼리 파라미터를 가져옴
+	const urlParams = new URLSearchParams(window.location.search);
 
+	// 특정 파라미터 값을 가져오기
+	const param_selected = urlParams.get('selected');
 
-
+	//model-item들에서 url에   utilization-model/{param_selected}가 포함된 것을 찾아서 클릭
+	$('.model-item').each(function() {
+		const url = $(this).data('url');
+		if (url.includes(`utilization-model/${param_selected}`)) {
+			$(this).find('.explore').click();
+		}
+	});
 
 </script>
+
 </body>
 </html>
