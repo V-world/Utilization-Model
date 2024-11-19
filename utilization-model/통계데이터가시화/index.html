@@ -143,6 +143,7 @@
 <body>
     <div id="vmap"></div>
     <div class="startMenu">
+        <label>*GeoJson 파일만 선택 가능합니다.</label>
         <label class="file-label" for="file">파일 선택</label>
         <input type="file" id="file" name="file" accept=".json">
         <a class="startMenuButton" href="seoul.json" download="seoul.json">샘플 데이터 다운로드</a>
@@ -211,8 +212,6 @@
 
         const viewer = ws3d.viewer;
 
-
-
         document.getElementById('file').addEventListener('change', function (e) {
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -220,7 +219,8 @@
                 viewer.dataSources
                     .add(
                         Cesium.GeoJsonDataSource.load(e.target.result, {
-                            clampToGround: true
+                            clampToGround: true,
+
                         })
                     )
                     .then(function (dataSource) {
@@ -283,8 +283,7 @@
             reader.readAsDataURL(file);
         });
 
-
-            /**
+     /**
      * 클릭시 이벤트 
      */
     var setEvent = function () {
@@ -298,13 +297,15 @@
             if (Cesium.defined(feature)) {
 
                 c_pop = feature.id.properties.pop_2021.getValue();
-                c_name = feature.id.properties.GRID_500M.getValue();
+                //c_name = feature.id.properties.GRID_500M.getValue();
 
-                document.getElementById('pop_text').innerText= `GRID_500M : ${c_name}  인구 : ${c_pop}`;
-                console.log(c_name);
+                if(c_pop===null){
+                    c_pop = '0';
+                }
+
+                document.getElementById('pop_text').innerText= `GRID_500M / 인구 수 : ${c_pop}명`;
                 document.getElementById('pop_menu').style.display="flex";                
             }
-            
             
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK); // 레프트 클릭 시
     };
