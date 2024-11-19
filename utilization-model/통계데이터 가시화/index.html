@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
+    <style>
+        #vmap {
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .startMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            width: 500px;
+            height: 300px;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+        }
+
+        .startMenuButton {
+            width: 220px;
+            height: 50px;
+            font-size: 20px;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            width: 220px;
+            height: 50px;
+            font-size: 20px;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .file-label:hover {
+            background-color: #0056b3;
+        }
+
+        #pop_menu {
+            position: absolute;
+            top: 85%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            width: 500px;
+            height: 145px;
+            background-color: rgba(255, 255, 255, 0.8);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            display: none;
+        }
+        .pop_text {
+            font-size: 20px;
+        }
+
+        /* CSS 스타일 범례 */
+        #legend-container {
+            position: absolute;
+            top: 70%;
+            left: 2%;
+            width: 300px;
+            height: 200px;
+            border: 1px solid gray;
+            background-color: white;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            display: none;
+        }
+
+        #legend-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .legend-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+        }
+
+        /* 색상 클래스 */
+        .color-1 { background-color: #FF0000; }
+        .color-2 { background-color: #ff9100; }
+        .color-3 { background-color: #f78672; }
+        .color-4 { background-color: #f3abe7; }
+        .color-5 { background-color: #faf7cc; }
+        .color-6 { background-color: #ffffff; }
+        .color-7 { background-color: #029e48; }
+
+    </style>
+</head>
+<body>
+    <div id="vmap"></div>
+    <div class="startMenu">
+        <label class="file-label" for="file">파일 선택</label>
+        <input type="file" id="file" name="file" accept=".json">
+        <a class="startMenuButton" href="seoul.json" download="seoul.json">샘플 데이터 다운로드</a>
+    </div>
+    <!-- 범례 HTML 시작 -->
+    <div id="legend-container">
+        <div id="legend-title">범례</div>
+        <div id="legend-grid">
+            <!-- 왼쪽 열 -->
+            <div class="legend-column">
+                <div class="legend-item">
+                    <div class="color-box color-1"></div>
+                    <span class="legend-text">5,000명 이상</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box color-2"></div>
+                    <span class="legend-text">4,000명 이상</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box color-3"></div>
+                    <span class="legend-text">3,000명 이상</span>
+                </div>
+            </div>
+            
+            <!-- 오른쪽 열 -->
+            <div class="legend-column">
+                <div class="legend-item">
+                    <div class="color-box color-4"></div>
+                    <span class="legend-text">2,000명 이상</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box color-5"></div>
+                    <span class="legend-text">1,000명 이상</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box color-6"></div>
+                    <span class="legend-text">500명 이상</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box color-7"></div>
+                    <span class="legend-text">0명 이상</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 범례 HTML 종료 -->
+    <!-- 클릭 HTML 팝업 -->
+    <div id="pop_menu">
+        <p id="pop_text">GRID_500M : 다사61b55a  인구 : 3780</p>
+    </div>
+    
+    
+    <script type="text/javascript" charset="utf-8">
+        var options = {
+            mapId: "vmap",
+            initPosition: new vw.CameraPosition(
+                new vw.CoordZ(126.9401465303777, 37.519874413465715, 500),
+                new vw.Direction(0, -70, 0)
+            ),
+            logo: true,
+            navigation: false
+        };
+        var map = new vw.Map();
+        map.setOption(options);
+        map.start();
+
+        const viewer = ws3d.viewer;
+
+
+
+        document.getElementById('file').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                viewer.dataSources
+                    .add(
+                        Cesium.GeoJsonDataSource.load(e.target.result, {
+                            clampToGround: true
+                        })
+                    )
+                    .then(function (dataSource) {
+                        viewer.zoomTo(dataSource);
+                        //Get the array of entities
+                        document.getElementById('legend-container').style.display="block"; // 범례 가시화 
+                        let entities = dataSource.entities.values;
+                        for (var i = 0; i < entities.length; i++) {
+                            //For each entity, create a random color based on the state name.
+                            //Some states have multiple entities, so we store the color in a
+                            //hash so that we use the same color for the entire state.
+                            let entity = entities[i];
+                            let population;
+                            let color;
+                            population = entity.properties._pop_2021._value; // sig_kor_nm 인구숫자 데이터 JSON 예시
+                            height = 250;
+                            /**
+                             *  인구 값에 따른 색상 처리 
+                             */
+                            if (population < 100) {
+                            height = 200;
+                            color = Cesium.Color.GREEN; //18c669
+                            } else if (population < 500) {
+                            height = 200;
+                            color = Cesium.Color.WHITE; //FFFFFF
+                            } else if (population < 1000) {
+                            height = 250;
+                            color = Cesium.Color.ALICEBLUE; //F0F8FF
+                            } else if (population < 2000) {
+                            height = 300;
+                            color = Cesium.Color.PAPAYAWHIP; //FFEFD5
+                            } else if (population < 3000) {
+                            height = 350;
+                            color = Cesium.Color.PINK; //FFC0CB
+                            } else if (population < 4000) {
+                            height = 400;
+                            color = Cesium.Color.LIGHTCORAL; //F08080
+                            } else if (population < 5000) {
+                            height = 450;
+                            color = Cesium.Color.ORANGERED; //FF4500
+                            } else if (population >= 5000) {
+                            height = 500;
+                            color = Cesium.Color.RED; //FF0000
+                            }
+
+                            //Set the polygon material to our random color.
+                            entity.polygon.material = color;
+                            entity.polygon.material._color._value.alpha = 0.5;
+                            //Remove the outlines.
+                            entity.polygon.outline = true;
+                            entity.polygon.outlineColor = Cesium.Color.BLACK;
+                            entity.polygon.extrudedHeight = height; //인구에 따라서 높이를 표현
+                            
+                        } //for
+                        document.querySelector('.startMenu').style.display = 'none';
+                    });
+            }
+            //var encoding = 'euc-kr';
+            //reader.readAsDataURL(file, encoding);
+            reader.readAsDataURL(file);
+        });
+
+
+            /**
+     * 클릭시 이벤트 
+     */
+    var setEvent = function () {
+    // 이벤트 구현 클릭 시 용
+        var handler = new Cesium.ScreenSpaceEventHandler(ws3d.viewer.canvas);
+
+        handler.setInputAction(function (movement) {
+            //선택 제어 시작
+            var feature = ws3d.viewer.scene.pick(movement.position);
+            var c_pop, c_name
+            if (Cesium.defined(feature)) {
+
+                c_pop = feature.id.properties.pop_2021.getValue();
+                c_name = feature.id.properties.GRID_500M.getValue();
+
+                document.getElementById('pop_text').innerText= `GRID_500M : ${c_name}  인구 : ${c_pop}`;
+                console.log(c_name);
+                document.getElementById('pop_menu').style.display="flex";                
+            }
+            
+            
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK); // 레프트 클릭 시
+    };
+
+    vw.ws3dInitCallBack = function () { // 로딩시 실행
+        setEvent();
+    }
+
+    </script>
+</body>
+</html>
