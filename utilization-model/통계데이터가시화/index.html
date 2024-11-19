@@ -297,13 +297,13 @@
             if (Cesium.defined(feature)) {
 
                 c_pop = feature.id.properties.pop_2021.getValue();
-                //c_name = feature.id.properties.GRID_500M.getValue();
+                c_name = feature.id.properties.GRID_500M.getValue();
 
                 if(c_pop===null){
                     c_pop = '0';
                 }
 
-                document.getElementById('pop_text').innerText= `GRID_500M / 인구 수 : ${c_pop}명`;
+                document.getElementById('pop_text').innerText= `GRID_500M : ${c_name} / 인구 수 : ${c_pop}명`;
                 document.getElementById('pop_menu').style.display="flex";                
             }
             
