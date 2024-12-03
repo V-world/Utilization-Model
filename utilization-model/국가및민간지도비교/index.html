@@ -112,7 +112,6 @@
     <input type="hidden" name="category" value="ROAD" />
 	<input type="hidden" name="request" value="search" />
 	<input type="hidden" name="apiKey" value="CEB52025-E065-364C-9DBA-44880E3B02B8"> 
-	<input type="hidden" name="domain" value="http://localhost:8080"> 
 	<input type="hidden" name="crs" value="EPSG:3857" />
 	<div>
         <select name="type" id="type">
@@ -176,7 +175,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 	var view_resolutions = [1954.597389,977.2986945, 488.64934725,	244.324673625, 122.1623368125, 61.08116840625,30.540584203125, 15.2702921015625, 7.63514605078125,3.817573025390625, 1.9087865126953125, 0.9543932563476563,0.47719662817382813, 0.23859831408691407];
     var key = "48B39DEAF1939913FAD957A5BA699048";
     var s_resolutions =  [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25] //14
-    var attr2 = '&copy; <a href="http://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
+    var attr2 = '&copy; <a href="https://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
 
     var geotileGrid = new ol.tilegrid.WMTS({ //기본지도 설정
             origin : [ -200000.0, 4000000.0 ],
@@ -197,7 +196,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
     var source = new ol.source.WMTS({
         //layer : ["korean_map", "color_map", "lowV_map", "english_map", "white_map", "chinese_map", "japanese_map", "white_edu_map", "base_hd"],
         layer: "korean_map",
-        url : `http://map.ngii.go.kr/openapi/Gettile.do?apikey=${key}`,
+        url : `https://map.ngii.go.kr/openapi/Gettile.do?apikey=${key}`,
         service : 'WMTS',
         format : 'image/png',
         matrixSet : 'korean',
@@ -209,7 +208,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 	var source2 = new ol.source.WMTS({
         //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
         layer: "AIRPHOTO",
-        url : `http://210.117.198.120:8081/o2map/services`,
+        url : `https://210.117.198.120:8081/o2map/services`,
         service : 'WMTS',
         matrixSet : 'NGIS_AIR',
 		style:"_null",
@@ -256,7 +255,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 
     var VworldBase,VworldSatellite,VworldGray,VworldMidnight,VworldHybrid;
 	var attr = '&copy; <a href="http://dev.vworld.kr"  target="_blank">브이월드</a>';
-    var attr2 = '&copy; <a href="http://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
+    var attr2 = '&copy; <a href="https://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
     
 	var VworldHybrid = new ol.source.XYZ({
 		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Hybrid/{z}/{y}/{x}.png'
@@ -464,16 +463,14 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 	let wms_tile = new ol.layer.Tile({
 		name : "WMS_LAYER",
 		source : new ol.source.TileWMS({
-			url : "http://api.vworld.kr/req/wms?",
+			url : "https://api.vworld.kr/req/wms?",
 			params : {
 				LAYERS : wms_val,
 				STYLES : wms_val,
 				CRS : "EPSG:900913",
 				apikey : "CEB52025-E065-364C-9DBA-44880E3B02B8",
-				DOMAIN : "http://loacalhost:8080",
 				title : wms_title,
-				FORMAT : "image/png",
-				domain : "http://localhost"
+				FORMAT : "image/png"
 			}
 		})
 	});
