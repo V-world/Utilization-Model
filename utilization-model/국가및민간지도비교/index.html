@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>간단한 지도 표시하기</title>
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=rev3qfeszy&submodules=panorama"></script>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=97dy4t5kqk&submodules=panorama"></script>
     <script src="https://openlayers.org/en/v6.4.3/build/ol.js"></script>
     <script  src="http://code.jquery.com/jquery-latest.min.js"></script>
     <link rel="stylesheet" 	href="https://openlayers.org/en/v6.4.3/css/ol.css" type="text/css">
@@ -108,6 +108,7 @@
     </div>	
 </div>
 
+
 <form id="searchForm" action="#" class="form_data" onsubmit="return false;search();">
 	<input type="hidden" name="page" value="1" />
     
@@ -174,6 +175,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 
 	ol.proj.get("EPSG:5179").setExtent(oo78)
 
+	//	var view_extent = [13887536.0793924, 3904296.7081297645, 14697533.102725917, 4656728.245734523]
 	var view_resolutions = [1954.597389,977.2986945, 488.64934725,	244.324673625, 122.1623368125, 61.08116840625,30.540584203125, 15.2702921015625, 7.63514605078125,3.817573025390625, 1.9087865126953125, 0.9543932563476563,0.47719662817382813, 0.23859831408691407];
     var key = "48B39DEAF1939913FAD957A5BA699048";
     var s_resolutions =  [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25] //14
@@ -196,6 +198,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 
    
     var source = new ol.source.WMTS({
+        //layer : ["korean_map", "color_map", "lowV_map", "english_map", "white_map", "chinese_map", "japanese_map", "white_edu_map", "base_hd"],
         layer: "korean_map",
         url : `http://map.ngii.go.kr/openapi/Gettile.do?apikey=${key}`,
         service : 'WMTS',
@@ -207,6 +210,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
     });
 
 	var source2 = new ol.source.WMTS({
+        //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
         layer: "AIRPHOTO",
         url : `http://210.117.198.120:8081/o2map/services`,
         service : 'WMTS',
@@ -218,6 +222,8 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
         attributions:attr2
     });
 
+	// source.setRenderReprojectionEdges(false);
+	// source2.setRenderReprojectionEdges(false);
     var view = new ol.View({
         projection : "EPSG:3857",
  //     resolutions : view_resolutions,
@@ -589,7 +595,6 @@ naver.maps.onJSContentLoaded = function() {
         }
     });
 };
-
 
 //=================e다음지도
 var overlayOn = false, // 지도 위에 로드뷰 오버레이가 추가된 상태를 가지고 있을 변수
