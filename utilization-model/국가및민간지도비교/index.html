@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>간단한 지도 표시하기</title>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=rev3qfeszy&submodules=panorama"></script>
+    <script src="https://openlayers.org/en/v6.4.3/build/ol.js"></script>
+    <script  src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <link rel="stylesheet" 	href="https://openlayers.org/en/v6.4.3/css/ol.css" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.4.4/proj4.js"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7f4d6e06f93c80761a8243d5829fbe00"></script>
+</head>
+<style type="text/css">
+    select, input[type="text"] {
+    width: 300px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: #333;
+    transition: all 0.3s ease;
+    }
+
+    select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    }
+
+    select:hover, input[type="text"]:hover {
+    border-color: #aaa;
+    }
+
+    select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .form_data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    }
+
+    .form_data a {
+    padding: 8px 15px;
+    background-color: #4a90e2;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    }
+
+    .form_data a:hover {
+    background-color: #3a7bc8;
+    }
+
+    .ol-mycontrol {
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 4px;
+        padding: 4px;
+        margin-left: 10px;
+        position: block;
+        width:163px;
+        top: 5px;
+        left:40px;
+    }
+	.ol-mycontrol2{
+		width:55px;
+	}
+    .ol-mycontrol button {
+        float:left;
+    }
+    .ol-mycontrol button.on {
+        background-color:rgba(124,60,55,.5);
+    }
+    .container{display: inline;}
+
+    .ol-attribution button {display:none}
+</style>
+
+<body>
+
+<div style="display: flex;">
+    <div style="float: left; width: 50%;">
+        <div id="map" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div style="float: left; width: 50%;">
+        <div id="map3" style="width: 100%; height: 400px;"></div>
+    </div>	
+</div>
+
+<div style="display: flex;">
+    <div id="map2" style="width:50%;height:400px;">
+    </div>
+    <div style=" width: 50%;">
+        <div id="map4" style="width: 100%; height: 400px;"></div>
+    </div>	
+</div>
+
+<form id="searchForm" action="#" class="form_data" onsubmit="return false;search();">
+	<input type="hidden" name="page" value="1" />
+    
+    <input type="hidden" name="category" value="ROAD" />
+	<input type="hidden" name="request" value="search" />
+	<input type="hidden" name="apiKey" value="CEB52025-E065-364C-9DBA-44880E3B02B8"> 
+	<input type="hidden" name="domain" value="http://localhost:8080"> 
+	<input type="hidden" name="crs" value="EPSG:3857" />
+	<div>
+        <select name="type" id="type">
+            <option value="PLACE">POI</option>
+            <option value="address" data-c="PARCEL">지번</option>
+            <option value="address" data-c="ROAD" selected="selected">도로명</option>
+        </select>
+		<input type="text" lang="50" id="searchValue" name="query" value="판교로 242" style="width: 300px;" /> <a href="javascript:search();" >검색</a> 
+	</div>
+</form>
+
+<script>
+
+$(document).on("change","#type",function(){
+    let thisVal = $(this).val();	
+    let thisTxt = $("#type option:selected").attr("data-c")
+    $('[name=category').val(thisTxt);
+})
+
+var mapOptions3 = {
+    mapTypeControl: true,
+    mapTypeControlOptions: {
+        style: naver.maps.MapTypeControlStyle.BUTTON,
+        position: naver.maps.Position.TOP_RIGHT
+    },
+    zoomControl: true,
+    zoomControlOptions: {
+        style: naver.maps.ZoomControlStyle.SMALL,
+        position: naver.maps.Position.TOP_RIGHT
+    },
+    scaleControl: true,
+    scaleControlOptions: {
+        position: naver.maps.Position.RIGHT_CENTER
+    },
+    logoControl: true,
+    logoControlOptions: {
+        position: naver.maps.Position.TOP_LEFT
+    },
+    mapDataControl: true,
+    mapDataControlOptions: {
+        position: naver.maps.Position.BOTTOM_LEFT
+    },
+    zoom: 12,
+    mapTypeId: 'normal',
+    center: new naver.maps.LatLng(37.48273,127.594214)
+};
+
+var map3 = new naver.maps.Map('map3', mapOptions3);
+
+	//바로이맵 설정
+	var epsg5179 ="+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+    proj4.defs("EPSG:5179", epsg5179);
+    ol.proj.proj4.register(proj4)
+    var view_projection = ol.proj.get("EPSG:5179");
+    var view_extent = [743623.1161898939, 1456333.7988633565, 1394868.4484408265, 2070228.7850445202];
+	var oo78 = [-200000, -28024123.62, 31824123.62, 4000000]; //
+
+	ol.proj.get("EPSG:5179").setExtent(oo78)
+
+	var view_resolutions = [1954.597389,977.2986945, 488.64934725,	244.324673625, 122.1623368125, 61.08116840625,30.540584203125, 15.2702921015625, 7.63514605078125,3.817573025390625, 1.9087865126953125, 0.9543932563476563,0.47719662817382813, 0.23859831408691407];
+    var key = "48B39DEAF1939913FAD957A5BA699048";
+    var s_resolutions =  [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25] //14
+    var attr2 = '&copy; <a href="http://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
+
+    var geotileGrid = new ol.tilegrid.WMTS({ //기본지도 설정
+            origin : [ -200000.0, 4000000.0 ],
+            resolutions: [2088.96, 1044.48, 522.24, 261.12, 130.56, 65.28, 32.64, 16.32, 8.16, 4.08, 2.04, 1.02, 0.51, 0.255],//properties.wmtEmapOption.serverResolutions,
+            matrixIds : [ 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11',
+                    'L12', 'L13', 'L14', 'L15', 'L16', 'L17', 'L18' ]
+                   
+    })
+	var geotileGrid2 = new ol.tilegrid.WMTS({ //영상지도 설정
+            origin : [ -200000.0, 4000000.0 ],
+            resolutions: [2088.96, 1044.48, 522.24, 261.12, 130.56, 65.28, 32.64, 16.32, 8.16, 4.08, 2.04, 1.02, 0.51, 0.255],//properties.wmtEmapOption.serverResolutions,
+            matrixIds : [ '5','6', '7', '8', '9', '10', '11',
+                    '12', '13', '14', '15', '16', '17', '18' ]
+                   
+    })
+
+   
+    var source = new ol.source.WMTS({
+        layer: "korean_map",
+        url : `http://map.ngii.go.kr/openapi/Gettile.do?apikey=${key}`,
+        service : 'WMTS',
+        format : 'image/png',
+        matrixSet : 'korean',
+        tileGrid : geotileGrid,
+		projection: 'EPSG:5179',
+        attributions:attr2
+    });
+
+	var source2 = new ol.source.WMTS({
+        layer: "AIRPHOTO",
+        url : `http://210.117.198.120:8081/o2map/services`,
+        service : 'WMTS',
+        matrixSet : 'NGIS_AIR',
+		style:"_null",
+		format:"image/jpg", //
+		projection: 'EPSG:5179',
+        tileGrid : geotileGrid2,
+        attributions:attr2
+    });
+
+    var view = new ol.View({
+        projection : "EPSG:3857",
+ //     resolutions : view_resolutions,
+        center:  ol.proj.transform([127.100616,37.402142], 'EPSG:4326', 'EPSG:3857'),
+        // maxZoom : 17,
+        // minZoom : 7,
+        zoom: 0
+    });
+
+    var baro_map = new ol.layer.Tile({
+        source : source,
+        id : 'baro_map',
+        name : "mapLayer"
+    });
+
+    let tileDebug =  new ol.source.TileDebug({
+        projection: 'EPSG:5179',
+        tileGrid: source.getTileGrid()
+    })
+
+    let baro_debug = new ol.layer.Tile({ 
+	 	name : "debug",
+	 	source: tileDebug //ol 6버전에 생김
+    }); // 타일의 넘버링을 확인할 수 있음 z: 레벨  / y 위 아래 , x 좌 우    /{z}7/{y}47/{x}111.png
+
+
+
+     var debug = new ol.layer.Tile({ 
+	 	name : "debug",
+	 	source: new ol.source.TileDebug() //ol 6버전에 생김
+     }); // 타일의 넘버링을 확인할 수 있음 z: 레벨  / y 위 아래 , x 좌 우    /{z}7/{y}47/{x}111.png
+     debug.setVisible(false)
+
+    var VworldBase,VworldSatellite,VworldGray,VworldMidnight,VworldHybrid;
+	var attr = '&copy; <a href="http://dev.vworld.kr"  target="_blank">브이월드</a>';
+    var attr2 = '&copy; <a href="http://map.ngii.go.kr/ms/map/NlipMap.do?tabGb=total" target="_blank">바로e맵</a>';
+    
+	var VworldHybrid = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Hybrid/{z}/{y}/{x}.png'
+	}); //문자 타일 레이어
+	
+	var VworldSatellite = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Satellite/{z}/{y}/{x}.jpeg'
+		,attributions : attr
+	}); //항공사진 레이어 타일
+
+	var VworldBase = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png'
+		,attributions : attr
+	}); // 기본지도 타일
+
+	var VworldGray =  new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/gray/{z}/{y}/{x}.png'
+		,attributions : attr
+	}); //회색지도 타일
+	
+	var VworldMidnight =  new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/midnight/{z}/{y}/{x}.png'
+		,attributions : attr
+	})
+
+    var VworldVectorBackground =  new ol.source.XYZ({
+		url: 'https://cdn.vworld.kr/2d/vector/Base/service/{z}/{x}/{y}.png'
+		,attributions : attr
+	})
+	
+	/*
+		control 설정
+	*/
+	var element = document.createElement('div');
+	element.className = 'rotate-north ol-unselectable ol-control ol-mycontrol';
+	var base_button = document.createElement('button');
+	base_button.innerHTML = 'B';
+	var gray_button = document.createElement('button');
+	gray_button.innerHTML = 'G';
+	var midnight_button = document.createElement('button');
+	midnight_button.innerHTML = 'M';
+	var hybrid_button = document.createElement('button');
+	hybrid_button.innerHTML = 'H';
+	hybrid_button.className='on';
+	var sate_button = document.createElement('button');
+    sate_button.innerHTML = 'S';
+    
+    var debug_button = document.createElement('button');
+	debug_button.innerHTML = 'D';
+    debug_button.className='';
+
+    var follow_button = document.createElement('button');
+	follow_button.innerHTML = 'F';
+    follow_button.className='on';
+    var vbackground_button = document.createElement('button');
+    vbackground_button.innerHTML = 'V';
+    vbackground_button.className='';
+
+    base_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldBase)
+			}
+	    })
+    }
+    gray_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldGray)
+			}
+	    })
+    }
+    midnight_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldMidnight)
+			}
+	    })
+    }
+    sate_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldSatellite)
+			}
+	    })
+    }
+    hybrid_button.onclick=function(){
+    	var _this = this;
+   		map.getLayers().forEach(function(layer){
+   			if(layer.get("name")=="hybrid"){
+   				if(_this.className == "on"){
+    				layer.setSource(null)
+    				_this.className ="";
+   				}else{
+   					_this.className ="on";
+   					
+   					layer.setSource(VworldHybrid)
+   				}
+   			}
+   	    })
+    }
+
+    debug_button.onclick=function(){
+    	var _this = this;
+   		map.getLayers().forEach(function(layer){
+   			if(layer.get("name")=="debug"){
+   				if(_this.className == "on"){
+                    _this.className ="";
+    				layer.setVisible(false)
+   				}else{
+   					_this.className ="on";
+   					layer.setVisible(true)
+   				}
+   			}
+   	    })
+    }
+    vbackground_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldVectorBackground)
+			}
+	    })
+    }
+    
+    element.appendChild(base_button);
+    element.appendChild(gray_button);
+    element.appendChild(midnight_button);
+    element.appendChild(sate_button);
+    element.appendChild(hybrid_button);
+    element.appendChild(debug_button);
+    element.appendChild(vbackground_button);
+    //element.appendChild(follow_button);
+    var layerControl = new ol.control.Control({element: element});
+    
+    let olView = new ol.View({
+			center: ol.proj.transform([127.100616,37.402142], 'EPSG:4326', 'EPSG:900913'),
+			zoom: 7,
+			minZoom : 0,
+			maxZoom : 19,
+			//extent: oo78
+    })
+
+
+	map = new ol.Map({
+		controls: ol.control.defaults().extend([
+			layerControl, new ol.control.OverviewMap({
+                layers:[new ol.layer.Tile({
+				source: VworldBase,
+				name:"vworld"
+			})],
+            }),new ol.control.ZoomSlider()
+		]).extend([new ol.control.Attribution({
+        collapsible: false,
+        attribution: "바로E맵"
+        })]),
+		layers: [
+			new ol.layer.Tile({
+				source: VworldSatellite,
+				name:"vworld"
+                
+			}),new ol.layer.Tile({
+				source: VworldHybrid,
+				name:"hybrid"
+			}),debug
+		],
+		target: 'map',
+		view: olView
+		
+    });
+    
+	var baro_button = document.createElement('button');
+	baro_button.innerHTML = 'B';
+	var air_button = document.createElement('button');
+	air_button.innerHTML = 'A';
+    var element2 = document.createElement('div');
+    element2.className = 'rotate-north ol-unselectable ol-control ol-mycontrol ol-mycontrol2';
+	
+    element2.appendChild(baro_button);
+	element2.appendChild(air_button);
+
+	var layerControl2 = new ol.control.Control({element: element2});
+
+    let map2 = new ol.Map({ 
+		controls: ol.control.defaults().extend([
+			layerControl2,new ol.control.ZoomSlider() 
+		],{ attributionOptions: { collapsible: true } }).extend([new ol.control.Attribution({
+        collapsible: false,
+        attr: "바로E맵"
+        })]),
+        layers: [baro_map], //[OSM,Base,debug] 
+        target: 'map2',
+        view: olView
+    });
+	
+	baro_button.onclick=function(){
+		baro_map.setSource(source)
+    }
+    air_button.onclick=function(){
+        baro_map.setSource(source2)
+    }
+
+	let wms_title = '주요상권';
+	let wms_val = 'lt_c_dgmainbiz';
+
+	let wms_tile = new ol.layer.Tile({
+		name : "WMS_LAYER",
+		source : new ol.source.TileWMS({
+			url : "http://api.vworld.kr/req/wms?",
+			params : {
+				LAYERS : wms_val,
+				STYLES : wms_val,
+				CRS : "EPSG:900913",
+				apikey : "CEB52025-E065-364C-9DBA-44880E3B02B8",
+				DOMAIN : "http://loacalhost:8080",
+				title : wms_title,
+				FORMAT : "image/png",
+				domain : "http://localhost"
+			}
+		})
+	});
+	// map.addLayer(wms_tile);
+	// map2.addLayer(wms_tile);
+	
+
+	$('[type=checkbox]').on("click",function(){
+		let layer = $(this).attr("id");
+		
+		if($(this).is(":checked")){
+			map.addLayer(wms_tile);
+			map2.addLayer(wms_tile);
+		}else{
+			
+			map.removeLayer(wms_tile);
+			map2.removeLayer(wms_tile);
+			// map.getLayers().forEach(function(layer){ //기존검색결과 제거 
+            //     if(layer.get("name")=="WMS_LAYER"){
+            //         map.removeLayer(layer);
+            //     }
+            // });
+			// map2.getLayers().forEach(function(layer){ //기존검색결과 제거 
+            //     if(layer.get("name")=="WMS_LAYER"){
+            //         map2.removeLayer(layer);
+            //     }
+            // });
+		}
+	})
+
+    
+/* 지도이동 후 지오코더 호출  */
+map.on("moveend", function(evt) {
+    let center = map.getView().getCenter();
+
+	epsg4326 = ol.proj.transform(center, "EPSG:900913",'EPSG:4326')
+
+	map3.setCenter(new naver.maps.LatLng(epsg4326[1],epsg4326[0]));
+	
+
+    mapzoom =Math.round(map.getView().getZoom())
+
+    map3.setZoom(mapzoom, true);
+
+    var moveLatLon = new kakao.maps.LatLng(epsg4326[1],epsg4326[0]);
+        
+    // 지도 중심을 이동 시킵니다
+    map4.setCenter(moveLatLon);
+
+    map3.setZoom(mapzoom, true);
+
+    map4.setLevel(19-mapzoom);
+    // 14- 3 2 1
+
+    // 5- 17 18 19
+});
+
+
+
+let search = function(){
+    // jquery ajax 비동기 통신
+    $.ajax({
+        type: "get",
+        url: "http://api.vworld.kr/req/search",
+        data : $('#searchForm').serialize(),
+        dataType: 'jsonp', //cors 우회를 위해 jsonp 이용
+        async: false,
+        success: function(data) {
+            if(data.response.status =="NOT_FOUND"){
+                alert("검색결과가 없습니다.");
+            }else{
+                for(var o in data.response.result.items){ 
+                    if(o==0){
+                        moves(data.response.result.items[o].point.x,data.response.result.items[o].point.y,18); 
+                    }
+                }
+            }
+        },
+        error: function(xhr, stat, err) {}
+    });
+}
+
+let searchV = function(value){
+    // jquery ajax 비동기 통신
+    $('[name=query]').val(value);
+    search();
+}
+
+
+/** 이동함수 구현
+	*/
+	let moves = function(x,y,z){
+		map.getView().setCenter([ x*1, y*1 ]); // 지도 이동 값에 문자열로 숫자가 들어 갈 경우 이동이 안되는 증상이 있음
+		map.getView().setZoom(z); // 줌레벨 설정
+	}
+
+    
+var pano = null;
+naver.maps.onJSContentLoaded = function() {
+    // 아이디 혹은 지도 좌표로 파노라마를 표시할 수 있습니다.
+    pano = new naver.maps.Panorama("pano", {
+        position: new naver.maps.LatLng(37.3599605, 127.1058814),
+        pov: {
+            pan: -133,
+            tilt: 0,
+            fov: 100
+        }
+    });
+
+    // 파노라마 위치가 갱신되었을 때 발생하는 이벤트를 받아 지도의 중심 위치를 갱신합니다.
+    naver.maps.Event.addListener(pano, 'pano_changed', function() {
+        var latlng = pano.getPosition();
+
+        if (!latlng.equals(map3.getCenter())) {
+            map3.setCenter(latlng);
+        }
+    });
+};
+
+
+//=================e다음지도
+var overlayOn = false, // 지도 위에 로드뷰 오버레이가 추가된 상태를 가지고 있을 변수
+    container = document.getElementById('container'), // 지도와 로드뷰를 감싸고 있는 div 입니다
+    mapWrapper = document.getElementById('mapWrapper'), // 지도를 감싸고 있는 div 입니다
+    mapContainer = document.getElementById('map'), // 지도를 표시할 div 입니다 
+    rvContainer = document.getElementById('roadview'); //로드뷰를 표시할 div 입니다
+
+
+    var mapContainer = document.getElementById('map4');
+    var mapOption = {
+        center: new kakao.maps.LatLng(33.450701, 126.570667),
+        level: 3
+    }; 
+
+    
+
+// 지도를 표시할 div와 지도 옵션으로 지도를 생성합니다
+var map4 = new kakao.maps.Map(mapContainer, mapOption);
+
+// 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+var mapTypeControl = new kakao.maps.MapTypeControl();
+
+// 지도에 컨트롤을 추가해야 지도위에 표시됩니다
+// kakao.maps.ControlPosition은 컨트롤이 표시될 위치를 정의하는데 TOPRIGHT는 오른쪽 위를 의미합니다
+map4.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+// 로드뷰 객체를 생성합니다 
+var rv = new kakao.maps.Roadview(rvContainer); 
+
+// 좌표로부터 로드뷰 파노라마 ID를 가져올 로드뷰 클라이언트 객체를 생성합니다 
+var rvClient = new kakao.maps.RoadviewClient(); 
+
+// 로드뷰에 좌표가 바뀌었을 때 발생하는 이벤트를 등록합니다 
+kakao.maps.event.addListener(rv, 'position_changed', function() {
+
+    // 현재 로드뷰의 위치 좌표를 얻어옵니다 
+    var rvPosition = rv.getPosition();
+
+    // 지도의 중심을 현재 로드뷰의 위치로 설정합니다
+    map4.setCenter(rvPosition);
+
+    // 지도 위에 로드뷰 도로 오버레이가 추가된 상태이면
+    if(overlayOn) {
+        // 마커의 위치를 현재 로드뷰의 위치로 설정합니다
+        marker.setPosition(rvPosition);
+    }
+});
+
+// 마커 이미지를 생성합니다
+var markImage = new kakao.maps.MarkerImage(
+    'https://t1.daumcdn.net/localimg/localimages/07/2018/pc/roadview_minimap_wk_2018.png',
+    new kakao.maps.Size(26, 46),
+    {
+        // 스프라이트 이미지를 사용합니다.
+        // 스프라이트 이미지 전체의 크기를 지정하고
+        spriteSize: new kakao.maps.Size(1666, 168),
+        // 사용하고 싶은 영역의 좌상단 좌표를 입력합니다.
+        // background-position으로 지정하는 값이며 부호는 반대입니다.
+        spriteOrigin: new kakao.maps.Point(705, 114),
+        offset: new kakao.maps.Point(13, 46)
+    }
+);
+var mapCenter = new kakao.maps.LatLng(33.45042 , 126.57091);
+// 드래그가 가능한 마커를 생성합니다
+var marker = new kakao.maps.Marker({
+    image : markImage,
+    position: mapCenter,
+    draggable: true
+});
+
+// 마커에 dragend 이벤트를 등록합니다
+kakao.maps.event.addListener(marker, 'dragend', function(mouseEvent) {
+
+    // 현재 마커가 놓인 자리의 좌표입니다 
+    var position = marker.getPosition();
+
+    // 마커가 놓인 위치를 기준으로 로드뷰를 설정합니다
+    toggleRoadview(position);
+});
+
+//지도에 클릭 이벤트를 등록합니다
+kakao.maps.event.addListener(map4, 'click', function(mouseEvent){
+    
+    // 지도 위에 로드뷰 도로 오버레이가 추가된 상태가 아니면 클릭이벤트를 무시합니다 
+    if(!overlayOn) {
+        return;
+    }
+
+    // 클릭한 위치의 좌표입니다 
+    var position = mouseEvent.latLng;
+
+    // 마커를 클릭한 위치로 옮깁니다
+    marker.setPosition(position);
+
+    // 클락한 위치를 기준으로 로드뷰를 설정합니다
+    toggleRoadview(position);
+});
+
+// 전달받은 좌표(position)에 가까운 로드뷰의 파노라마 ID를 추출하여
+// 로드뷰를 설정하는 함수입니다
+function toggleRoadview(position){
+    rvClient.getNearestPanoId(position, 50, function(panoId) {
+        // 파노라마 ID가 null 이면 로드뷰를 숨깁니다
+        if (panoId === null) {
+            toggleMapWrapper(true, position);
+        } else {
+         toggleMapWrapper(false, position);
+
+            // panoId로 로드뷰를 설정합니다
+            rv.setPanoId(panoId, position);
+        }
+    });
+}
+
+// 지도를 감싸고 있는 div의 크기를 조정하는 함수입니다
+function toggleMapWrapper(active, position) {
+    if (active) {
+
+        // 지도를 감싸고 있는 div의 너비가 100%가 되도록 class를 변경합니다 
+        container.className = '';
+
+        // 지도의 크기가 변경되었기 때문에 relayout 함수를 호출합니다
+        map4.relayout();
+
+        // 지도의 너비가 변경될 때 지도중심을 입력받은 위치(position)로 설정합니다
+        map4.setCenter(position);
+    } else {
+
+        // 지도만 보여지고 있는 상태이면 지도의 너비가 50%가 되도록 class를 변경하여
+        // 로드뷰가 함께 표시되게 합니다
+        if (container.className.indexOf('roadview') === -1) {
+            container.className = 'roadview';
+
+            // 지도의 크기가 변경되었기 때문에 relayout 함수를 호출합니다
+            map4.relayout();
+
+            // 지도의 너비가 변경될 때 지도중심을 입력받은 위치(position)로 설정합니다
+            map4.setCenter(position);
+        }
+    }
+}
+
+// 지도 위의 로드뷰 도로 오버레이를 추가,제거하는 함수입니다
+function toggleOverlay(active) {
+    if (active) {
+        overlayOn = true;
+
+        // 지도 위에 로드뷰 도로 오버레이를 추가합니다
+        map4.addOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+
+        // 지도 위에 마커를 표시합니다
+        marker.setMap(map4);
+
+        // 마커의 위치를 지도 중심으로 설정합니다 
+        marker.setPosition(map4.getCenter());
+
+        // 로드뷰의 위치를 지도 중심으로 설정합니다
+        toggleRoadview(map4.getCenter());
+    } else {
+        overlayOn = false;
+
+        // 지도 위의 로드뷰 도로 오버레이를 제거합니다
+        map4.removeOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+
+        // 지도 위의 마커를 제거합니다
+        marker.setMap(null);
+    }
+}
+
+// 지도 위의 로드뷰 버튼을 눌렀을 때 호출되는 함수입니다
+function setRoadviewRoad() {
+    var control = document.getElementById('roadviewControl');
+
+    // 버튼이 눌린 상태가 아니면
+    if (control.className.indexOf('active') === -1) {
+        control.className = 'active';
+
+        // 로드뷰 도로 오버레이가 보이게 합니다
+        toggleOverlay(true);
+    } else {
+        control.className = '';
+
+        // 로드뷰 도로 오버레이를 제거합니다
+        toggleOverlay(false);
+    }
+}
+
+
+</script>
+</body>
+</html>
