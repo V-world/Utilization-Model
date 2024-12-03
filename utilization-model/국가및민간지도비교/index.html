@@ -214,18 +214,22 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
         attributions:attr2
     });
 
+    var proxy_url = 'https://map.ngii.go.kr/openapi/proxy/proxyTile.jsp?url=';
+    var api_url = `http://210.117.198.120:8081/o2map/services?apikey=${key}&tilematrixset=NGIS_AIR`;
+
 	var source2 = new ol.source.WMTS({
         //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
         layer: "AIRPHOTO",
-        url : `http://210.117.198.120:8081/o2map/services`,
+        url : proxy_url+api_url,
         service : 'WMTS',
-        matrixSet : 'NGIS_AIR',
+        matrixset : 'NGIS_AIR',
 		style:"_null",
-		format:"image/jpg", //
+		format:"image/jpg", 
 		projection: 'EPSG:5179',
         tileGrid : geotileGrid2,
         attributions:attr2
     });
+
 
 	// source.setRenderReprojectionEdges(false);
 	// source2.setRenderReprojectionEdges(false);
