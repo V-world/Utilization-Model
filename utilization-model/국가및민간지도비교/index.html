@@ -214,13 +214,10 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
         attributions:attr2
     });
 
-    var proxy_url = 'https://map.ngii.go.kr/openapi/proxy/proxyTile.jsp?url=';
-    var api_url = `http://210.117.198.120:8081/o2map/services?apikey=${key}&tilematrixset=NGIS_AIR`;
-
-	var source2 = new ol.source.WMTS({
+    var source2 = new ol.source.WMTS({
         //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
-        layer: "AIRPHOTO",
-        url : proxy_url+api_url,
+        mapMode: 2,
+        url : `http://210.117.198.120:8081/o2map/services`,
         service : 'WMTS',
         matrixset : 'NGIS_AIR',
 		style:"_null",
@@ -229,7 +226,6 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
         tileGrid : geotileGrid2,
         attributions:attr2
     });
-
 
 	// source.setRenderReprojectionEdges(false);
 	// source2.setRenderReprojectionEdges(false);
@@ -443,6 +439,7 @@ var map3 = new naver.maps.Map('map3', mapOptions3);
 	baro_button.innerHTML = 'B';
 	var air_button = document.createElement('button');
 	air_button.innerHTML = 'A';
+    air_button.title = '바로e맵(국토지리정보원)의 항공영상 API는 SSL을 지원하지 않아 소스를 다운로드 받으시어 활용 바랍니다.';
     var element2 = document.createElement('div');
     element2.className = 'rotate-north ol-unselectable ol-control ol-mycontrol ol-mycontrol2';
 	
