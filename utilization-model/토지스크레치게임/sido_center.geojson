@@ -1,0 +1,24 @@
+{
+"type": "FeatureCollection",
+"name": "sido_center",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "11", "SIDO_NM": "서울" }, "geometry": { "type": "Point", "coordinates": [ 126.991792171935671, 37.55189861546544 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "21", "SIDO_NM": "부산" }, "geometry": { "type": "Point", "coordinates": [ 129.058611988211879, 35.199700627980064 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "22", "SIDO_NM": "대구" }, "geometry": { "type": "Point", "coordinates": [ 128.599240192355154, 35.969532792003555 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "23", "SIDO_NM": "인천" }, "geometry": { "type": "Point", "coordinates": [ 126.382959389998746, 37.577937549351503 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "24", "SIDO_NM": "광주" }, "geometry": { "type": "Point", "coordinates": [ 126.835435782579921, 35.155737288840982 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "25", "SIDO_NM": "대전" }, "geometry": { "type": "Point", "coordinates": [ 127.394021061771213, 36.339806864713715 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "26", "SIDO_NM": "울산" }, "geometry": { "type": "Point", "coordinates": [ 129.238715217741145, 35.55347552757997 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "29", "SIDO_NM": "세종" }, "geometry": { "type": "Point", "coordinates": [ 127.258773753658772, 36.560663613807009 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "31", "SIDO_NM": "경기" }, "geometry": { "type": "Point", "coordinates": [ 127.174898888361298, 37.532359528471389 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "32", "SIDO_NM": "강원" }, "geometry": { "type": "Point", "coordinates": [ 128.301065709580939, 37.725175178074096 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "33", "SIDO_NM": "충북" }, "geometry": { "type": "Point", "coordinates": [ 127.830476353062465, 36.737911361309393 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "34", "SIDO_NM": "충남" }, "geometry": { "type": "Point", "coordinates": [ 126.847562551688995, 36.529910694696127 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "35", "SIDO_NM": "전북" }, "geometry": { "type": "Point", "coordinates": [ 127.137873349466872, 35.716465736329837 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "36", "SIDO_NM": "전남" }, "geometry": { "type": "Point", "coordinates": [ 126.897812170362329, 34.873236635044499 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "37", "SIDO_NM": "경북" }, "geometry": { "type": "Point", "coordinates": [ 128.752212925133506, 36.353449815255303 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "38", "SIDO_NM": "경남" }, "geometry": { "type": "Point", "coordinates": [ 128.261905338867052, 35.32242354597976 ] } },
+{ "type": "Feature", "properties": { "BASE_DATE": "20230701", "SIDO_CD": "39", "SIDO_NM": "제주" }, "geometry": { "type": "Point", "coordinates": [ 126.553645799517284, 33.387064335102743 ] } }
+]
+}
