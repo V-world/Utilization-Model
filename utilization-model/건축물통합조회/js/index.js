@@ -95,46 +95,49 @@ Map.on('click', function (evt) {
 			$("#addrName").text("ㆍ" + data.response.result.featureCollection.features[0].properties.addr);
 
 			$.ajax({
-				url: "https://apis.data.go.kr/1613000/BldRgstService_v2/getBrTitleInfo?",
+				url: "https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?",
 				type: "get",
 				dataType: "json",
 				data: {
-					serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+					serviceKey: "yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==",
 					sigunguCd: data.response.result.featureCollection.features[0].properties.pnu.slice(0, 5),
 					bjdongCd: data.response.result.featureCollection.features[0].properties.pnu.slice(5, 10),
-					platGbCd: "0",
+					platGbCd: data.response.result.featureCollection.features[0].properties.pnu.slice(10, 11),
 					bun: data.response.result.featureCollection.features[0].properties.pnu.slice(11, 15),
 					ji: data.response.result.featureCollection.features[0].properties.pnu.slice(15, 19),
 					numOfRows: "1",
-					pageNo: "1"
+					pageNo: "1",
+					_type : "json"
 				},
 				success: function (dataT){
+					/** 
 					$.ajax({
 						url: "https://apis.data.go.kr/1611000/nsdi/BuildingAgeService/attr/getBuildingAge?",
 						type: "get",
 						data: {
-							serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+							serviceKey: "yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==",
 							pageNo: "1",
 							numOfRows: "1",
 							pnu: data.response.result.featureCollection.features[0].properties.pnu,
 							format: "json"
 						},
 						success: function (dataH) {
+						*/
 
 							$("#buildingName").text(dataT.response.body.items.item?.bldNm);
 							$("#buildingCode").text(dataT.response.body.items.item?.mainPurpsCdNm);
 							$("#buildingHeight").text(dataT.response.body.items.item?.heit+"m");//㎡
 							$("#buildingGround").text(dataT.response.body.items.item?.platGbCd == 0 ? "대지" : dataT.response.body.items.item?.platGbCd == 1 ? "산" : "블록");
 							$("#buildingFloor").text(dataT.response.body.items.item?.ugrndFlrCnt + " / " + dataT.response.body.items.item?.grndFlrCnt);
-							$("#mainPrposCodeNm").text(dataH.buildingAges.field[0]?.mainPrposCodeNm);
+							//$("#mainPrposCodeNm").text(dataH.buildingAges.field[0]?.mainPrposCodeNm);
 							$("#buildingPlatArea").text(dataT.response.body.items.item?.platArea+"㎡");
 							$("#buildingArchArea").text(dataT.response.body.items.item?.archArea+"㎡");
 							$("#buildingStrctCdNm").text(dataT.response.body.items.item?.strctCdNm);
 							$("#buildingEngrGrade").text(dataT.response.body.items.item?.engrGrade == "" || " " ? "정보없음" : dataT.response.body.items.item?.engrGrade);
 							$("#buildingRserthqkDsgnApplyYn").text(dataT.response.body.items.item?.rserthqkDsgnApplyYn);
 							$("#buildingRserthqkAblty").text(dataT.response.body.items.item?.rserthqkAblty == "" || " "  ? "정보없음" : dataT.response.body.items.item?.rserthqkAblty);
-							$("#buildingAge").text(dataH.buildingAges.field[0]?.buldAge);
-							$("#buildingUseConfmDe").text(dataH.buildingAges.field[0]?.useConfmDe);
+							//$("#buildingAge").text(dataH.buildingAges.field[0]?.buldAge);
+							//$("#buildingUseConfmDe").text(dataH.buildingAges.field[0]?.useConfmDe);
 
 
 							$("#popup").css("display", "block");
@@ -144,7 +147,7 @@ Map.on('click', function (evt) {
 							data.response.result.featureCollection.features[0].geometry.coordinates[0][0].forEach(function (xylist) {
 								route += xylist[0] + " " + xylist[1] + ",";
 							})
-							$("#buildingImg").attr("src", "https://api.vworld.kr/req/image?service=image&request=getmap&key=E5B1657B-9B6F-3A4B-91EF-98512BE931A1&basemap="+"GRAPHIC"+"&size=629,300&crs=epsg:3857&zoom=18&center=" + coordinate + "&route=point:" + route + "|color:red|width:3|style:solid");
+							$("#buildingImg").attr("src", "https://api.vworld.kr/req/image?service=image&request=getmap&key=CBDA8338-FEF2-34AE-9B04-D31B3597153F&basemap="+"GRAPHIC"+"&size=629,300&crs=epsg:3857&zoom=18&center=" + coordinate + "&route=point:" + route + "|color:red|width:3|style:solid");
 
 							var Obj = maps.getObjectById("map3dMarker");
 							maps.removeObject(Obj);
@@ -170,8 +173,10 @@ Map.on('click', function (evt) {
 							$("#loading").css("display", "none");
 						},
 					})
+					/*
 				}
 			})
+				*/
 		}
 	})
 })
@@ -180,7 +185,7 @@ function getIndvdLandPriceAttr(pnu) {
 		url: "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attr/getIndvdLandPriceAttr?",
 		type: "get",
 		data: {
-			serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+			serviceKey: "CBDA8338-FEF2-34AE-9B04-D31B3597153F",
 			pnu: pnu,
 			stdrYear: "2023",
 			format: "json",
@@ -192,10 +197,10 @@ function getIndvdLandPriceAttr(pnu) {
 		},
 		complete: function (){
 			$.ajax({
-				url: "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attr/getIndvdLandPriceAttr?",
+				url: "http://api.vworld.kr/ned/data/getIndvdLandPriceAttr?",
 				type: "get",
 				data: {
-					serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+					serviceKey: "CBDA8338-FEF2-34AE-9B04-D31B3597153F",
 					pnu: pnu,
 					stdrYear: "2021",
 					format: "json",
@@ -207,10 +212,10 @@ function getIndvdLandPriceAttr(pnu) {
 				},
 				complete: function (){
 					$.ajax({
-						url: "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attr/getIndvdLandPriceAttr?",
+						url: "http://api.vworld.kr/ned/data/getIndvdLandPriceAttr?",
 						type: "get",
 						data: {
-							serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+							serviceKey: "CBDA8338-FEF2-34AE-9B04-D31B3597153F",
 							pnu: pnu,
 							stdrYear: "2020",
 							format: "json",
@@ -222,10 +227,10 @@ function getIndvdLandPriceAttr(pnu) {
 						},
 						complete: function (){
 							$.ajax({
-								url: "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attr/getIndvdLandPriceAttr?",
+								url: "http://api.vworld.kr/ned/data/getIndvdLandPriceAttr?",
 								type: "get",
 								data: {
-									serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+									serviceKey: "CBDA8338-FEF2-34AE-9B04-D31B3597153F",
 									pnu: pnu,
 									stdrYear: "2019",
 									format: "json",
@@ -237,10 +242,10 @@ function getIndvdLandPriceAttr(pnu) {
 								},
 								complete: function (){
 									$.ajax({
-										url: "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attr/getIndvdLandPriceAttr?",
+										url: "http://api.vworld.kr/ned/data/getIndvdLandPriceAttr?",
 										type: "get",
 										data: {
-											serviceKey: "aCdaU+NvJ5bk1HWXu5BRZWjG6uMcj9Wz9UUBoruCaG9ZjBIcQ0Sd7cS0zQmiqK7UV6rfB0LgRSlRO2LcXWpCfA==",
+											serviceKey: "CBDA8338-FEF2-34AE-9B04-D31B3597153F",
 											pnu: pnu,
 											stdrYear: "2018",
 											format: "json",
