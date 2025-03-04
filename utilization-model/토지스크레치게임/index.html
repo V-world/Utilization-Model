@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #vmap {
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+        }
+        #lotto {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1280px;
+            height: 650px;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        #lotto_left{
+            width: 65%;
+            height: 100%;
+            background-color: #54C2F0;
+            border-radius: 10px 0 0 10px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lotto_left_top{
+            width: 100%;
+            height: 25%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lotto_left_top p:nth-child(1){
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px;
+        }
+        #lotto_left_top p:nth-child(2){
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        #lotto_right{
+            width: 30%;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lotto_right_top{
+            width: 100%;
+            height: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lotto_right_top img{
+            width: 80%;
+            height: 80%;
+        }
+
+        #lotto_right_bottom {
+            position: relative;
+            width: 100%;
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #54C2F0;
+            overflow: hidden;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("imgs/캐릭터.png");
+            background-position: bottom center;
+            background-repeat: no-repeat;
+            background-size: 90%;
+            z-index: 903;
+        }
+
+        .inner-background {
+            position: absolute;
+            top: 10px;
+            left: 30px;
+            right: 30px;
+            bottom: 0;
+            background-color: #F0F0F0;
+            border-radius: 20px 20px 0 0;
+            z-index: 2;
+        }
+
+        #lotto_right_bottom > ul {
+            position: relative;
+            z-index: 4;
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0;
+            margin: 0;
+            font-size: 16px;
+            transform: translateY(-65px);
+        }
+
+        #lotto_right_bottom > ul > li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #F0F0F0;
+        }
+
+        #lotto_right_bottom > ul > li > span {
+            font-weight: bold;
+        }
+
+        #lotto_right_bottom > ul > li > span:first-child {
+            margin-right: 5px;
+        }
+
+
+
+        #scratch {
+            width: 90%;
+            height: 550px;
+            border-radius: 100%;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-gap: 30px;
+            justify-items: center;
+            align-items: center;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+
+        .wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            background-color: #F0F0F0;
+            border: 1px solid #F0F0F0;
+            color: #000000;
+            font-size: 32px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .result {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 98%;
+            height: 98%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            border-radius: 100%;
+            border: 0;
+        }
+
+
+        #lotto_left_bottom {
+            margin: 20px;
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            color: #000000;
+            width: 90%;
+            height: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            gap: 20px; /* 자식 요소 간 간격 */
+            padding: 0 20px; /* 부모 요소의 좌우 여백 추가 */
+        }
+
+        #lotto_left_bottom > div {
+            padding: 10px 0;
+            border-right: 2px solid #54C2F0;
+            flex-basis: calc(33% - 20px); /* 각 자식 div의 너비를 부모의 33% 정도로 설정 */
+            max-width: 30%; /* 자식 요소의 최대 너비를 제한 */
+            box-sizing: border-box; /* padding과 border를 포함한 전체 크기 계산 */
+        }
+
+        #lotto_left_bottom > div:last-child {
+            border-right: none;
+        }
+
+        #lotto_left_bottom > div > p:nth-child(1){
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #lotto_left_bottom > div > p:nth-child(2){
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #endcard {
+            position: absolute;
+            top: 50%;
+            right: 7%;
+            transform: translate(0%, -50%);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100%;
+            width: 420px;
+            z-index: 900;
+            background-color: #5c9dd5;
+        }
+
+        .lucky-draw {
+            width: 100%;
+            height: 15%;
+            background-size: contain;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 901;
+            margin-top: 35px;
+        }
+
+        .lucky-draw > img {
+            height: 85%;
+        }
+
+        .inner {
+            width: 85%;
+            height: 79%;
+            background-color: #ffffff;
+            border-radius: 20px 20px 0 0;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            background-clip: padding-box;
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-top: auto;
+            gap: 10px;
+        }
+
+        .label-value {
+            margin: 10px 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .label {
+            font-weight: bold;
+            text-align: center;
+            padding: 0 10px;
+            border-right: 3px solid #9fd8f7;
+            white-space: nowrap;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .value {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            padding-left: 10px;
+            flex-grow: 1;
+        }
+
+        .value > div:nth-child(2){
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .value div {
+            margin: 2px 0;
+        }
+
+        #summary{
+            margin-top: 30px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .value > div > img {
+            width: auto;
+            height: 75px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id="vmap"></div>
+
+    <script>
+        const firstRank = '4,500,000원 초과'
+        const secondRank = '2,500,000원 ~ 4,500,000원'
+        const thirdRank = '2,500,000 미만'
+    </script>
+
+    <div id="endcard">
+        <div class="lucky-draw">
+            <img src="imgs/브이월드.png">
+        </div>
+        <div class="background-image"></div>
+        <div class="inner">
+            <div id="summary">
+                합산 결과
+            </div>
+            <div class="label-value">
+                <div class="label">1등</div>
+                <div class="value">
+                    <div id="firstRank"></div>
+                    <div><img src="imgs/파우치.png"></div>
+                    <div>여행용 파우치</div>
+                </div>
+            </div>
+            <div class="label-value">
+                <div class="label">2등</div>
+                <div class="value">
+                    <div id="secondRank"></div>
+                    <div><img src="imgs/수건.png"></div>
+                    <div>고급 수건세트</div>
+                </div>
+            </div>
+            <div class="label-value">
+                <div class="label">3등</div>
+                <div class="value">
+                    <div id="thirdRank"></div>
+                    <div><img src="imgs/바세린.png"></div>
+                    <div>바세린 3종 세트</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lotto">
+        <div id="lotto_left">
+            <div id="lotto_left_top">
+                <p>가상과 현실이 하나되는 디지털 트윈국토 플랫폼</p>
+                <p>브이월드가 여러분에게 행운을 드립니다!</p>
+            </div>
+            <div id="scratch">
+            </div>
+
+            <div id="lotto_left_bottom">
+                <div>
+                    <p>1등</p>
+                </div>
+                <div>
+                    <p>2등</p>
+                </div>
+                <div>
+                    <p>3등</p>
+                </div>
+            </div>
+        </div>
+        <div id="lotto_right">
+            <div id="lotto_right_top">
+                <img src="imgs/브이월드.png">
+            </div>
+            <div id="lotto_right_bottom">
+                <div class="background-image"></div>
+                <div class="inner-background"></div>
+                <ul>
+                    <li>
+                        <span>서울</span>
+                        <span>6,778,947원/㎡</span>
+                    </li>
+                    <li>
+                        <span>부산</span>
+                        <span>1,937,491원/㎡</span>
+                    </li>
+                    <li>
+                        <span>대구</span>
+                        <span>1,089,393원/㎡</span>
+                    </li>
+                    <li>
+                        <span>인천</span>
+                        <span>1,129,430원/㎡</span>
+                    </li>
+                    <li>
+                        <span>대전</span>
+                        <span>926,918원/㎡</span>
+                    </li>
+                    <li>
+                        <span>경기</span>
+                        <span>824,194원/㎡</span>
+                    </li>
+                    <li>
+                        <span>울산</span>
+                        <span>711,527원/㎡</span>
+                    </li>
+                    <li>
+                        <span>광주</span>
+                        <span>709,703원/㎡</span>
+                    </li>
+                    <li>
+                        <span>세종</span>
+                        <span>351,892원/㎡</span>
+                    </li>
+                    <li>
+                        <span>제주</span>
+                        <span>286,375원/㎡</span>
+                    </li>
+                    <li>
+                        <span>경남</span>
+                        <span>202,317원/㎡</span>
+                    </li>
+                    <li>
+                        <span>강원</span>
+                        <span>151,719원/㎡</span>
+                    </li>
+                    <li>
+                        <span>충북</span>
+                        <span>145,988원/㎡</span>
+                    </li>
+                    <li>
+                        <span>경북</span>
+                        <span>135,112원/㎡</span>
+                    </li>
+                    <li>
+                        <span>충남</span>
+                        <span>134,635원/㎡</span>
+                    </li>
+                    <li>
+                        <span>전북</span>
+                        <span>110,042원/㎡</span>
+                    </li>
+                    <li>
+                        <span>전남</span>
+                        <span>79,179원/㎡</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        const apikey = 'E5B1657B-9B6F-3A4B-91EF-98512BE931A1';
+
+        let vectorSource = new ol.source.Vector({});
+        let vectorLayer = new ol.layer.Vector({
+            source: vectorSource
+        });
+
+        let maps = new ol.Map({
+            target: "vmap",
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: `https://api.vworld.kr/req/wmts/1.0.0/${apikey}/Base/{z}/{y}/{x}.png`
+                    })
+                }),
+                vectorLayer
+            ],
+            view: new ol.View({
+                projection: "EPSG:3857",
+                center: ol.proj.transform([127.11015314141542,37.39472714688412], "EPSG:4326", "EPSG:3857"),
+                zoom: 7,
+                minZoom: 6,
+                maxZoom: 19,
+            })
+        });
+
+        window.onload = function() {
+            MetropolitanCity()
+            init();
+        }
+
+        document.getElementById('lotto_left_bottom').children[0].innerHTML += `<p>${firstRank}</p>`;
+        document.getElementById('lotto_left_bottom').children[1].innerHTML += `<p>${secondRank}</p>`;
+        document.getElementById('lotto_left_bottom').children[2].innerHTML += `<p>${thirdRank}</p>`;
+        document.getElementById('firstRank').innerHTML = firstRank;
+        document.getElementById('secondRank').innerHTML = secondRank;
+        document.getElementById('thirdRank').innerHTML = thirdRank;
+
+    </script>
+
+    <script>
+
+
+        let selectedFeature = [];
+
+        function MetropolitanCity() {
+
+            for (let i = 0; i < 17; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'wrapper';
+                const result = document.createElement('div');
+                result.className = 'result';
+                result.dataset.code = '';
+                result.innerHTML = '당첨 결과입니다.';
+                const canvas = document.createElement('canvas');
+                canvas.id = `canvas${i + 1}`;
+                wrapper.appendChild(result);
+                wrapper.appendChild(canvas);
+                canvas.style.borderRadius = '100%';
+                document.getElementById('scratch').appendChild(wrapper);
+            }
+
+            // imgs/로고.png로 하나 더 추가
+            const wrapper = document.createElement('div');
+            wrapper.className = 'wrapper';
+            wrapper.style.backgroundImage = 'url(imgs/로고.png)';
+            wrapper.style.backgroundSize = 'cover';
+            document.getElementById('scratch').appendChild(wrapper);
+
+
+            const results = document.querySelectorAll('.result');
+
+            avgResults = {
+                서울: 6778947,
+                부산: 1937491,
+                대구: 1089393,
+                인천: 1129430,
+                광주: 709703,
+                대전: 926918,
+                울산: 711527,
+                세종: 351892,
+                경기: 824194,
+                충북: 145988,
+                충남: 134635,
+                전남: 79179,
+                경북: 135112,
+                경남: 202317,
+                제주: 286375,
+                강원: 151719,
+                전북: 110042,
+            }
+
+            avgResults = Object.fromEntries(Object.entries(avgResults).sort(() => Math.random() - 0.5));
+
+            results.forEach((result, index) => {
+                const feature = avgResults;
+                result.innerHTML = `${Object.keys(feature)[index]}`;
+                result.dataset.price = feature[Object.keys(feature)[index]];
+            });
+        }
+
+
+        function initScratchCard(canvas) {
+            const context = canvas.getContext("2d");
+            const { top: canvasTop, left: canvasLeft } = canvas.getBoundingClientRect();
+            const WIDTH = 100
+            const HEIGHT = 100;
+            const ERASE_RADIUS = 7; // 지우개 반지름
+            const ERASE_DISTANCE = ERASE_RADIUS / 2; // 지워진 부분을 확인하기 위한 거리
+            const dpr = window.devicePixelRatio;
+            const erasedList = [];
+
+            let isDrawing = false;
+            let thresholdOfEraseCount = 0;
+            let isRevealed = false;
+
+            const initCanvas = () => {
+                canvas.style.width = `${WIDTH}%`;
+                canvas.style.height = `${HEIGHT}%`;
+                canvas.width = WIDTH * dpr;
+                canvas.height = HEIGHT * dpr;
+                context.scale(dpr, dpr);
+                context.strokeStyle = "#999";
+                context.fillStyle = "#999";
+                context.beginPath();
+                context.roundRect(0, 0, WIDTH, HEIGHT, 8);
+                context.stroke();
+                context.fill();
+                context.font = "16px sans-serif";
+                context.fillStyle = "#000";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText("여기를", WIDTH / 2, HEIGHT / 2 - 10); // 약간 위쪽에 배치
+                context.fillText("긁어보세요", WIDTH / 2, HEIGHT / 2 + 10); // 약간 아래쪽에 배치
+                context.borderRadius = "100%";
+
+
+                const col = Math.ceil(WIDTH / (ERASE_RADIUS * 3 + ERASE_DISTANCE)); // 한 줄에 그릴 수 있는 원의 개수
+                const row = Math.ceil(HEIGHT / (ERASE_RADIUS * 3 + ERASE_DISTANCE)); // 한 열에 그릴 수 있는 원의 개수
+                // thresholdOfEraseCount = col * row;
+                thresholdOfEraseCount = Math.floor((col * row) * 0.15);// ??%만 지워도 결과 확인 가능
+            };
+
+            const handleDrawingStart = () => {
+                isDrawing = true;
+            };
+
+            const handleMouseMove = (event) => {
+                event.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                handleDrawing(x, y);
+            };
+
+            const handleTouchMove = (event) => {
+                event.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = event.touches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                handleDrawing(x, y);
+            };
+
+            const drawTransparentCircle = (x, y) => {
+                context.save();
+                context.globalCompositeOperation = "destination-out";
+                context.beginPath();
+                context.arc(x, y, ERASE_RADIUS, 0, 2 * Math.PI, false);
+                context.fill();
+                context.closePath();
+                context.restore();
+
+                const checkList = erasedList.filter(({ x: posX, y: posY }) => {
+                    const distX = posX - x;
+                    const distY = posY - y;
+                    return (
+                        Math.sqrt(distX * distX + distY * distY) < ERASE_RADIUS + ERASE_DISTANCE
+                    );
+                });
+                if (!checkList.length) {
+                    erasedList.push({ x, y });
+                }
+            };
+
+            const handleDrawing = (x, y) => {
+                if (isDrawing) {
+                    if (erasedList.length < thresholdOfEraseCount) {
+                        drawTransparentCircle(x, y);
+                    } else if (!isRevealed) {
+                        context.clearRect(0, 0, WIDTH, HEIGHT);
+                        isRevealed = true;
+
+                        const result = canvas.parentElement.querySelector('.result')
+                        selectedFeature.push({
+                            name: result.innerHTML,
+                            price: result.dataset.price,
+                        });
+
+                        if (selectedFeature.length >= 3) {
+
+
+                            document.getElementById('lotto').style.display = 'none';
+
+                            const ranking = document.getElementById('ranking');
+                            let maxFeature = {};
+
+                            selectedFeature.sort((a, b) => b.price - a.price);
+
+                            if (selectedFeature.length > 0) {
+                                maxFeature = selectedFeature[0];  // 최고가 feature 객체 자체를 저장
+                            }
+
+                            if (selectedFeature.length >= 3) {
+
+                                const totalPrice = parseInt(selectedFeature[0].price)
+                                    + parseInt(selectedFeature[1].price)
+                                    + parseInt(selectedFeature[2].price);
+                                const formattedPrice = totalPrice.toLocaleString('ko-KR');
+
+                                fetch('sido_center.geojson')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const targetRegions = [selectedFeature[0].name, selectedFeature[1].name, selectedFeature[2].name];
+                                        const selectedCoordinates = data.features
+                                            .filter(feature => targetRegions.includes(feature.properties.SIDO_NM))
+                                            .map(feature => ({
+                                                sido_nm: feature.properties.SIDO_NM,
+                                                coordinates: feature.geometry.coordinates,
+                                                price: selectedFeature.find(({ name }) => name === feature.properties.SIDO_NM).price
+                                            }));
+
+                                        console.log(selectedCoordinates);
+
+
+                                        vectorLayer.getSource().clear();
+                                        selectedCoordinates.forEach(({ sido_nm, coordinates, price }) => {
+                                            const transformedCoordinates = ol.proj.transform(coordinates, "EPSG:4326", "EPSG:3857");
+
+                                            const feature = new ol.Feature({
+                                                geometry: new ol.geom.Point(transformedCoordinates),
+                                                name: sido_nm,
+                                                price: price
+                                            });
+
+                                            // 스타일 설정: 말풍선과 삼각형을 가깝게 배치
+                                            const style = new ol.style.Style({
+                                                image: new ol.style.RegularShape({
+                                                    points: 3,  // 삼각형 모양
+                                                    radius: 10,
+                                                    rotation: Math.PI,  // 아래를 가리키도록 회전
+                                                    fill: new ol.style.Fill({
+                                                        color: 'rgb(0,95,175)'
+                                                    }),
+                                                    offsetY: -35  // 말풍선 텍스트와 가까워지도록 조정
+                                                }),
+                                                text: new ol.style.Text({
+                                                    text: `${sido_nm}\n${parseInt(price).toLocaleString('ko-KR')}/㎡`,
+                                                    font: 'bold 14px Arial',
+                                                    textAlign: 'center',
+                                                    offsetY: -35,  // 텍스트가 화살표와 가까워지도록 조정
+                                                    backgroundFill: new ol.style.Fill({
+                                                        color: 'rgba(255, 255, 255, 0.8)'  // 말풍선 배경 색상
+                                                    }),
+                                                    padding: [10, 20, 10, 20],
+                                                    fill: new ol.style.Fill({
+                                                        color: '#000000'
+                                                    }),
+                                                    backgroundStroke: new ol.style.Stroke({
+                                                        color: '#005faf',  // 말풍선 테두리 색상
+                                                        width: 2
+                                                    })
+                                                })
+                                            });
+                                            feature.setStyle(style);
+                                            vectorSource.addFeature(feature);
+                                        });
+
+                                    })
+                                    .catch(error => console.error('Error loading GeoJSON:', error))
+                                    .finally(() => {
+                                        const extent = vectorSource.getExtent();
+                                        maps.getView().fit(extent, {padding: [150, 700, 150, 150]});
+
+                                        document.getElementById('summary').innerHTML = `합산 금액 결과 <br/> ${formattedPrice}원/㎡`;
+
+                                        document.getElementById('endcard').style.display = 'flex';
+                                    });
+
+
+
+
+                            } else {
+                                console.error('selectedFeature 배열의 항목이 부족합니다.');
+                            }
+
+                        }
+                    }
+                }
+            };
+
+
+            const handleDrawingEnd = () => {
+                isDrawing = false;
+            };
+
+            initCanvas();
+            canvas.addEventListener("mousedown", handleDrawingStart);
+            canvas.addEventListener("touchstart", handleDrawingStart);
+            canvas.addEventListener("mousemove", handleMouseMove);
+            canvas.addEventListener("touchmove", handleTouchMove);
+            canvas.addEventListener("mouseup", handleDrawingEnd);
+            canvas.addEventListener("touchend", handleDrawingEnd);
+        }
+
+        function init(){
+            document.querySelectorAll('canvas').forEach(canvas => {
+                if (canvas.id) {
+                    initScratchCard(canvas);
+                } else {
+                    console.warn('캔버스 읽기 실패');
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
