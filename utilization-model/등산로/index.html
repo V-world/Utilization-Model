@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
+    <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/routeSim/routeSim_analysis_api.js"></script>
+    <style>
+       @font-face {
+            font-family: 'TheJamsil5Bold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'NanumGothic';
+        }
+
+        #vmap {
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* 등산로 리스트 패널 스타일 */
+        #route_search {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        #route_search strong {
+            display: block;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #route_search_result {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: #fff;
+        }
+
+        #route_search_result::-webkit-scrollbar {
+			width: 5px;
+		}
+
+		#route_search_result::-webkit-scrollbar-thumb {
+			background-color: #717171;
+		}
+
+		#route_search_result::-webkit-scrollbar-track {
+			background-color: #000000;
+		}
+
+		#route_search_result::-webkit-scrollbar-thumb:hover {
+			background-color: #999;
+		}
+
+		#route_search_result::-webkit-scrollbar-thumb:active {
+			background-color: #666;
+		}
+
+		#route_search_result::-webkit-scrollbar-button {
+			display: none;
+		}
+
+		#route_search_result li{
+			padding: 5px;
+			border-bottom: 1px solid #ccc;
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+		}
+
+		#route_search_result li:hover{
+			background-color: #f1f1f1;
+		}
+
+		#route_search_result li:last-child{
+			border-bottom: none;
+		}
+
+        #route_search_result li.selected{
+			background: #4CAF50;
+            color: white;
+            font-weight: bold;
+		}
+
+        #route_search_input{
+            font-family: 'NanumGothic';
+			width: 100%;
+			height: 30px;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+			padding: 5px;
+            margin: 5px 0; /* 위아래 여백 추가 */
+		}
+
+        /* GeoJSON 관련 버튼 스타일 */
+        .geojson {
+            margin-top: 10px; /* `#route_search` 바로 아래에 위치 */
+            background: #4CAF50;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .geojson button {
+            font-family: 'TheJamsil5Bold';
+            width: 100%;
+            color: white;
+            font-weight: bold;
+            background: #4CAF50;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .geojson button:hover{
+            cursor: pointer;
+			background-color: #398f00c7;
+		}
+
+        #map-buttons {
+            position: absolute;
+            top: 10px;
+            left: 270px; /* `#route_search` 오른쪽에 배치 */
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            display: none; /* 초기에는 숨김 */
+            font-size: 16px;
+            flex-direction: column; /* 버튼들을 세로 정렬 */
+            align-items: center; /* 가운데 정렬 */
+        }
+
+        #map-buttons button {
+            font-family: 'TheJamsil5Bold';
+            display: block;
+            width: 100%; /* 버튼을 전체 영역 차지하도록 설정 */
+            padding: 12px 20px; /* 버튼 크기 키우기 */
+            font-size: 16px; /* 버튼 텍스트 크기 증가 */
+            font-weight: bold; /* 글씨 두껍게 */
+            border-radius: 8px; /* 둥근 모서리 */
+        }
+
+        #map-buttons button:hover{
+            cursor: pointer;
+			background-color: #398f00c7;
+		}
+
+        /* 버튼 간 간격 추가 */
+        .map-buttons button:not(:last-child) {
+            margin-bottom: 10px; /* 버튼 사이 여백 */
+        }
+
+        /* 주행 모드 선택 영역 */
+        .col-md-2 {
+            font-family: 'TheJamsil5Bold';
+            position: absolute;
+            top: 10px;
+            left: 500px; /* `#map-buttons` 오른쪽에 배치 */
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            display: none; /* 초기에는 숨김 */
+        }
+
+        .col-md-2 label {
+            font-family: 'TheJamsil5Bold';
+            margin: 5px 0; /* 위아래 여백 추가 */
+            padding: 5px /* 버튼 크기 조정 */
+        }
+
+        .col-md-2 select, 
+        .col-md-2 input {
+            font-family: 'NanumGothic';
+            margin: 5px 0; /* 위아래 여백 추가 */
+            padding: 5px /* 버튼 크기 조정 */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="vmap"></div>
+    <div id="route_search">
+        <strong>100대 명산 등산로 리스트</strong>
+        <input id="route_search_input" type="text" placeholder="검색어를 입력해주세요.">
+		<ul id="route_search_result">
+
+		</ul>
+        <div class="geojson">
+            <textarea class="form-control" id="routeGeoJSONTextarea" rows="4" hidden></textarea>
+            <button id="createRouteFromGeoJSON_btn" class="btn btn-success" onclick="createRouteFromGeoJSON()">등산로 경로 그리기</button> 
+        </div>
+	</div>
+    
+    <div id="map-buttons" class="map-buttons">
+        <button id="playRouteSim_btn" class="btn btn-primary" onclick="playRouteSim()">등산로 산책 시작</button>
+        <button id="pauseRouteSim_btn" class="btn btn-default" onclick="pauseRouteSim()">등산로 산책 일시정지</button>
+        <button id="resumeRouteSim_btn" class="btn btn-default" onclick="resumeRouteSim()">등산로 산책 재시작</button>
+        <button id="initRouteSim_btn" class="btn btn-default" onclick="initRouteSim()">등산로 초기화</button>
+    </div>
+
+    <div class="col-md-2">
+	    <h3 style="text-align: center;">*객체 타입 선택*</h3>
+        </br>
+
+	    <label for="cameraMode" style="width: 150px;">주행모드</label>
+	    <select class="form-control" id="cameraMode" onchange="cameraLookAt()">
+	        <option value="fpView">1인칭</option>
+            <option value="tpView">3인칭</option>
+	    </select>
+        </br>
+
+	    <label for="cameraLookAt">카메라 고정</label>
+	    <input type="checkbox" class="form-check-input" id="cameraLookAt" checked onchange="cameraLookAt();">
+	    </br>
+
+	    <label for="objSpeed">주행속도(km/h)</label>
+	    <input type="number" style="width: 50px;" class="form-control" id="objSpeed" value="10" onchange="updateSpeed(this.value)">		    
+    </div>	
+
+    <script type="text/javascript">
+        var options = {
+            mapId: "vmap",
+            initPosition: new vw.CameraPosition(
+                new vw.CoordZ(126.9401465303777, 37.519874413465715, 800),
+                new vw.Direction(0, -70, 0)
+            ),
+            logo: true,
+            navigation: false
+        };
+        var map = new vw.Map();
+        map.setOption(options);
+        map.setMapId("vmap");
+        map.start();
+
+        const viewer = ws3d.viewer;
+        let hiking_name = '';
+        let hiking_geom = [];
+        let hiking_road = [];
+
+
+        vw.ws3dInitCallBack = function () {
+            $.ajax({
+                url: './hiking_geojson.geojson',
+                success: function(data) {
+                    let result = data.features;
+
+                    for (var i = 0; i < data.features.length; i++) {
+                        let li = document.createElement('li');
+
+                        let span = document.createElement('span');
+                        let filename = result[i].properties.filename;
+                        let cleanFilename = filename.replace(".gpx", ""); 
+
+                        span.innerText = cleanFilename;
+                        span.setAttribute("name", cleanFilename);
+                        li.dataset.value = i;
+                        li.appendChild(span);
+
+                        document.getElementById('route_search_input').addEventListener('input', function(e) {
+                            document.querySelectorAll("#route_search_result li").forEach(li => {
+                                const spanElement = li.querySelector('span');
+                                if (spanElement && spanElement.textContent.includes(document.getElementById('route_search_input').value)) {
+                                    li.style.display = 'block';
+                                } else {
+                                    li.style.display = 'none';
+                                }
+                            });
+                        });
+
+                        // 클릭 이벤트 추가 (지도 이동)
+                        li.addEventListener('click', function () {
+                            document.querySelectorAll("#route_search_result li").forEach(li => {
+                                li.classList.remove("selected");
+                            });
+                            
+                            this.classList.add("selected");
+
+                            sel = this.dataset.value;;
+                            
+                            hiking_name = result[sel].properties.filename;
+                            hiking_geom = result[sel].geometry.coordinates;
+
+                            hiking_road = JSON.stringify({
+                                type: "FeatureCollection",
+                                name: "hiking_geojson",
+                                crs: { type: "name", properties: { name: "EPSG:4326" } },
+                                features: [{
+                                    type: "Feature",
+                                    properties: { filename: hiking_name },
+                                    geometry: { type: "MultiLineString", coordinates: hiking_geom }
+                                }]
+                            });
+                            $('#routeGeoJSONTextarea').text(hiking_road);
+                            
+                            /*
+                            if (x !== 0 && y !== 0) {
+                                maps.getView().setCenter([x, y]);
+                                maps.getView().setZoom(18);
+                            } else {
+                                console.error('유효한 좌표가 없습니다.');
+                            }
+                            */
+
+                            Cesium.GeoJsonDataSource.load(JSON.parse(hiking_road), {
+                                crsNames: 'EPSG:4326',
+                                stroke: Cesium.Color.HOTPINK,
+                                fill: Cesium.Color.PINK.withAlpha(0.3),
+                                strokeWidth: 3,
+                                clampToGround: true // 지면 위에 고정되도록 설정
+                            }).then(function(dataSource) {
+                                if(dataSource){
+                                    viewer.dataSources.removeAll();
+                                } 
+                                viewer.dataSources.add(dataSource);
+
+                                // 데이터의 중심으로 카메라 이동
+                                viewer.zoomTo(dataSource);
+
+                            }).catch(function(error) {
+                                console.error('GeoJson 파일을 불러오는 중 오류 발생:', error);
+                            });
+                        });
+
+                        // 검색 결과에 li 요소 추가
+                        document.getElementById('route_search_result').appendChild(li);
+                    }
+
+                } 
+            });  
+        }
+        
+        $(function(){
+            var wmsLayer_line = new vw.Layers();
+            wmsSource_line = new vw.source.TileWMS();
+            wmsSource_line.setLayers("strge_202502111617100057");
+            wmsSource_line.setUrl("https://api.vworld.kr/req/wms?MYMAP=true&key=CBDA8338-FEF2-34AE-9B04-D31B3597153F&");
+            var wmsTile_line = new vw.layer.Tile(wmsSource_line);
+            wmsLayer_line.add(wmsTile_line);
+
+            var wmsLayer_point = new vw.Layers();
+            wmsSource_point = new vw.source.TileWMS();
+            wmsSource_point.setUrl("https://api.vworld.kr/req/wms?MYMAP=true&key=CBDA8338-FEF2-34AE-9B04-D31B3597153F&layers=strge_202502111626480520&");
+            var wmsTile_point = new vw.layer.Tile(wmsSource_point);
+            wmsLayer_point.add(wmsTile_point);
+
+            viewCheck();
+        });
+
+        let routeSimObject; // 모의주행 객체
+        let crashPointEntities = []; //충돌지점
+        
+        // GeoJSON 으로 경로 생성
+        function createRouteFromGeoJSON() {
+            // 모의주행 타입 (DRONE OR VEHICLE)
+            const objType = 'VEHICLE';
+            // 입력된 GeoJSON 문자열을 불러와 객체 생성
+            const routeGeoJSONStr = $('#routeGeoJSONTextarea').val();
+            let routeGeoJSONObject;
+            try {
+                routeGeoJSONObject = JSON.parse(routeGeoJSONStr);
+            } catch (e) {
+                alert('GeoJSON 형식이 아닙니다.');
+            }
+            // 이미 만들어진 객체 없으면 신규 생성
+            if(!routeSimObject) {
+                routeSimObject = new RouteSimulation('routeSimObject1', 'routeSimObject1', objType);
+            } else {
+                routeSimObject.type = objType;
+            }
+            // GeoJSON 객체로 경로 생성
+            routeSimObject.createRouteByGeoJSON(routeGeoJSONObject);
+            
+            document.getElementById("map-buttons").style.display = "block";
+            document.querySelector(".col-md-2").style.display = "block";
+
+        }
+        
+        // 저장된 지점을 기반으로 모의주행 수행
+        function playRouteSim() {
+            if (routeSimObject) {
+                routeSimObject.alertEnabled = 'crashIgnore' == "true";
+                $('#crashPosition').empty(); // 테이블 결과 초기화
+                // 충돌 발생시 처리 이벤트 생성
+                
+                routeSimObject.modelCrashEventCallBackFn = (position) => {
+                    if (routeSimObject.alertEnabled) {
+                        // 충돌위치에 점 생성
+                        var crashPoint = ws3d.viewer.entities.add({
+                            position: position,
+                            point: {
+                                pixelSize: 20,
+                                color: ws3d.common.Color.BLUE,
+                                outlineColor: ws3d.common.Color.WHITE,
+                                outlineWidth: 1,
+                                heightReference: 0,
+                                disableDepthTestDistance: Number.POSITIVE_INFINITY
+                            },
+                        });
+                        crashPointEntities.push(crashPoint);
+                        // ECEF -> WGS84 (위도, 경도, 고도) 변환
+                        const cartographic = ws3d.common.Cartographic.fromCartesian(crashPoint.position.getValue());
+                        // 위도, 경도, 고도를 얻기
+                        const longitude = cartographic.longitudeDD; // 경도 (degree)
+                        const latitude = cartographic.latitudeDD; // 위도 (degree)
+                        const height = cartographic.height; // 고도 (미터 단위)
+                        
+                        /* const newDiv = document.createElement('div');
+                        const newText = document.createTextNode(longitude + "<br/>" + latitude + "<br/>" + height);
+                        newDiv.appendChild(newText);  */
+                        
+                        const crashPosition = $('#crashPosition');
+                        
+
+                        
+                        pauseRouteSim(); // 재생중지
+                    }
+                }
+                const speed = 10; //Number($('#objSpeed').val());
+                const color = '#FFFFFF'; //$('#objColor').val();
+                const droneViewAngle = 65; //Number($('#droneViewAngle').val());
+               
+                routeSimObject.modelUrl = './vworld_2.glb';
+        
+                let type = '';
+                if($('#cameraMode').val() == ''){
+                    type = 'fpView';
+                } else {
+                    type = $('#cameraMode').val();
+                }
+
+                map.getElementById('poi_road').hide();
+                map.getElementById('poi_base').hide();
+                map.getElementById('poi_bound').hide();
+
+                routeSimObject.playRouteSimulation(speed, 0.5, color, droneViewAngle);
+                routeSimObject.trackedModel(type, $('#cameraLookAt').prop('checked'));
+            } else {
+                alert('생성된 경로 정보가 존재하지 않습니다.');
+            }
+        }
+        
+        function viewCheck() {
+            if($('#cameraMode').val() == 'fpView'){
+                document.querySelector('#cameraLookAt').checked = true;
+                document.querySelector('#cameraLookAt').disabled = true;
+            } else {
+                document.querySelector('#cameraLookAt').disabled = false;
+            }
+        }
+
+        // 모의주행 객체로 카메라 고정 수행
+        function cameraLookAt() {
+
+            viewCheck();
+
+            if(routeSimObject) {
+                const isChk = $('#cameraLookAt').prop('checked');
+                const type = $('#cameraMode').val();
+                routeSimObject.trackedModel(type, isChk);
+            }
+        }
+        
+        //모의주행 기능 재시작
+        function resumeRouteSim() {
+            if(routeSimObject) {
+            routeSimObject.resumeRouteSimulation();
+            }
+        }
+        
+        // 모의주행 기능 일시정지
+        function pauseRouteSim() {
+            if(routeSimObject) {
+            routeSimObject.pauseRouteSimulation();
+            }
+        }
+        
+        // 주행속도 업데이트
+        function updateSpeed(speed) {
+            if(routeSimObject) {
+            routeSimObject.updateRouteSpeed(Number(speed));
+            }
+        }
+        
+        // 카메라 뷰 세팅
+        function setCameraView(viewType) {
+            if(routeSimObject) {
+            let cameraHeadingOffsetValue = 0;
+            if(viewType === 'FRONT') {
+                cameraHeadingOffsetValue = 0;
+            } else if(viewType === 'BACK') {
+                cameraHeadingOffsetValue = 180;
+            } else if(viewType === 'LEFT') {
+                cameraHeadingOffsetValue = 90;
+            } else {
+                cameraHeadingOffsetValue = 270;
+            }
+            // 카메라 뷰 방향 세팅
+            routeSimObject.setCameraTrackViewHeadingOffset(cameraHeadingOffsetValue);
+            }
+        }
+        
+        // 초기화
+        function initRouteSim() {
+            document.getElementById("map-buttons").style.display = "none";
+            document.querySelector(".col-md-2").style.display = "none";
+
+            if(routeSimObject) {
+                routeSimObject.initRouteSimulation();
+                $('#crashPosition').empty();
+            }
+            
+            map.getElementById('poi_road').show();
+            map.getElementById('poi_base').show();
+            map.getElementById('poi_bound').show();
+        }
+
+    </script>
+</body>
+</html>
