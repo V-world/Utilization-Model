@@ -232,7 +232,8 @@
 	    </br>
 
 	    <label for="objSpeed">주행속도(km/h)</label>
-	    <input type="number" style="width: 50px;" class="form-control" id="objSpeed" value="10" onchange="updateSpeed(this.value)">		    
+	    <input type="number" style="width: 50px;" class="form-control" id="objSpeed" value="10" onchange="updateSpeed(this.value)">
+        <input type="number" class="form-control" id="objScale" value="1" onchange="updateScale(this.value)" hidden>		    
     </div>	
 
     <script type="text/javascript">
@@ -463,6 +464,7 @@
                 document.querySelector('#cameraLookAt').disabled = true;
             } else {
                 document.querySelector('#cameraLookAt').disabled = false;
+                updateScale(0.5);
             }
         }
 
@@ -489,6 +491,13 @@
         function pauseRouteSim() {
             if(routeSimObject) {
             routeSimObject.pauseRouteSimulation();
+            }
+        }
+        
+        // 스케일 값 업데이트
+        function updateScale(scale) {
+            if(routeSimObject) {
+            routeSimObject.updateModelScale(Number(scale));
             }
         }
         
