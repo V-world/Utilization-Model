@@ -642,7 +642,7 @@ function fetchHealthData(type) {
   const apiDate = (type === 'airdif') ? `${y}${m}${(d - 1)}00` : curDate;
 
   $.ajax({
-    url: `http://apis.data.go.kr/1360000/${apiName}?`,
+    url: `https://apis.data.go.kr/1360000/${apiName}?`,
     data: {
           serviceKey : 'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==',
           numOfRows : 10000,
