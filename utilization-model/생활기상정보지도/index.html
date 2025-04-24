@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>생활 기상정보 지도</title>
+<link rel="stylesheet" href="http://openlayers.org/en/latest/css/ol.css" type="text/css">
+<style>
+  @font-face {
+      font-family: 'TheJamsil5Bold';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+  }
+  
+  html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	
+	body {
+		overflow: hidden;
+    font-family: 'NanumGothic';
+	}
+
+	#map {
+		width: 100%;
+		height: 100%;
+	}
+
+  .popup-tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #888;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 20;
+    pointer-events: auto;
+  }
+
+  .theme-selector {
+    font-family: 'TheJamsil5Bold';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    font-family: 'Noto Sans KR', sans-serif;
+    z-index: 10;
+    width: 240px;
+  }
+
+  #map-title {
+    font-family: 'TheJamsil5Bold';
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #333;
+  }
+
+  .theme-selector input[type="radio"] {
+    font-family: 'TheJamsil5Bold';
+    margin-right: 6px;
+  }
+
+  /* 라디오 버튼의 색상 표시용 공통 클래스 */
+  .theme-color {
+    display: inline-block;
+    width: 20px;
+    height: 10px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  #loadings{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    padding: 10000px;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  #applyTheme {
+    display: block;
+    margin: 10px auto 0 auto; /* 상단 마진 + 좌우 중앙 정렬 */
+    background: #0077cc;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-weight: 600;
+  }
+
+  #applyTheme:hover {
+    background: #005fa3;
+  }
+
+  #legend {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+
+  #legend div {
+    margin-bottom: 4px;
+  }
+
+</style>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+</head>
+<body>
+<div id="loadings"><img	src="./loading.gif"></div>
+<div id="map"></div>
+<div class="theme-selector">
+  <div id="map-title">생활 기상정보 지도</div>
+  <div>
+    <label><input type="radio" name="indexType" value="oak" checked> 꽃가루농도위험지수(참나무)</label><br>
+    <label><input type="radio" name="indexType" value="pine"> 꽃가루농도위험지수(소나무)</label><br>
+    <label><input type="radio" name="indexType" value="weeds"> 꽃가루농도위험지수(잡초류)</label><br>
+    <label><input type="radio" name="indexType" value="uv"> 자외선지수</label><br>
+    <label><input type="radio" name="indexType" value="airdif"> 대기정체지수</label><br>
+  </div>
+
+  <button id="applyTheme">적용</button>
+  <div id="legend" style="margin-top:10px;"></div>
+  <div style="font-size: 12px;">* 본 통계 자료는 기상청 API를 이용하였습니다.</div>
+</div>
+<div id="tooltip" style="position: absolute; background: white; border: 1px solid gray; padding: 4px; display: none; font-size: 12px;"></div>
+<div id="popup" class="popup-tooltip" style="display: none;"></div>
+
+<script>
+// 기본 지도 호출
+let map = new ol.Map({
+  target: 'map',
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: 'http://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png'
+      })
+    })
+  ],
+  view: new ol.View({
+    center:[14117020.306437293, 4360534.687684822],
+    zoom: 7
+  })
+});
+
+
+let weatherData = {}, colorMap = {};
+let vectorLayer, sigunguLayer;
+const selectedField = "today" // 총 인구수를 통한 색상 범위 지정
+let currentView = 'sido';
+
+let lastZoomLevel = map.getView().getZoom();
+
+let currentSidoName = null;
+let currentSidoExtent = null;
+
+let highlight;
+const tooltip = document.getElementById('tooltip');
+
+// JSON과 브이월드 행정경계 API 매칭 후 통계 색상 지정
+function processWeatherData(selectedIndexType = 'oak') {
+  const matched = [];
+
+  // 브이월드 시도명 목록이 필요하므로 임시 시도 저장
+  const sidoCodes = [
+    "1100000000", "2600000000", "2700000000", "2800000000", "2900000000", "3000000000",
+    "3100000000", "3600000000", "4100000000", "4300000000", "4400000000", "4600000000",
+    "4700000000", "4800000000", "5000000000", "5100000000", "5200000000"
+  ];
+
+  sidoCodes.forEach(code => {
+    const entry = weatherData[code];
+    if (entry) {
+      matched.push({ name: code, value: entry.today });
+    }
+  });
+
+  matched.sort((a, b) => b.value - a.value);
+  matched.forEach(item => {
+    colorMap[item.name] = getRiskColor(item.value, selectedIndexType);
+  });
+}
+
+function getRiskColor(value, type = 'default') {
+  if (type === 'uv') {
+    if (value >= 11) return 'rgba(103, 58, 183, 0.6)';
+    if (value >= 8) return 'rgba(244, 67, 54, 0.6)';  
+    if (value >= 6) return 'rgba(255, 152, 0, 0.6)';   
+    if (value >= 3) return 'rgba(255, 235, 59, 0.6)';  
+    return 'rgba(129, 212, 250, 0.6)';                  
+  }
+
+  if (type === 'airdif') {
+    if (value == 25) return 'rgba(129, 212, 250, 0.6)';
+    if (value == 50) return 'rgba(255, 241, 118, 0.6)';
+    if (value == 75) return 'rgba(255, 183, 77, 0.6)';
+    return 'rgba(239, 83, 80, 0.6)';
+  }
+
+  if (type === 'oak' || type === 'pine' || type === 'weeds') {
+    if (value == 0) return 'rgba(129, 212, 250, 0.6)';
+    if (value == 1) return 'rgba(255, 241, 118, 0.6)';
+    if (value == 2) return 'rgba(255, 183, 77, 0.6)';
+    return 'rgba(239, 83, 80, 0.6)';
+  }
+}
+
+function updateLegend(indexType) {
+  const legendBox = document.getElementById('legend');
+  let legendHTML = `<strong>범례</strong><br>`;
+
+  const legendItems = {
+    oak: [
+      { label: "매우높음(3)", color: '#ef5350' },
+      { label: "높음(2)", color: '#ffb74d' },
+      { label: "보통(1)", color: '#fff176' },
+      { label: "낮음(0)", color: '#81d4fa' }
+    ],
+    pine: [
+      { label: "매우높음(3)", color: '#ef5350' },
+      { label: "높음(2)", color: '#ffb74d' },
+      { label: "보통(1)", color: '#fff176' },
+      { label: "낮음(0)", color: '#81d4fa' }
+    ],
+    weeds: [
+      { label: "매우높음(3)", color: '#ef5350' },
+      { label: "높음(2)", color: '#ffb74d' },
+      { label: "보통(1)", color: '#fff176' },
+      { label: "낮음(0)", color: '#81d4fa' }
+    ],
+    uv: [
+      { label: "위험 (11 이상)", color: '#673AB7' },
+      { label: "매우높음 (8~10)", color: '#f44336' },
+      { label: "높음 (6~7)", color: '#ff9800' },
+      { label: "보통 (3~5)", color: '#ffeb3b' },
+      { label: "낮음 (0~2)", color: '#81d4fa' },
+    ],
+    airdif: [
+    { label: "매우높음(100)", color: '#ef5350' },
+      { label: "높음(75)", color: '#ffb74d' },
+      { label: "보통(50)", color: '#fff176' },
+      { label: "낮음(25)", color: '#81d4fa' }
+    ],
+  };
+
+  (legendItems[indexType] || []).forEach(item => {
+    legendHTML += `<div><span style="display:inline-block;width:12px;height:12px;background:${item.color};margin-right:6px;"></span>${item.label}</div>`;
+  });
+
+  legendBox.innerHTML = legendHTML;
+}
+
+map.getView().on('change:resolution', function () {
+  const zoom = map.getView().getZoom();
+  const selectedIndexType = localStorage.getItem('selectedIndexType') || 'oak';
+
+  if (zoom >= 9 && lastZoomLevel < 9 && currentView !== 'sigungu') {
+    const extent = map.getView().calculateExtent(map.getSize());
+    const center = map.getView().getCenter();
+    let matchedSido = null;
+
+    if (vectorLayer && vectorLayer.getSource()) {
+      const features = vectorLayer.getSource().getFeatures();
+      features.forEach(feature => {
+        if (feature.getGeometry().intersectsCoordinate(center)) {
+          matchedSido = feature.get('ctprvn_cd') + '00000000';
+        }
+      });
+    }
+
+    if (matchedSido) {
+      currentView = 'sigungu';
+      currentSidoName = matchedSido;
+      currentSidoExtent = extent;
+      map.removeLayer(vectorLayer);
+      loadSigunguLayer(matchedSido, extent, selectedIndexType);
+    }
+
+  } else if (zoom < 9 && lastZoomLevel >= 9 && currentView !== 'sido') {
+    returnToSido();
+  }
+
+  lastZoomLevel = zoom;
+});
+
+// 시도 레이어 호출
+function loadSidoLayer() {
+  const vworldApiUrl = `https://api.vworld.kr/req/data?key=CEB52025-E065-364C-9DBA-44880E3B02B8&service=data&version=2.0&request=getfeature&format=json&size=1000&page=1&geometry=true&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADSIDO_INFO`;
+
+  $.ajax({
+    url: vworldApiUrl,
+    type: "GET",
+    dataType: 'jsonp',
+    async: false,
+    success: function(data) {
+      const features = new ol.format.GeoJSON().readFeatures(data.response.result.featureCollection);
+
+      vectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({ features }),
+        style: getStyleByMode
+      });
+
+      map.addLayer(vectorLayer);
+    },
+    error: function() {
+      alert("브이월드 시도 데이터를 불러오는 데 실패했습니다.");
+    }
+  });
+}
+
+// 시도에서 상세보기 시 시군구 영역으로 이동하기
+function zoomToSigungu(sidoName, sidoCode) {
+  document.getElementById('popup').style.display = 'none';
+  
+  // 현재 레이어에서 해당 시도 feature 찾기
+  let targetFeature = null;
+    vectorLayer.getSource().getFeatures().forEach(feature => {
+      if (feature.get('ctprvn_cd')+'00000000' === sidoName) {
+        targetFeature = feature;
+      }
+    });
+    if (!targetFeature) return;
+    const extent = targetFeature.getGeometry().getExtent();
+
+    currentSidoName = sidoName;
+    currentSidoExtent = extent;
+
+    map.getView().fit(extent, { duration: 1000, padding: [50, 50, 50, 50] });
+    // 기존 시도 레이어 제거
+    map.removeLayer(vectorLayer);
+    loadSigunguLayer(sidoName, extent, localStorage.getItem('selectedIndexType'));
+    currentView = 'sigungu';
+}
+
+// 시군구 레이어 호출
+function loadSigunguLayer(sidoName, extent, selectedIndexType) {
+  const sigunguUrl = `https://api.vworld.kr/req/data?key=CEB52025-E065-364C-9DBA-44880E3B02B8&service=data&version=2.0&request=getfeature&format=json&size=1000&page=1&geometry=true&attribute=true&crs=EPSG:3857&data=LT_C_ADSIGG_INFO`;
+
+  if (window.sigunguLayer) map.removeLayer(window.sigunguLayer);
+
+  const sidoPrefix = sidoName.substr(0, 2);
+
+  $.ajax({
+    url: sigunguUrl,
+    data: {geomfilter: 'BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)'},
+    type: "GET",
+    dataType: 'jsonp',
+    async: false,
+    success: function(data) {
+
+      const features = new ol.format.GeoJSON().readFeatures(data.response.result.featureCollection);
+
+      const matched = [];
+      const sigunguNames = [];
+      features.forEach(f => {
+        const name = f.get('sig_cd')+'00000';
+        sigunguNames.push(name);
+      });
+      sigunguNames.forEach(name => {
+        if (weatherData[name]) {   // 여기서 weatherData에 해당 시군구 데이터가 없으면 색상이 기본값으로 나옴.
+          matched.push({ name, value: weatherData[name][selectedField] });
+        }
+      });
+      matched.sort((a, b) => b.value - a.value);
+  
+      matched.forEach((item, i) => {
+        colorMap[item.name] = getRiskColor(item.value, selectedIndexType);
+      });
+
+      sigunguLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({ features }),
+        style: getStyleByMode
+      });
+
+      map.addLayer(sigunguLayer);
+    },
+    beforeSend: function(){
+      $("#loadings").show();
+    },
+    complete: function(){
+      $("#loadings").hide();
+    },
+    error: function() {
+      alert("브이월드 시군구 데이터를 불러오는 데 실패했습니다.");
+    }
+  });
+}
+
+
+// 시군구에서 상세보기 시 시도 영역으로 이동
+function returnToSido() {
+  document.getElementById('popup').style.display = 'none';
+ 
+  if (sigunguLayer) {
+    map.removeLayer(sigunguLayer);
+    sigunguLayer = null;
+  }
+  // 시도 벡터 레이어가 없다면 다시 불러오기
+  if (!vectorLayer) {
+    processWeatherData(localStorage.getItem('selectedIndexType'));
+    loadSidoLayer();
+  } else {
+    // 중복 추가 방지
+    if (!map.getLayers().getArray().includes(vectorLayer)) {
+      map.addLayer(vectorLayer);
+    }
+    processWeatherData(localStorage.getItem('selectedIndexType'));
+    vectorLayer.setStyle(defaultStyle);
+  }
+
+  // 시도 기본 줌으로 이동
+  map.getView().animate({
+    center:[14117020.306437293, 4360534.687684822],
+    zoom: 7,
+    duration: 1000
+  });
+
+  currentView = 'sido';
+  localStorage.setItem('mapView', 'sido'); // 상태 갱신
+  localStorage.removeItem('mapExtent');
+  localStorage.removeItem('mapSido');
+
+  if (highlight) {
+    highlight.setStyle(defaultStyle(highlight));
+    highlight = null;
+  }
+}
+
+
+function getStyleByMode(feature, isHover = false) {
+  const style = defaultStyle(feature);
+  if (isHover) {
+    style.getStroke().setColor('#FFF');
+    style.getStroke().setWidth(3);
+  }
+  return style;
+}
+
+// 버블 / 색상 시각화가 겹쳐 리셋 함수 설정
+function resetLayerStyles() {
+  if (vectorLayer) {
+    vectorLayer.getSource().getFeatures().forEach(f => f.setStyle(getStyleByMode(f)));
+  }
+  if (sigunguLayer) {
+    sigunguLayer.getSource().getFeatures().forEach(f => f.setStyle(getStyleByMode(f)));
+  }
+}
+
+// 색상 스타일 지정
+function defaultStyle(feature) {
+  let name;
+
+  if (currentView === 'sido') {
+    name = feature.get('ctprvn_cd')+'00000000';
+  } else if (currentView === 'sigungu') {
+    name = feature.get('sig_cd')+'00000';
+  }
+
+  const value = weatherData[name]?.[selectedField];
+  const color = colorMap[name] || 'rgba(200,200,200,0.3)';
+  return new ol.style.Style({
+    fill: new ol.style.Fill({ color }),
+    stroke: new ol.style.Stroke({ color: '#fff', width: 1.5, lineDash: [1.5, 7] }),
+  });
+}
+
+let selectedMode = 'color';
+const savedMode = localStorage.getItem('selectedMode');
+if (savedMode) selectedMode = savedMode;
+
+// 마우스 오버 시 하이라이트 기능
+map.on('pointermove', function (evt) {
+  if (highlight) {
+    highlight.setStyle(defaultStyle(highlight)); // 원래대로
+    highlight = null;
+  }
+
+  map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+    highlight = feature;
+    feature.setStyle(getStyleByMode(feature, true));
+
+    const name = feature.get('ctp_kor_nm') || feature.get('full_nm');
+
+    tooltip.innerText = name;
+    tooltip.style.left = evt.pixel[0] + 15 + 'px';
+    tooltip.style.top = evt.pixel[1] + 15 + 'px';
+    tooltip.style.display = 'block';
+  }, { hitTolerance: 5 });
+
+  if (!highlight) {
+    tooltip.style.display = 'none';
+    resetLayerStyles();
+  }
+});
+
+map.on('singleclick', function (evt) {
+  map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+    let name, data, title;
+    if (currentView === 'sido') {
+      title = feature.get('ctp_kor_nm')
+      name = feature.get('ctprvn_cd')+'00000000';
+      data = weatherData[name];
+    } else if (currentView === 'sigungu') {
+      title = feature.get('full_nm');
+      name = feature.get('sig_cd')+'00000';
+      data = weatherData[name];
+    }
+    if (!data) return;
+
+    let gubun = weatherData[name].today.toLocaleString();
+    let gubun_nm;
+    let type = document.querySelector('input[name="indexType"]:checked').value;
+    let value = data.today.toLocaleString();
+
+    if (value == 0) { gubun_nm = '낮음';}
+    else if (value == 1) { gubun_nm = '보통'; }
+    else if (value == 2) { gubun_nm = '높음'; }
+    else { gubun_nm = '매우 높음'; }
+
+    if (type === 'uv') {
+      if (value >= 11) { gubun_nm = '위험'; }
+      else if (value >= 8) { gubun_nm = '매우 높음'; }
+      else if (value >= 6) { gubun_nm = '높음'; }
+      else if (value >= 3) { gubun_nm = '보통'; }
+      else {  gubun_nm = '낮음'; }
+    }
+
+    if (type === 'airdif') {
+      if (value == 25) { gubun_nm = '낮음'; }
+      else if (value == 50) { gubun_nm = '보통'; }
+      else if (value == 75) { gubun_nm = '높음'; }
+      else { gubun_nm = '매우 높음'; }
+    }
+
+    
+    const content = `
+      <div style="text-align:right;">
+        <label onclick="document.getElementById('popup').style.display='none'">Ⅹ</label>
+      </div>
+      <span style="font-weight:bold; font-size:14px;">${title}</span><br>
+      코드 : ${name}<br>
+      구분: ${data.gubun.toLocaleString()}<br>
+      지수: ${data.today.toLocaleString()} (${gubun_nm})<br>
+      기준일: ${data.date.toLocaleString()}<br>
+    `;
+
+    const popup = document.getElementById('popup');
+    popup.innerHTML = content;
+    popup.style.left = evt.pixel[0] + 10 + 'px';
+    popup.style.top = evt.pixel[1] + 10 + 'px';
+    popup.style.display = 'block';
+  });
+});
+
+const applyBtn = document.getElementById('applyTheme');
+if (applyBtn) {
+  applyBtn.addEventListener('click', function () {
+  // 선택된 지수 타입
+  const selectedIndexRadio = document.querySelector('input[name="indexType"]:checked');
+  const selectedIndexType = selectedIndexRadio ? selectedIndexRadio.value : 'pine';
+
+  // 기존 레이어 제거
+  if (vectorLayer && map.getLayers().getArray().includes(vectorLayer)) {
+    map.removeLayer(vectorLayer);
+    vectorLayer = null;
+  }
+
+  if (sigunguLayer && map.getLayers().getArray().includes(sigunguLayer)) {
+    map.removeLayer(sigunguLayer);
+    sigunguLayer = null;
+  }
+
+  //processWeatherData(selectedIndexType);
+
+  // 저장 (다음 방문 시 유지)
+  localStorage.setItem('selectedIndexType', selectedIndexType);
+
+  // 범례 갱신
+  updateLegend(selectedIndexType);
+
+  // API 호출 + 지도 갱신
+  fetchHealthData(selectedIndexType);
+  resetLayerStyles();
+});
+}
+
+function updateMapLayers(type) {
+  processWeatherData(type); // 색상 계산만
+  if (currentView === 'sigungu') {
+    loadSigunguLayer(currentSidoName, currentSidoExtent, type);
+  } else {
+    loadSidoLayer(); // 시도 레이어 기본
+  }
+}
+
+function fetchHealthData(type) {
+  weatherData = {};
+
+  const month = new Date().getMonth() + 1;
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = (today.getMonth() + 1).toString().padStart(2, '0');
+  const d = today.getDate().toString().padStart(2, '0');
+  const curDate = `${y}${m}${d}00`;
+  const realDate = `${y}-${m}-${d}`;
+
+  if (type === 'oak' && !(month >= 4 && month <= 6)) {
+    alert("참나무 꽃가루농도지수는 4월~6월 사이에만 조회할 수 있습니다.");
+    return;
+  }
+  if (type === 'pine' && !(month >= 4 && month <= 6)) {
+    alert("소나무 꽃가루농도지수는 4월~6월 사이에만 조회할 수 있습니다.");
+    return;
+  }
+  if (type === 'weeds' && !(month >= 8 && month <= 10)) {
+    alert("잡초류 꽃가루농도지수는 8월~10월 사이에만 조회할 수 있습니다.");
+    return;
+  }
+
+  const apiMap = {
+    oak: ['HealthWthrIdxServiceV3/getOakPollenRiskIdxV3', '꽃가루농도위험지수(참나무)'],
+    pine: ['HealthWthrIdxServiceV3/getPinePollenRiskIdxV3', '꽃가루농도위험지수(소나무)'],
+    weeds: ['HealthWthrIdxServiceV3/getWeedsPollenRiskndxV3', '꽃가루농도위험지수(잡초류)'],
+    uv: ['LivingWthrIdxServiceV4/getUVIdxV4', '자외선지수'],
+    airdif: ['LivingWthrIdxServiceV4/getAirDiffusionIdxV4', '대기확산지수']
+  };
+
+  const [apiName, gubunLabel] = apiMap[type];
+  const apiDate = (type === 'airdif') ? `${y}${m}${(d - 1)}00` : curDate;
+
+  $.ajax({
+    url: `http://apis.data.go.kr/1360000/${apiName}?`,
+    data: {
+          serviceKey : 'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==',
+          numOfRows : 10000,
+          pageNo : 1,
+          time : apiDate,
+          areaNo : '',
+          dataType : 'json'
+        },
+    type: "GET",
+    dataType: 'json',
+    success: function(data) {
+      const items = data.response.body.items.item;
+
+      items.forEach(item => {
+        let value = (type === 'oak' || type === 'pine' || type === 'weeds') ? item.tomorrow
+                   : (type === 'uv') ? item.h0
+                   : item.h24;
+
+        if (item.areaNo.substr(5, 10) === '00000') {
+          weatherData[item.areaNo] = {
+            code: item.areaNo,
+            today: value,
+            date: realDate,
+            gubun: gubunLabel
+          };
+        }
+      });
+
+      updateMapLayers(type);
+
+    },
+    beforeSend: function(){
+      $("#loadings").show();
+    },
+    complete: function(){
+      $("#loadings").hide();
+    },
+    error: function() {
+      alert("공공데이터포털의 api를 불러오는데 실패하였습니다.");
+    }
+  });
+}
+
+</script>
+
+</body>
+</html>
