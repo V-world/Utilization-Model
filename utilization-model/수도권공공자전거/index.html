@@ -386,7 +386,7 @@
                 { start: 2001, end: 3000 }
             ];
             const apiKey = '416353556b676f7237364f676a4c56';
-            const baseUrl = `http://openapi.seoul.go.kr:8088/${apiKey}/json/bikeList/`;
+            const baseUrl = `https://openapi.seoul.go.kr:8088/${apiKey}/json/bikeList/`;
             const fetchPromises = ranges.map(range => {
                 const url = `${baseUrl}${range.start}/${range.end}`;
                 return fetch(url)
