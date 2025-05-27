@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- MarkerCluster CSS (cdnjs) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+    <title>수도권 공공 공유자전거 지도</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            margin-right: 10px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            flex-grow: 1;
+        }
+        .scroll-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 110px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        .scroll-item {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 200px;
+            height: 90px;
+            margin-right: 15px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .scroll-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .scroll-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .scroll-item .region {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .scroll-item .bike-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            padding: 5px 10px;
+        }
+        .scroll-item .bike-label {
+            font-size: 12px;
+            color: #666;
+        }
+        .scroll-item .bike-count {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        /* 커스텀 팝업 스타일 */
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: #2c3e50;
+            color: #fff;
+            font-size: 16px;
+            line-height: 24px;
+            border-radius: 10px;
+        }
+        .custom-popup .leaflet-popup-content-wrapper a {
+            color: rgba(255,255,255,0.8);
+        }
+        .custom-popup .leaflet-popup-tip-container {
+            width: 30px;
+            height: 15px;
+        }
+        .custom-popup .leaflet-popup-tip {
+            background: #2c3e50;
+        }
+        .bike-popup{
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .bike-popup h3 {
+            margin: 0 0 10px 0;
+            color: #ecf0f1;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 5px;
+        }
+        .bike-popup .bike-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .bike-popup .bike-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            background: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .bike-popup .stat-item {
+            text-align: center;
+        }
+        .bike-popup .stat-label {
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+        .bike-popup .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .bike-popup .bike-features, .bike-popup .bike-contact {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .bike-popup strong {
+            color: #f39c12;
+        }
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            header h1 {
+                font-size: 20px;
+            }
+            .logo {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="header-content">
+            <div class="logo">🚲</div>
+            <h1>공공 공유자전거 지도</h1>
+        </div>
+    </header>
+    <main>
+        <div id="map"></div>
+        <div id="bike-list" class="scroll-container"></div>
+    </main>
+    <footer>
+        <!--<p>활용모델 페이지 하단 메뉴용</p>-->
+    </footer>
+</div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<!-- MarkerCluster JS (cdnjs) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script>
+    class BikeMap {
+        constructor(mapId, bikeListId) {
+            // 지도 생성 및 초기 설정
+            this.map = L.map(mapId, { minZoom: 12 }).setView([37.5665, 126.9780], 13);
+            L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png', {
+                maxZoom: 19,
+                minZoom: 10,
+                attribution: '배경지도 &copy; <a href="https://www.vworld.kr/">브이월드</a>'
+            }).addTo(this.map);
+            this.map.removeControl(this.map.zoomControl);
+
+            // 전역 변수 초기화
+            this.seoulBike = null;
+            this.gyeonggiBike = null;
+            this.bikeListContainer = document.getElementById(bikeListId);
+
+            // 마커 아이콘
+            this.iconBike = L.icon({
+                iconUrl: 'https://vworld1.moonlight.one/Utilization-Model/imgs/model-itme/수도권공공자전거.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+
+            // 지도 이동 시 목록 업데이트
+            this.map.on('moveend', () => this.updateBikeList());
+        }
+
+        // 클러스터 그룹 내부 모든 개별 마커 반환
+        getMarkersFromClusterGroup(clusterGroup) {
+            let markers = [];
+            clusterGroup.getLayers().forEach(layer => {
+                if (layer.getAllChildMarkers && typeof layer.getAllChildMarkers === 'function') {
+                    markers = markers.concat(layer.getAllChildMarkers());
+                } else if (layer instanceof L.Marker) {
+                    markers.push(layer);
+                }
+            });
+            return markers;
+        }
+
+        // 목록 아이템 클릭 시 지도 중심 이동
+        bikeListClick(lat, lng) {
+            this.map.setView([lat, lng], 18);
+        }
+
+        // 지도 보이는 영역 내 마커 데이터를 목록으로 업데이트
+        updateBikeList() {
+            const bounds = this.map.getBounds();
+            let allMarkers = [];
+            if(this.gyeonggiBike) {
+                allMarkers = allMarkers.concat(this.getMarkersFromClusterGroup(this.gyeonggiBike));
+            }
+            if(this.seoulBike) {
+                allMarkers = allMarkers.concat(this.getMarkersFromClusterGroup(this.seoulBike));
+            }
+            // 목록 컨테이너 초기화
+            this.bikeListContainer.innerHTML = '';
+            allMarkers.forEach(marker => {
+                if(bounds.contains(marker.getLatLng()) && marker.where) {
+                    const data = marker.data;
+                    const bikeCount = data.rackTotCnt ? data.rackTotCnt : data.BICYCL_HOLD_CNT;
+                    const bikeCenter = data.stationName ? data.stationName : data.BICYCL_LEND_PLC_NM_INST_NM;
+                    const region = marker.where === 'seoul' ? '서울' : '경기도';
+
+                    const div = document.createElement('div');
+                    div.className = 'scroll-item';
+                    div.onclick = () => this.bikeListClick(marker.getLatLng().lat, marker.getLatLng().lng);
+                    div.innerHTML = `
+                        <div>
+                            <span class="region">${region}</span>
+                            <h3>${bikeCenter}</h3>
+                        </div>
+                        <div class="bike-info">
+                            <span class="bike-label">대여 가능 자전거 수</span>
+                            <span class="bike-count">${bikeCount}대</span>
+                        </div>
+                        `;
+                    this.bikeListContainer.appendChild(div);
+                }
+            });
+        }W
+
+        // 서울 데이터 팝업 내용 생성
+        createSeoulPopup(props) {
+        return `
+            <div class="bike-popup">
+                <h3>${props.stationName || props.BICYCL_LEND_PLC_NM_INST_NM}</h3>
+                <div class="bike-info">
+                    <p><strong>대여 가능 자전거 수:</strong> ${props.rackTotCnt ? props.rackTotCnt : props.BICYCL_HOLD_CNT}</p>
+                    <p><strong>자전거주차총건수:</strong> ${props.parkingBikeTotCnt || '정보 없음'}</p>
+                    <p><strong>거치율:</strong> ${props.shared || '정보 없음'}</p>
+                </div>
+            </div>
+        `;
+        }
+
+
+            // 경기도 데이터 팝업 내용 생성
+        createGyeonggiPopup(props) {
+            return `
+            <div class="bike-popup">
+                <h3>${props.BICYCL_LEND_PLC_NM_INST_NM}</h3>
+                <div class="bike-info">
+                    <p><strong>구분:</strong> ${props.BICYCL_LEND_PLC_DIV_NM}</p>
+                    <p><strong>주소:</strong> ${props.REFINE_ROADNM_ADDR}</p>
+                    <p><strong>운영시간:</strong> ${props.OPERT_BEGIN_TM} - ${props.OPERT_END_TM}</p>
+                    <p><strong>휴무일:</strong> ${props.RESTDAY_INFO}</p>
+                </div>
+                <div class="bike-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">보유 대수</span>
+                        <span class="stat-value">${props.BICYCL_HOLD_CNT}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">거치대 수</span>
+                        <span class="stat-value">${props.STANDS_CNT ? props.STANDS_CNT : '정보 없음'}</span>
+                    </div>
+                </div>
+                <div class="bike-features">
+                    <p><strong>요금:</strong> ${props.BICYCL_UTLZ_CHRG_INFO ? props.BICYCL_UTLZ_CHRG_INFO : '정보 없음'}</p>
+                    <p><strong>공기주입기:</strong> ${props.AIR_INJEK_POSTNG_YN === 'Y' ? '있음' : '없음'}</p>
+                    <p><strong>수리대:</strong> ${props.REPAIR_INSTL_YN === 'Y' ? '있음' : '없음'}</p>
+                </div>
+                <div class="bike-contact">
+                    <p><strong>관리기관 연락처:</strong> ${props.MNGINST_TELNO}</p>
+                </div>
+            </div>
+        `;
+        }
+
+        // 서울 데이터 로드 및 클러스터 생성
+        async loadSeoulData() {
+            const ranges = [
+                { start: 1, end: 1000 },
+                { start: 1001, end: 2000 },
+                { start: 2001, end: 3000 }
+            ];
+            const apiKey = '416353556b676f7237364f676a4c56';
+            const baseUrl = `http://openapi.seoul.go.kr:8088/${apiKey}/json/bikeList/`;
+            const fetchPromises = ranges.map(range => {
+                const url = `${baseUrl}${range.start}/${range.end}`;
+                return fetch(url)
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('서울 데이터 로드 실패:', error);
+                    });
+            });
+            const results = await Promise.all(fetchPromises);
+            let features = [];
+            results.forEach(data => {
+                if(data && data.rentBikeStatus && data.rentBikeStatus.row) {
+                    data.rentBikeStatus.row.forEach(item => {
+                        const lat = parseFloat(item.stationLatitude);
+                        const lng = parseFloat(item.stationLongitude);
+                        if(lat && lng) {
+                            features.push({
+                                type: "Feature",
+                                geometry: { type: "Point", coordinates: [lng, lat] },
+                                properties: item
+                            });
+                        }
+                    });
+                }
+            });
+            const geojson = { type: "FeatureCollection", features: features };
+
+            this.seoulBike = L.markerClusterGroup();
+            L.geoJSON(geojson, {
+                pointToLayer: (feature, latlng) => {
+                    let marker = L.marker(latlng, { icon: this.iconBike });
+                    let popupContent = this.createSeoulPopup(feature.properties);
+                    marker.bindPopup(popupContent, { maxWidth: 300, className: 'custom-popup' });
+                    marker.where = 'seoul';
+                    marker.data = feature.properties;
+                    return marker;
+                }
+            }).addTo(this.seoulBike);
+            this.map.addLayer(this.seoulBike);
+        }
+
+        // 경기도 데이터 로드 및 클러스터 생성
+        async loadGyeonggiData() {
+            const apiKey = '0901b82a7c0b4ca7b854f568f95e0167';
+            const baseUrl = `https://openapi.gg.go.kr/BICYCL?KEY=${apiKey}&Type=json&pindex=1&pSize=1000`;
+            const data = await fetch(baseUrl)
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('경기도 데이터 로드 실패:', error);
+                });
+            let features = [];
+            if(data && data.BICYCL && data.BICYCL[1] && data.BICYCL[1].row) {
+                data.BICYCL[1].row.forEach(item => {
+                    const lat = parseFloat(item.REFINE_WGS84_LAT);
+                    const lng = parseFloat(item.REFINE_WGS84_LOGT);
+                    if(lat && lng) {
+                        features.push({
+                            type: "Feature",
+                            geometry: { type: "Point", coordinates: [lng, lat] },
+                            properties: item
+                        });
+                    }
+                });
+            }
+            const geojson = { type: "FeatureCollection", features: features };
+
+            this.gyeonggiBike = L.markerClusterGroup();
+            L.geoJSON(geojson, {
+                pointToLayer: (feature, latlng) => {
+                    let marker = L.marker(latlng, { icon: this.iconBike });
+                    let popupContent = this.createGyeonggiPopup(feature.properties);
+                    marker.bindPopup(popupContent, { maxWidth: 300, className: 'custom-popup' });
+                    marker.where = 'gyeonggi';
+                    marker.data = feature.properties;
+                    return marker;
+                }
+            }).addTo(this.gyeonggiBike);
+            this.map.addLayer(this.gyeonggiBike);
+        }
+
+        // 초기화: 서울과 경기도 데이터를 모두 로드한 후 목록 업데이트
+        async init() {
+            await this.loadSeoulData();
+            await this.loadGyeonggiData();
+            this.updateBikeList();
+        }
+    }
+
+    // DOMContentLoaded 후 인스턴스 생성 및 초기화
+    document.addEventListener("DOMContentLoaded", () => {
+        const bikeMap = new BikeMap('map', 'bike-list');
+        bikeMap.init();
+    });
+</script>
+</body>
+</html>
