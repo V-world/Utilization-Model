@@ -9,7 +9,7 @@
     <!-- MarkerCluster CSS (cdnjs) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
-    <title>수도권 공공 공유자전거 지도</title>
+    <title>전국 공공 공유자전거 지도</title>
     <style>
         body {
             margin: 0;
@@ -21,7 +21,7 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            max-width: 430px;
+            /*max-width: 430px;*/
             height: 100vh;
             margin: 0 auto;
             background-color: #fff;
@@ -82,6 +82,7 @@
             z-index: 1000;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            display: flex;
         }
         .scroll-container::-webkit-scrollbar {
             display: none;
@@ -222,6 +223,28 @@
                 font-size: 24px;
             }
         }
+
+        .region-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .region-buttons button {
+            background-color: #ffffff;
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .region-buttons button:hover {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -230,6 +253,7 @@
         <div class="header-content">
             <div class="logo">🚲</div>
             <h1>공공 공유자전거 지도</h1>
+            <div class="region-buttons"></div>
         </div>
     </header>
     <main>
@@ -247,20 +271,34 @@
 <!-- MarkerCluster JS (cdnjs) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <script>
+    // 권역별 중심 좌표
+    const REGION_CENTERS = {
+      수도권: { name: "수도권", lat: 37.5665, lng: 126.9780 },
+      충청권: { name: "충청권(대전, 세종, 충남 공주시)", lat: 36.3504, lng: 127.3845 },
+      전라남도: { name: "전라남도(여수시, 순천시)", lat: 34.8555, lng: 127.5749 },
+      경상도: { name: "경상도(경북 경주시, 경남 창원시, 경남 거창군)", lat: 35.2284, lng: 128.6811 },
+      부산광역시: { name: "기장군", lat: 35.2445, lng: 129.2227 },
+      광주광역시: { name: "광주광역시", lat: 35.1595, lng: 126.8526 },
+    };
+
+    // 시간 포맷 함수
+    function formatTimeString(timeStr) {
+        if (!timeStr || timeStr.length !== 6) return timeStr;
+        return `${timeStr.slice(0,2)}:${timeStr.slice(2,4)}:${timeStr.slice(4,6)}`;
+    }
+
     class BikeMap {
         constructor(mapId, bikeListId) {
             // 지도 생성 및 초기 설정
             this.map = L.map(mapId, { minZoom: 12 }).setView([37.5665, 126.9780], 13);
             L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png', {
-                maxZoom: 19,
-                minZoom: 10,
+                
                 attribution: '배경지도 &copy; <a href="https://www.vworld.kr/">브이월드</a>'
             }).addTo(this.map);
             this.map.removeControl(this.map.zoomControl);
 
             // 전역 변수 초기화
-            this.seoulBike = null;
-            this.gyeonggiBike = null;
+            this.allBike = null;
             this.bikeListContainer = document.getElementById(bikeListId);
 
             // 마커 아이콘
@@ -297,20 +335,20 @@
         updateBikeList() {
             const bounds = this.map.getBounds();
             let allMarkers = [];
+            if(this.allBike) {
+                allMarkers = allMarkers.concat(this.getMarkersFromClusterGroup(this.allBike));
+            }
             if(this.gyeonggiBike) {
                 allMarkers = allMarkers.concat(this.getMarkersFromClusterGroup(this.gyeonggiBike));
-            }
-            if(this.seoulBike) {
-                allMarkers = allMarkers.concat(this.getMarkersFromClusterGroup(this.seoulBike));
             }
             // 목록 컨테이너 초기화
             this.bikeListContainer.innerHTML = '';
             allMarkers.forEach(marker => {
                 if(bounds.contains(marker.getLatLng()) && marker.where) {
                     const data = marker.data;
-                    const bikeCount = data.rackTotCnt ? data.rackTotCnt : data.BICYCL_HOLD_CNT;
-                    const bikeCenter = data.stationName ? data.stationName : data.BICYCL_LEND_PLC_NM_INST_NM;
-                    const region = marker.where === 'seoul' ? '서울' : '경기도';
+                    const bikeCount = data.detailInfo?.bcyclTpkctNocs ? data.detailInfo?.bcyclTpkctNocs : data.BICYCL_HOLD_CNT;
+                    const bikeCenter = data.rntstnNm ? data.rntstnNm : data.BICYCL_LEND_PLC_NM_INST_NM;
+                    const region = marker.where === 'all' ? data.lcgvmnInstNm : '경기도';
 
                     const div = document.createElement('div');
                     div.className = 'scroll-item';
@@ -322,31 +360,45 @@
                         </div>
                         <div class="bike-info">
                             <span class="bike-label">대여 가능 자전거 수</span>
-                            <span class="bike-count">${bikeCount}대</span>
+                            <span class="bike-count">${bikeCount ? bikeCount +'대' : '정보 없음'}</span>
                         </div>
                         `;
                     this.bikeListContainer.appendChild(div);
                 }
             });
-        }W
+        }
 
-        // 서울 데이터 팝업 내용 생성
-        createSeoulPopup(props) {
-        return `
+        // 전국 데이터 팝업 내용 생성
+        createAllPopup(props) {
+            return `
             <div class="bike-popup">
-                <h3>${props.stationName || props.BICYCL_LEND_PLC_NM_INST_NM}</h3>
+                <h3>${props.rntstnNm}</h3>
                 <div class="bike-info">
-                    <p><strong>대여 가능 자전거 수:</strong> ${props.rackTotCnt ? props.rackTotCnt : props.BICYCL_HOLD_CNT}</p>
-                    <p><strong>자전거주차총건수:</strong> ${props.parkingBikeTotCnt || '정보 없음'}</p>
-                    <p><strong>거치율:</strong> ${props.shared || '정보 없음'}</p>
+                    <p><strong>구분:</strong> ${props.rntstnFcltTypeNm}</p>
+                    <p><strong>주소:</strong> ${props.roadNmAddr}</p>
+                    <p><strong>운영시간:</strong> ${formatTimeString(props.operBgngHrCn)} - ${formatTimeString(props.operEndHrCn)}</p>
+                    <p><strong>휴무일:</strong> ${props.rntstnOperDayoffDayCn}</p>
+                </div>
+                <div class="bike-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">보유 대수</span>
+                        <span class="stat-value">${props.detailInfo?.bcyclTpkctNocs ? props.detailInfo?.bcyclTpkctNocs : '정보 없음'}</span>
+                    </div>
+                </div>
+                <div class="bike-features">
+                    <p><strong>요금:</strong> ${props.rntFeeTypeNm ? props.rntFeeTypeNm : '정보 없음'}</p>
+                    <p><strong>공기주입기:</strong> ${props.arinjcInstlYn === 'Y' ? '있음' : '없음'}</p>
+                    <p><strong>수리대:</strong> ${props.rpfactInstlYn === 'Y' ? '있음' : '없음'}</p>
+                </div>
+                <div class="bike-contact">
+                    <p><strong>관리기관 연락처:</strong> ${props.mngInstTelno}</p>
                 </div>
             </div>
         `;
         }
 
-
-            // 경기도 데이터 팝업 내용 생성
-        createGyeonggiPopup(props) {
+        // 경기도 데이터 팝업 내용 생성
+        createGyeonggiPopup(props) {            
             return `
             <div class="bike-popup">
                 <h3>${props.BICYCL_LEND_PLC_NM_INST_NM}</h3>
@@ -378,54 +430,83 @@
         `;
         }
 
-        // 서울 데이터 로드 및 클러스터 생성
-        async loadSeoulData() {
-            const ranges = [
-                { start: 1, end: 1000 },
-                { start: 1001, end: 2000 },
-                { start: 2001, end: 3000 }
-            ];
-            const apiKey = '416353556b676f7237364f676a4c56';
-            const baseUrl = `http://openapi.seoul.go.kr:8088/${apiKey}/json/bikeList/`;
-            const fetchPromises = ranges.map(range => {
-                const url = `${baseUrl}${range.start}/${range.end}`;
-                return fetch(url)
-                    .then(response => response.json())
-                    .catch(error => {
-                        console.error('서울 데이터 로드 실패:', error);
-                    });
+        // 전국 데이터 로드 및 클러스터 생성
+        async loadAllData() {
+
+            const apiKey = 'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW%2B4ADeoHWXkF1j8TrQ%2BrBNRikicwGB7wGc4AUQtWishlRlSuhMw%3D%3D';
+            const baseUrl = `https://apis.data.go.kr/B551982/pbdo/inf_101_00010001?type=JSON&serviceKey=${apiKey}`;
+            const detailUrl  = `https://apis.data.go.kr/B551982/pbdo/inf_101_00010002?type=JSON&serviceKey=${apiKey}`;
+
+            const pageSize = 1000;
+
+            // 전국 공공자전거 기본정보
+            const totalCnt = `&pageNo=1&numOfRows=1`;
+            const baseTotal = await fetch(baseUrl+totalCnt).then(res => res.json());
+            const baseTotalCount = baseTotal?.body?.totalCount ?? 0;
+            const basePages = Math.ceil(baseTotalCount / pageSize);
+
+            const baseFetches = Array.from({ length: basePages }, (_, i) => {
+                return fetch(`${baseUrl}&pageNo=${i + 1}&numOfRows=${pageSize}`).then(res => res.json());
             });
-            const results = await Promise.all(fetchPromises);
-            let features = [];
-            results.forEach(data => {
-                if(data && data.rentBikeStatus && data.rentBikeStatus.row) {
-                    data.rentBikeStatus.row.forEach(item => {
-                        const lat = parseFloat(item.stationLatitude);
-                        const lng = parseFloat(item.stationLongitude);
-                        if(lat && lng) {
-                            features.push({
-                                type: "Feature",
-                                geometry: { type: "Point", coordinates: [lng, lat] },
-                                properties: item
-                            });
-                        }
-                    });
-                }
+
+            const baseResults = await Promise.all(baseFetches);
+            const baseList = baseResults.flatMap(result => result?.body?.item ?? []);
+
+            // 전국 공공자전거 대여 가능 수
+            const detailTotal = await fetch(`${detailUrl}&pageNo=1&numOfRows=1`).then(res => res.json());
+            const detailTotalCount = detailTotal?.body?.totalCount ?? 0;
+            const detailPages = Math.ceil(detailTotalCount / pageSize);
+
+            const detailFetches = Array.from({ length: detailPages }, (_, i) => {
+                return fetch(`${detailUrl}&pageNo=${i + 1}&numOfRows=${pageSize}`).then(res => res.json());
             });
+
+            const detailResults = await Promise.all(detailFetches);
+            const detailList = detailResults.flatMap(result => result?.body?.item ?? []);
+
+
+            // 병합: Map을 사용해 빠르게 매칭
+            const detailMap = new Map();
+            detailList.forEach(item => {
+                const id = item.lcgvmnInstCd + item.rntstnId;
+                detailMap.set(id, item);
+            });
+
+            const features = [];
+
+            baseList.forEach(item => {
+                const id = item.lcgvmnInstCd + item.rntstnId;
+                const detail = detailMap.get(id);
+
+                const lat = parseFloat(item.lat);
+                const lng = parseFloat(item.lot);
+                if (!lat || !lng) return;
+
+                // detail 병합
+                item.detailInfo = detail ?? null;
+
+                features.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [lng, lat] },
+                    properties: item
+                });
+            });
+
             const geojson = { type: "FeatureCollection", features: features };
 
-            this.seoulBike = L.markerClusterGroup();
-            L.geoJSON(geojson, {
+            this.allBike = L.markerClusterGroup();
+            const geoLayer = L.geoJSON(geojson, {
                 pointToLayer: (feature, latlng) => {
                     let marker = L.marker(latlng, { icon: this.iconBike });
-                    let popupContent = this.createSeoulPopup(feature.properties);
+                    let popupContent = this.createAllPopup(feature.properties);
                     marker.bindPopup(popupContent, { maxWidth: 300, className: 'custom-popup' });
-                    marker.where = 'seoul';
+                    marker.where = 'all';
                     marker.data = feature.properties;
                     return marker;
                 }
-            }).addTo(this.seoulBike);
-            this.map.addLayer(this.seoulBike);
+            }).addTo(this.allBike);
+            this.allBike.addLayer(geoLayer);
+            this.map.addLayer(this.allBike);
         }
 
         // 경기도 데이터 로드 및 클러스터 생성
@@ -469,7 +550,7 @@
 
         // 초기화: 서울과 경기도 데이터를 모두 로드한 후 목록 업데이트
         async init() {
-            await this.loadSeoulData();
+            await this.loadAllData();
             await this.loadGyeonggiData();
             this.updateBikeList();
         }
@@ -479,6 +560,17 @@
     document.addEventListener("DOMContentLoaded", () => {
         const bikeMap = new BikeMap('map', 'bike-list');
         bikeMap.init();
+
+        // 권역 버튼 생성
+        const container = document.querySelector(".region-buttons");
+        Object.entries(REGION_CENTERS).forEach(([key, value]) => {
+            const button = document.createElement("button");
+            button.textContent = value.name;
+            button.onclick = () => {
+                bikeMap.map.setView([value.lat, value.lng], 11); // 해당 권역으로 지도 이동
+            };
+            container.appendChild(button);
+        });
     });
 </script>
 </body>
