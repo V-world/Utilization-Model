@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>청약홈 분양정보 조회</title>
+    <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
+    <link rel="stylesheet" href="css/index.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="title-banner"><strong>한국부동산원 청약홈 분양 정보 조회</strong></div>
+
+    <a href="https://www.applyhome.co.kr/" target="_blank" id="home-link" title="청약홈 바로가기">🏠</a>
+
+    <div id="filter-toggle-wrapper">
+        <button id="filter-toggle-btn">🔍 필터</button>
+        <div id="filter-box" class="hidden">
+            <label>공고시작일: <input type="date" id="gte_date_input"></label>
+            <label>공고종료일: <input type="date" id="lte_date_input"></label>
+            <label>지역: 
+                <select id="area-select">
+                    <option value="">전체</option>
+                    <option name="서울" value="100">서울</option>
+                    <option name="강원" value="200">강원</option>
+                    <option name="대전" value="300">대전</option>
+                    <option name="충남" value="312">충남</option>
+                    <option name="세종" value="338">세종</option>
+                    <option name="충북" value="360">충북</option>
+                    <option name="인천" value="400">인천</option>
+                    <option name="경기" value="410">경기</option>
+                    <option name="광주" value="500">광주</option>
+                    <option name="전남" value="513">전남</option>
+                    <option name="전북" value="560">전북</option>
+                    <option name="부산" value="600">부산</option>
+                    <option name="경남" value="621">경남</option>
+                    <option name="울산" value="680">울산</option>
+                    <option name="제주" value="690">제주</option>
+                    <option name="대구" value="700">대구</option>
+                    <option name="경북" value="712">경북</option>
+                </select>
+            </label>
+            <label>주택구분:
+                <select id="type-select">
+                    <option value="">전체</option>
+                    <option name="APT" value="01">APT</option>
+                    <option name="민간사전청약" value="09">민간사전청약</option>
+                    <option name="신혼희망타운" value="10">신혼희망타운</option>
+                </select>
+            </label>
+            <button id="filter-apply">적용</button>
+        </div>
+    </div>
+
+    <div id="container">
+        <div id="sidebar">
+            <div id="list-items"></div> 
+            <div id="pagination-container"></div>
+        </div>
+        <div id="vmap"></div>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-header">
+            <span id="modal-title"><strong>모달 제목</strong></span>
+            <button class="modal-close" id="modal-close">×</button>
+        </div>
+        <div class="modal-notice">※ 페이지를 닫으시려면 상단의 닫기 버튼을 이용하세요.</div>
+        <iframe id="modal-frame"></iframe>
+    </div>
+    	
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        let apikey = 'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW%2B4ADeoHWXkF1j8TrQ%2BrBNRikicwGB7wGc4AUQtWishlRlSuhMw%3D%3D';
+
+        let today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth();
+        let date = today.getDate();
+
+        let lte_date = year + "-" + (month+1).toString().padStart(2, '0') + "-" + date;
+        let gte_date = year + "-" + month.toString().padStart(2, '0') + "-" + date;
+
+        document.getElementById('filter-toggle-btn').addEventListener('click', () => {
+            const box = document.getElementById('filter-box');
+            box.classList.toggle('hidden');
+        });
+
+        $(document).ready(function () {
+            $('#gte_date_input').val(gte_date);
+            $('#lte_date_input').val(lte_date);
+
+            goToPage(1); // 최초 호출
+
+            $('#search-input').on('input', function () {
+                const keyword = $(this).val().trim();
+                currentPage = 1;
+                goToPage(currentPage, keyword);
+            });
+        });
+
+        const viewer = ws3d.viewer;
+        let map, searchPolygon, currentMarker;
+
+        const perPage = 10;
+        let currentPage = 1;
+
+        let fullItemList = [];
+        let currentList = [];
+    
+        map = new vw.Map();
+        map.setOption({
+            mapId: "vmap",
+            initPosition: new vw.CameraPosition(
+                new vw.CoordZ(126.9401465303777, 37.519874413465715, 800),
+                new vw.Direction(0, -70, 0)
+            ),
+            logo: true,
+            navigation: false
+        });
+        map.setMapId("vmap");
+        map.start();
+
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('modal-frame').src = '';
+        });
+        
+        $('#filter-apply').on('click', function () {
+            currentPage = 1;
+            goToPage(currentPage);
+        });
+
+        vw.ws3dInitCallBack = function () {
+            
+            map.getElementById('poi_base').hide();
+            map.getElementById('facility_build').hide();
+            map.getElementById('facility_build_lod1').show();
+
+            fetchTotalAndLoad();
+        }
+
+        function showModal(title, url) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-frame').src = url;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function renderPagination(totalCount, searchKeyword = '') {
+            const totalPages = Math.ceil(totalCount / perPage);
+            const groupSize = 10;
+            const currentGroup = Math.floor((currentPage - 1) / groupSize);
+            const startPage = currentGroup * groupSize + 1;
+            const endPage = Math.min(startPage + groupSize - 1, totalPages);
+
+            const pager = $('<div class="pagination"></div>');
+
+            if (startPage > 1) {
+                pager.append(`<button data-page="1">&laquo;</button>`);
+                pager.append(`<button data-page="${startPage - 1}">&lsaquo;</button>`);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const active = (i === currentPage) ? 'active' : '';
+                pager.append(`<button class="${active}" data-page="${i}">${i}</button>`);
+            }
+
+            if (endPage < totalPages) {
+                pager.append(`<button data-page="${endPage + 1}">&rsaquo;</button>`);
+                pager.append(`<button data-page="${totalPages}">&raquo;</button>`);
+            }
+
+            pager.on('click', 'button', function () {
+                const page = Number($(this).attr('data-page'));
+                if (!isNaN(page)) {
+                    goToPage(page);
+                }
+            });
+
+            $('#pagination-container').empty().append(pager); 
+        }
+
+        function goToPage(page, searchKeyword = '') {
+            currentPage = page;
+
+            const gteInput = document.getElementById("gte_date_input").value || gte_date;
+            const lteInput = document.getElementById("lte_date_input").value || lte_date;
+            const area = document.getElementById("area-select").value;
+            const type = document.getElementById("type-select").value;
+
+            let url = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?` +
+                `cond[RCRIT_PBLANC_DE::LTE]=${encodeURIComponent(lteInput)}&` +
+                `cond[RCRIT_PBLANC_DE::GTE]=${encodeURIComponent(gteInput)}&` +
+                `page=${page}&perPage=${perPage}&returnType=JSON&serviceKey=${apikey}`;
+
+            if (area) url += `&cond[SUBSCRPT_AREA_CODE::EQ]=${encodeURIComponent(area)}`;
+            if (type) url += `&cond[HOUSE_SECD::EQ]=${encodeURIComponent(type)}`;
+            if (searchKeyword) url += `&cond[HOUSE_NM::LIKE]=${encodeURIComponent(searchKeyword)}`;
+
+            $('#list-items').html('<div style="text-align:center; padding:20px;">불러오는 중...</div>');
+
+            $.getJSON(url, function (data) {
+                currentList = data.data;
+                renderList(currentList);
+                renderPagination(data.matchCount, searchKeyword);
+            }).fail(function () {
+                $('#list-items').html('<div style="text-align:center; padding:20px; color:red;">데이터를 불러오는 데 실패했습니다.</div>');
+            });
+        }
+
+        function fetchTotalAndLoad() {
+            $.getJSON(`https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?cond[RCRIT_PBLANC_DE::LTE]=${lte_date}&cond[RCRIT_PBLANC_DE::GTE]=${gte_date}&serviceKey=${apikey}&page=1&perPage=1&returnType=JSON`, function(data) {
+                fetchList(data.matchCount);
+            });
+        }
+
+        function fetchList(totalCount = 0) {
+            $('#sidebar').html(`
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="search-input" placeholder="단지명 검색..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+                <div id="list-items"></div>
+                <div id="pagination-container"></div> 
+            `);
+            
+            $.getJSON(`https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?cond[RCRIT_PBLANC_DE::LTE]=${lte_date}&cond[RCRIT_PBLANC_DE::GTE]=${gte_date}&serviceKey=${apikey}&page=${currentPage}&perPage=${perPage}&returnType=JSON`, function(data) {
+                fullItemList = data.data;
+                isFiltered = false;
+                renderList(fullItemList);
+                
+                const matchCount = typeof data.matchCount === 'number' ? data.matchCount : fullItemList.length;
+                renderPagination(matchCount);
+
+                $('#search-input').on('input', function () {
+                    const keyword = $(this).val().trim();
+                    currentPage = 1;
+                    goToPage(currentPage, keyword);
+                });
+
+                $('#reset-filters').on('click', function () {
+                    $('#search-input').val('');
+                    $('#gte_date_input').val(gte_date);
+                    $('#lte_date_input').val(lte_date);
+                    currentPage = 1;
+                    isFiltered = false;
+                    renderList(fullItemList);
+                    renderPagination(fullItemList.length);
+                });
+            });
+        }
+
+        function renderList(list) {
+            $('#list-items').empty();
+            $('#sidebar').scrollTop(0);
+
+            if (!list || list.length === 0) {
+                $('#list-items').append('<div style="text-align:center; margin-top:20px; color:#777;">🔍 검색 결과가 없습니다.</div>');
+                return;
+            }
+
+            list.forEach(item => {
+                const el = $(`
+                    <div class="list-item">
+                        <div><strong>${item.HOUSE_NM} (${item.HOUSE_DTL_SECD_NM})</strong></div>
+                        <div style="font-size: 12px; color: #555;">- 공급위치: ${item.HSSPLY_ADRES}</div>
+                        <div style="font-size: 12px; color: #555;">- 접수시작일: ${item.RCEPT_BGNDE}</div>
+                    </div>
+                `);
+                el.click(() => locateAndShow(item));
+                $('#list-items').append(el);
+            });
+        }
+
+        function locateAndShow(itemT) {
+            // jquery ajax 비동기 통신
+            $.ajax({
+                type: "get",
+                url: "https://api.vworld.kr/req/address",
+                data : {
+                    key : 'CEB52025-E065-364C-9DBA-44880E3B02B8',
+                    service : 'address',
+                    request : 'getcoord',
+                    version : '2.0',
+                    crs : 'epsg:4326',
+                    address : itemT.HSSPLY_ADRES,
+                    type : 'PARCEL'
+                },
+                dataType: 'jsonp', //cors 우회를 위해 jsonp 이용
+                async: false,
+                success: function(data) {
+                    if(data.response.status =="NOT_FOUND"){
+                        alert('필지 정보가 존재하지 않습니다.');
+                    }else{
+                        let mx = data.response.result.point.x*1;
+                        let my = data.response.result.point.y*1;
+                        move(mx,my,300); 
+                    
+                        var title = itemT.HOUSE_NM;
+
+                        var pnu = data.response.refined.structure.level4LC;
+
+                        // 기존 폴리곤 제거
+                        if (searchPolygon) {
+                            map.removeObjectById("pnuPolygon");
+                        }
+                        
+                        if (currentMarker) {
+                            map.removeObject(currentMarker);
+                        }
+
+                        $.ajax({
+                            type: "get",
+                            url: "https://api.vworld.kr/req/data?key=CEB52025-E065-364C-9DBA-44880E3B02B8&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=10&page=1&geometry=true&attribute=true&crs=EPSG:4326&data=LP_PA_CBND_BUBUN",
+                            data : {attrfilter : 'pnu:=:'+pnu},
+                            async: false,
+                            dataType: 'jsonp',
+                            success: function(data) {
+                                const coords = data.response.result.featureCollection.features[0].geometry.coordinates[0][0].map(i => new vw.Coord(i[0], i[1]));
+                                const poly = new vw.geom.Polygon(new vw.Collection(coords));
+                                poly.setFillColor(new vw.Color(30, 144, 255, 130)); // dodgerblue, 약간 투명
+                                poly.setWidth(2);
+                                poly.setId("pnuPolygon");
+                                poly.create();
+                                searchPolygon = poly;
+
+                                const center = coords[Math.floor(coords.length / 2)];
+                                const markerCoord = new vw.CoordZ(center.x, center.y, 50);
+                                const marker = new vw.geom.PointZ(markerCoord);
+                                marker.setId("click_marker_" + Date.now());
+                                marker.setName(title);
+                                marker.setFont("Gowun Dodum");
+                                marker.setFontSize(16);
+                                marker.create();
+                                currentMarker = marker;
+
+                                marker.addEventListener(function(pos, ecef, carto, feature) {
+                                    showModal(title, itemT.PBLANC_URL);
+                                });
+
+                                poly.addEventListener(function(pos, ecef, carto, feature) {
+                                    showModal(title, itemT.PBLANC_URL);
+                                });
+                                
+                            },
+                            error: function(xhr, stat, err) {
+                                console.log(xhr, stat, err);
+                            }
+                        });
+                        
+                    }//else 종료
+
+                    
+                },
+                complete:function(){
+
+                },
+                error: function(xhr, stat, err) {}
+            });
+        }
+
+        function move(x, y, z) {
+            map.moveTo(new vw.CameraPosition(new vw.CoordZ(x, y, z), new vw.Direction(0, -80, 0)));
+        }
+
+        fetchList();
+
+    </script>
+</body>
+</html>

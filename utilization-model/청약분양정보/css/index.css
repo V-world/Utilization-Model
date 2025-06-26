@@ -1,0 +1,229 @@
+body {
+    font-family: 'Gowun Dodum', sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+div {
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+#title-banner {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e6f7ff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-size: 20px;
+}
+
+#container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+#sidebar {
+    width: 320px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    padding: 1rem;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+}
+
+#sidebar h1 {
+    font-size: 20px;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #333;
+}
+
+#vmap {
+    flex-grow: 1;
+    height: 100vh;
+    position: relative;
+}
+
+.list-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    border: 1px solid #dff6ff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.list-item:hover {
+    background-color: #e0f7ff;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    color: white;
+}
+
+.modal-header {
+    background: #8cd2f3;
+    color: white;
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.modal iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.modal-notice {
+    background-color: #e6f7ff;
+    color: #0369a1;
+    text-align: center;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #bde0f7;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 1px solid #bde0f7;
+    background-color: white;
+    color: #333;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.pagination button:hover {
+    background-color: #40bdf2;
+    border-color: #8cd2f3;
+    color: #000;
+}
+
+.pagination button.active {
+    background-color: #8cd2f3;
+    border-color: #1da2e0;
+    color: white;
+    font-weight: bold;
+}
+
+#home-link {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+    text-decoration: none;
+    z-index: 1500;
+    background: #ffffffcc;
+    border-radius: 10px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+#home-link:hover {
+    background-color: #e0f7ff;
+}
+
+#filter-toggle-wrapper {
+    font-family: 'Gowun Dodum', sans-serif;
+    position: absolute;
+    top: 20px;
+    left: 350px; 
+    z-index: 9999; 
+}
+
+#filter-toggle-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #8cd2f3;
+    background-color: #e6f7ff;
+    color: #0369a1;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+#filter-box {
+    background: #e6f7ff;
+    border: 1px solid #bde0f7;
+    border-radius: 12px;
+    padding: 14px;
+    width: 220px;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#filter-box label {
+    display: block;
+    margin-bottom: 8px;
+    color: #0369a1;
+}
+#filter-box select,
+#filter-box input[type="date"] {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #bde0f7;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+#filter-box button {
+    width: 100%;
+    padding: 6px 10px;
+    background-color: #8cd2f3;
+    border: 1px solid #1da2e0;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
