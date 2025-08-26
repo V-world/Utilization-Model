@@ -243,6 +243,10 @@
 			width: 100%;
 			height: auto;
 		}
+
+		#endMenu, #startMenu, #resultDIV {
+			display: none;
+		}
 	</style>
 </head>
 <body>
@@ -261,6 +265,7 @@
 			</div>
 		</div>
 	</div>
+	<!--
 	<div id="selBoxs">
 		<div id="ProList">
 		</div>
@@ -268,7 +273,8 @@
 			<button onclick="$('#selBoxs').hide()">닫기</button>
 		</div>
 	</div>
-
+	-->
+	
 	<div id="vmap"></div>
 	<div id="endMenu">
 		<div onclick="resetDart()">초기화면</div>
@@ -593,7 +599,7 @@
   			if (layerEl) layerEl.show();
 
 			dartEntity = false;
-			
+
 			removeAllFireworks();
 		}
 
