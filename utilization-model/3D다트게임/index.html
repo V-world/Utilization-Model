@@ -401,6 +401,7 @@
 		let selectedLayer = 0;
 		function layerSel(arg){
 			document.getElementById("startMenu").style.display = "none";
+			dartEntity = true;
 			const infoDesign = "success"
 
 			switch (arg){
@@ -481,10 +482,7 @@
 			}
 		};
 
-
-
-
-		var dartEntity;
+		var dartEntity = true;
 
 		var EarthrandomDart = Math.floor(Math.random() * cameraSettings.length)
 
@@ -591,7 +589,11 @@
 		}
 
 		function loadWMS(){
-			maps.getLayerElement(selectedLayer).show()
+			const layerEl = maps.getLayerElement(selectedLayer);
+  			if (layerEl) layerEl.show();
+
+			dartEntity = false;
+			
 			removeAllFireworks();
 		}
 
@@ -700,10 +702,17 @@
 		}
 
 		vw.ws3dInitCallBack = function () {
-			document.getElementById("mapToolBar").hidden = true;
-			document.getElementById("naviRotate").hidden = true;
-			document.getElementById("naviZoomPannel").hidden = true;
-			maps.getLayerElement("poi_bound").hide()
+			const mapToolBar = document.getElementById("mapToolBar");
+			if (mapToolBar) mapToolBar.hidden = true;
+
+			const naviRotate = document.getElementById("naviRotate");
+			if (naviRotate) naviRotate.hidden = true;
+
+			const naviZoomPannel = document.getElementById("naviZoomPannel");
+			if (naviZoomPannel) naviZoomPannel.hidden = true;
+
+			const poiBound = maps.getLayerElement("poi_bound");
+			if (poiBound) poiBound.hide();
 
 
 			var wmsSource = new vw.source.TileWMS();
