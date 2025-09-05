@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>문화재 찾기 게임</title>
+  <link rel="icon" type="image/png" href="./img/favicon.png" />
   <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
   <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/routeSim/routeSim_analysis_api.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
     body {
       margin: 0;
       font-family: 'NanumGothic', sans-serif;
@@ -15,104 +18,86 @@
       height: 100vh;
     }
 
-    #regionSelector {
-      position: absolute; z-index: 1000;
-      background: rgba(255,255,255,0.9); padding: 12px; border-radius: 8px;
-      font-family: 'NanumGothic', sans-serif;
+    #startImage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 720px;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
     }
 
-    #regionSelector {
+    #regionSelector.image-buttons {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1000;
-      background: rgba(255,255,255,0.95);
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      display: none; /* 초기에는 숨김 */
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      display: flex;
+      flex-direction: row;
+      gap: 40px;
+      z-index: 1001;
+      display: none;
       animation: floatIn 1s ease-out;
     }
 
-    #mainTitle {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 40px;
-      color:  rgba(255, 255, 255, 0.95);
-      font-weight: bold;
-      z-index: 1001;
-      font-family: 'NanumGothic', sans-serif;
+    #regionSelector.image-buttons img {
+      width: 160px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.3s ease;
     }
-
-    #regionSelector button {
-      background: #ffccdd; border: none;
-      padding: 16px 28px; font-size: 20px; font-weight: bold;
-      border-radius: 20px; cursor: pointer;
-      transition: transform 0.2s;
-      min-width: 260px;
-    }
-
-    #regionSelector button:hover { 
-      background: #ffc1d4; transform: scale(1.05); 
+    
+    #regionSelector.image-buttons img:hover {
+      transform: scale(1.3);
     }
 
     @keyframes floatIn {
       from { opacity: 0; transform: translate(-50%, -60%); }
       to { opacity: 1; transform: translate(-50%, -50%); }
     }
-
-    #routeButtons, #startBtn {
+    
+    #routeButtons {
       position: absolute;
       top: 100px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1100;
-      background: rgba(255, 255, 255, 0.95);
       padding: 12px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
       display: flex;
       gap: 10px;
     }
 
-    #routeButtons button {
-      background-color: #ffdcdc;
-      border: none;
-      padding: 10px 18px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    #routeButtons button:hover {
-      background-color: #ffbbbb;
-    }
-    #routeButtons {
+    #routeButtons.image-buttons {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 1100;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 20px;
       display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+      flex-direction: row;
+      gap: 50px;
+      animation: floatIn 1s ease-out;
+      /* 배경이미지 */
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+      padding: 55px 36px;
+      width: 750px;
+      height: 250px;
     }
-    #routeButtons.show {
-      opacity: 1;
+
+    #routeButtons.image-buttons img {
+      width: auto;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    #routeButtons.image-buttons img:hover {
+      transform: scale(1.2);
     }
 
     #startBtn {
@@ -121,31 +106,87 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 1000;
-      background: #ffccdd;
-      border: none;
-      padding: 20px 36px;
-      font-size: 24px;
-      font-weight: bold;
-      border-radius: 30px;
+      width: 300px;      
+      height: auto;
       cursor: pointer;
       display: none;
       animation: floatIn 1s ease-out;
+    }
+
+    /* 전체 상단 위치 컨테이너 */
+    .arrival-popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    /* 등수 라벨 */
+    .rank-label {
+      font-family: 'Jua', sans-serif; /* 귀여운 웹폰트 */
+      font-size: 42px;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* 검은 그림자 */
+      margin-bottom: 15px;
+    }
+
+    /* 붕붕 애니메이션 */
+    @keyframes floatUpDown {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0); }
+    }
+
+    .floating-marker {
+      animation: floatUpDown 1.5s ease-in-out infinite;
+    }
+
+    #resetImageBtn {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      z-index: 2000;
+      width: 180px;
+      height: auto;
+      cursor: pointer;
+      display: none;
+      transition: transform 0.3s ease;
+    }
+    #resetImageBtn:hover {
+      transform: scale(1.1);
+    }
+
+    #miniMapImage {
+      position: absolute;
+      bottom: 40px;
+      left: 20px;
+      width: 500px;
+      height: auto;
+      z-index: 1500;
+      border: 2px solid white;
+      border-radius: 12px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
   <div id="vmap"></div>
-  <h1 id="mainTitle">문화재 경로 찾기 게임!</h1>
-  <div id="regionSelector">
-    <button onclick="moveToHeritage('seoul')">🕌 서울 (경복궁)</button>
-    <button onclick="moveToHeritage('suwon')">🏯 수원 (팔달문)</button>
-    <button onclick="moveToHeritage('daejeon')">🔬 대전 (엑스포)</button>
+  <img id="startImage" src="./img/main_nobutton.png" />
+  <div id="regionSelector" class="image-buttons">
+    <img src="./img/1_seoul.png" onclick="moveToHeritage('seoul')" />
+    <img src="./img/2_suwon.png" onclick="moveToHeritage('suwon')" />
+    <img src="./img/3_daejeon.png" onclick="moveToHeritage('daejeon')" />
   </div>
-  <button id="startBtn" onclick="startRoute()">▶️ 시작</button>
+  <img id="startBtn" src="./img/start.png" onclick="startRoute()" />
   <div class="geojson">
     <textarea class="form-control" id="routeGeoJSONTextarea" rows="4" hidden></textarea>
   </div>
   <div id="routeButtons" style="display: none;"></div>
+  <img id="resetImageBtn" src="./img/restart.png" onclick="resetToStart()" />
+  <img id="miniMapImage" src="" style="display:none;" />
   <script>
     // 문화재별 설정: 좌표(lon,lat), 높이(alt), 회전반경(range)
     const configs = {
@@ -233,11 +274,11 @@
 
     // VWorld 초기화 콜백
     vw.ws3dInitCallBack = function() {
-      document.getElementById('regionSelector').style.display = 'flex';
-
       map.getElementById('poi_road').hide();
       map.getElementById('poi_base').hide();
       map.getElementById('poi_bound').hide();
+
+      document.getElementById('regionSelector').style.display = 'flex';
     };
 
     // 문화재 선택 후 해당 위치로 이동하고 회전 시작
@@ -245,6 +286,7 @@
       window.currentRegion = key;
       window.currentKey = key;
       const cfg = configs[key];
+      document.getElementById('startImage').style.display = 'none';
       document.getElementById('regionSelector').style.display = 'none';
       const dest = Cesium.Cartesian3.fromDegrees(cfg.lon, cfg.lat, cfg.alt);
       viewer.camera.flyTo({
@@ -260,7 +302,6 @@
 
     // 출발지 시뮬레이션 시작 함수
     function startRoute() {
-      document.getElementById('mainTitle').style.display = 'none';
       document.getElementById('startBtn').style.display = 'none';
 
       // 1. 회전 중지
@@ -272,11 +313,12 @@
       
       const region = window.currentRegion || 'seoul';
 
-      const geojsonUrl = `./${region}.geojson`;
+      const geojsonUrl = `./geojson/${region}.geojson`;
 
       // 2. GeoJSON 불러오기
       $.ajax({
         url: geojsonUrl,
+        // dataType: 'json', 운영 서버(tomcat) 적용 시
         success: function(data) {
           const allFeatures = data.features;
 
@@ -286,17 +328,28 @@
           // ✅ 동적으로 버튼 생성
           const container = document.getElementById('routeButtons');
           container.innerHTML = '';
+          container.className = 'image-buttons';
+         
           baseNames.forEach((name, idx) => {
-            const btn = document.createElement('button');
-            btn.textContent = `${idx + 1}번 경로`;
-            btn.onclick = () => {
+            const img = document.createElement('img');
+            img.src = `./img/route_${idx + 1}.png`; // 예: route_1.png, route_2.png, ...
+            img.alt = `${idx + 1}번 경로`;
+            img.onclick = () => {
+              const miniMap = document.getElementById('miniMapImage');
+              if (miniMap) miniMap.style.display = 'none';
+
               container.style.display = 'none';
+              container.classList.remove('show');
               selectRoute(name);
             };
-            container.appendChild(btn);
+            container.appendChild(img);
           });
-          container.style.display = 'flex';
-          container.classList.add('show');
+
+          if (baseNames.length === 3) {
+            container.style.backgroundImage = "url('./img/route_3button.png')";
+          } else if (baseNames.length === 2) {
+            container.style.backgroundImage = "url('./img/route_2button.png')";
+          }
 
           // 1. 저장해두기 (전역 변수 활용)
           window.routeFeatures = allFeatures; // feature array 저장
@@ -327,10 +380,7 @@
               pitch: Cesium.Math.toRadians(-90),
               roll: 0
             },
-            duration: 2,
-            complete: () => {
-              document.getElementById('routeButtons').classList.add('show');
-            }
+            duration: 2
           });
 
           // 5. 필터링된 결과로 FeatureCollection 생성
@@ -348,13 +398,22 @@
           // 7. 화면에 로드
           Cesium.GeoJsonDataSource.load(partialGeoJSON, {
             clampToGround: true,
-            stroke: Cesium.Color.HOTPINK,
-            fill: Cesium.Color.PINK.withAlpha(0.3),
-            strokeWidth: 3
+            stroke: Cesium.Color.TRANSPARENT,
+            fill: Cesium.Color.TRANSPARENT,
+            strokeWidth: 0
           }).then(function (dataSource) {
             viewer.dataSources.removeAll();
             viewer.dataSources.add(dataSource);
-            viewer.zoomTo(dataSource);
+
+            setTimeout(() => {
+              const miniMap = document.getElementById('miniMapImage');
+              miniMap.src = `./img/minimap_${region}_0.png`;
+              miniMap.style.display = 'block';
+              
+              const container = document.getElementById('routeButtons');
+              container.style.display = 'flex';
+              container.classList.add('show');
+            }, 3000); // 3000ms = 3초
           }).catch(function (error) {
             console.error('GeoJSON 로드 오류:', error);
           });
@@ -364,7 +423,7 @@
         }
       });
 
-      document.getElementById('routeButtons').style.display = 'flex';
+      //document.getElementById('routeButtons').style.display = 'flex';
     }
 
     function getLastCoordinate(feature) {
@@ -423,9 +482,9 @@
 
       Cesium.GeoJsonDataSource.load(geojson, {
         crsNames: 'EPSG:4326',
-        stroke: Cesium.Color.HOTPINK,
-        fill: Cesium.Color.PINK.withAlpha(0.3),
-        strokeWidth: 3,
+        stroke: Cesium.Color.TRANSPARENT,
+        fill: Cesium.Color.TRANSPARENT,
+        strokeWidth: 0,
         clampToGround: true
       }).then(function (dataSource) {
         viewer.dataSources.removeAll();
@@ -441,7 +500,7 @@
       }
 
       routeSimObject.createRouteByGeoJSON(geojson);
-      routeSimObject.playRouteSimulation(500, 0.5, '#FFFFFF', 75);
+      routeSimObject.playRouteSimulation(700, 0.5, '#FFFFFF', 75);
       routeSimObject.trackedModel('fpView', true);
 
       // ▶️ 모델 위치 추적해서 도착 감지
@@ -460,26 +519,19 @@
         const dy = lat - lastCoord[1];
         const distSq = dx * dx + dy * dy;
 
-        // 약 15m 이내일 경우 도착한 것으로 간주
-        if (distSq < 0.0000007) {
+        if (distSq < 0.0000005) {
           clearInterval(routeMonitorTimer);
           console.log('✅ 도착 확인', lon, lat);
           routeSimObject.pauseRouteSimulation();
           showBranchOptions();
         }
-      }, 1000);
+        
+      }, 500);
 
       console.log('📌 선택한 경로:', routeName);
       console.log('📌 마지막 좌표:', lastCoord);
       document.getElementById('routeButtons').style.display = 'none';
-    }
-
-    function isNear(pos, target, threshold = 0.0002) {
-      const [lon1, lat1] = pos;
-      const [lon2, lat2] = target;
-      const dLon = lon1 - lon2;
-      const dLat = lat1 - lat2;
-      return (dLon * dLon + dLat * dLat) < (threshold * threshold);
+      document.getElementById('miniMapImage').style.display = 'none';
     }
 
     // 회전 애니메이션 실행
@@ -502,27 +554,112 @@
 
       const container = document.getElementById('routeButtons');
       container.innerHTML = ''; // 기존 버튼 제거
+      container.className = 'image-buttons';
+
+      const baseIndex = ['_1', '_2', '_3'].findIndex(suffix => routeName.endsWith(suffix));
+      if (baseIndex !== -1) {
+        const miniMap = document.getElementById('miniMapImage');
+        miniMap.src = `./img/minimap_${region}_${baseIndex + 1}.png`;
+        miniMap.style.display = 'block';
+      }
       
       if (!branches || branches.length === 0) {
         container.style.display = 'none';
         container.classList.remove('show');
-        alert("🎉 탐험 종료!");
-        return;
+
+        document.getElementById('miniMapImage').style.display = 'none';
+
+        // ✅ 마커 이미지 선택 로직
+        let imgSrc = '';
+        let rankMessage = '';
+
+        if (routeName.includes('success')) {
+          const regionNames = {
+            seoul: '경복궁',
+            suwon: '팔달문',
+            daejeon: '엑스포 한빛탑'
+          };
+
+          const placeName = regionNames[region] || '문화재';
+          const successMessage = `1등 ! ${placeName}에 도착했습니다`;
+
+          showArrivalEffect(successMessage, null); // 이미지 없이
+        } else {
+          const rand = Math.floor(Math.random() * 3); // 0, 1, 2
+          const options = [
+            { img: './img/re_zuvi.png', msg: '2등! 쥬비 발견' },
+            { img: './img/re_ddid.png', msg: '3등! 띠드 발견' },
+            { img: './img/re_v.png', msg: '1등! 뷔 발견' }
+          ];
+          const selected = options[rand];
+          imgSrc = selected.img;
+          rankMessage = selected.msg;
+        }
+
+        showArrivalEffect(rankMessage, imgSrc);
+
+        document.getElementById('resetImageBtn').style.display = 'block';
+
+        return;    
       }
 
-      branches.forEach(branch => {
-        const btn = document.createElement('button');
-        btn.textContent = `${branch.label}`;
-        btn.onclick = () => {
-          container.style.display = 'none';  // 버튼 숨기기
+      branches.forEach((branch, idx) => {
+        const img = document.createElement('img');
+        img.src = `./img/route_${idx + 1}.png`;  // 👉 index 기반 이미지 사용
+        img.alt = branch.label;
+        img.onclick = () => {
+          container.style.display = 'none';
           container.classList.remove('show');
           selectRoute(branch.name);
         };
-        container.appendChild(btn);
+        container.appendChild(img);
       });
 
+      if (branches.length === 3) {
+        container.style.backgroundImage = "url('./img/route_3button.png')";
+        container.style.padding = '55px 36px';
+      } else if (branches.length === 2) {
+        container.style.backgroundImage = "url('./img/route_2button.png')";
+        container.style.padding = '50px 145px';
+        //55px 158px
+      }
+
       container.style.display = 'flex';
-      container.classList.add('show');
+      container.classList.add('image-buttons');
+    }
+
+    function showArrivalEffect(rank, imgSrc) {
+      const existing = document.querySelector('.arrival-popup');
+      if (existing) return; // 이미 떠 있으면 중복 방지
+
+      const container = document.createElement('div');
+      container.className = 'arrival-popup';
+
+      const label = document.createElement('div');
+      label.className = 'rank-label';
+      label.innerText = rank;
+
+      container.appendChild(label);
+
+      // 이미지가 있을 때만 생성
+      if (imgSrc) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.className = 'floating-marker';
+        container.appendChild(img);
+      }
+
+      document.body.appendChild(container);
+    }
+
+    function resetToStart() {
+      location.reload();
+    }
+
+    function showMiniMap(imgName) {
+      const miniMap = document.getElementById('miniMapImage');
+      miniMap.src = `./img/${imgName}`;
+      miniMap.style.display = 'block';
     }
 
   </script>

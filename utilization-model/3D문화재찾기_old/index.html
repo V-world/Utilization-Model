@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>문화재 찾기 게임</title>
+  <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CEB52025-E065-364C-9DBA-44880E3B02B8"></script>
+  <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/routeSim/routeSim_analysis_api.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'NanumGothic', sans-serif;
+    }
+    #vmap {
+      width: 100%;
+      height: 100vh;
+    }
+
+    #regionSelector {
+      position: absolute; z-index: 1000;
+      background: rgba(255,255,255,0.9); padding: 12px; border-radius: 8px;
+      font-family: 'NanumGothic', sans-serif;
+    }
+
+    #regionSelector {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      display: none; /* 초기에는 숨김 */
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: floatIn 1s ease-out;
+    }
+
+    #mainTitle {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 40px;
+      color:  rgba(255, 255, 255, 0.95);
+      font-weight: bold;
+      z-index: 1001;
+      font-family: 'NanumGothic', sans-serif;
+    }
+
+    #regionSelector button {
+      background: #ffccdd; border: none;
+      padding: 16px 28px; font-size: 20px; font-weight: bold;
+      border-radius: 20px; cursor: pointer;
+      transition: transform 0.2s;
+      min-width: 260px;
+    }
+
+    #regionSelector button:hover { 
+      background: #ffc1d4; transform: scale(1.05); 
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    #routeButtons, #startBtn {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      gap: 10px;
+    }
+
+    #routeButtons button {
+      background-color: #ffdcdc;
+      border: none;
+      padding: 10px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #routeButtons button:hover {
+      background-color: #ffbbbb;
+    }
+    #routeButtons {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1100;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #routeButtons.show {
+      opacity: 1;
+    }
+
+    #startBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: #ffccdd;
+      border: none;
+      padding: 20px 36px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      display: none;
+      animation: floatIn 1s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="vmap"></div>
+  <h1 id="mainTitle">문화재 경로 찾기 게임!</h1>
+  <div id="regionSelector">
+    <button onclick="moveToHeritage('seoul')">🕌 서울 (경복궁)</button>
+    <button onclick="moveToHeritage('suwon')">🏯 수원 (팔달문)</button>
+    <button onclick="moveToHeritage('daejeon')">🔬 대전 (엑스포)</button>
+  </div>
+  <button id="startBtn" onclick="startRoute()">▶️ 시작</button>
+  <div class="geojson">
+    <textarea class="form-control" id="routeGeoJSONTextarea" rows="4" hidden></textarea>
+  </div>
+  <div id="routeButtons" style="display: none;"></div>
+  <script>
+    // 문화재별 설정: 좌표(lon,lat), 높이(alt), 회전반경(range)
+    const configs = {
+      seoul:   { lon:126.9769,       lat:37.5796,       alt:300, range:400 },
+      suwon:   { lon:127.016941,    lat:37.277818, alt:300, range:300 },
+      daejeon: { lon:127.388008,       lat:36.376622,       alt:300, range:500 }
+    };
+    // 맵 & 뷰어 변수
+    let map, viewer, rotateId;
+    // 초기 카메라 위치
+    const initPos = { lon:126.9401465303777, lat:37.519874413465715, alt:800, heading:0, pitch:-70 };
+
+    map = new vw.Map();
+    map.setOption({
+    mapId: 'vmap',
+    initPosition: new vw.CameraPosition(
+        new vw.CoordZ(initPos.lon, initPos.lat, initPos.alt),
+        new vw.Direction(initPos.heading, initPos.pitch, 0)
+    ),
+    logo: true,
+    navigation: false
+    });
+    map.setMapId('vmap');
+    map.start();
+
+    viewer = ws3d.viewer;
+
+    let miro_name = '';
+    let miro_geom = [];
+    let miro_road = [];
+
+    let routeSimObject; // 모의주행 객체
+    let crashPointEntities = []; //충돌지점
+    let selectedRoute = null;
+    let geojsonData = null;
+    let routeMonitorTimer = null;
+
+    const routeBranchTables = {
+      seoul: {
+        'seoul_1': [
+          { name: '1_seoul_success_1st', label: '1번 경로', rank: 1 },
+          { name: '1_seoul_fail_2nd_1', label: '2번 경로', rank: 2 },
+          { name: '1_seoul_fail_2nd_2', label: '3번 경로', rank: 2 }
+        ],
+        'seoul_2': [
+          { name: '2_seoul_1', label: '1번 경로', rank: 3 },
+          { name: '2_seoul_2', label: '2번 경로', rank: 3 }
+        ],
+        'seoul_3': [
+          { name: '3_seoul_1', label: '1번 경로', rank: 3 },
+          { name: '3_seoul_2', label: '2번 경로', rank: 3 }
+        ]
+      },
+      suwon: {
+        'suwon_1': [
+          { name: '1_suwon_1', label: '1번 경로', rank: 3 },
+          { name: '1_suwon_2', label: '2번 경로', rank: 3 }
+        ],
+        'suwon_2': [
+          { name: '2_suwon_1', label: '1번 경로', rank: 3 },
+          { name: '2_suwon_2', label: '2번 경로', rank: 3 }
+        ],
+        'suwon_3': [
+          { name: '3_suwon_fail_2nd_1', label: '1번 경로', rank: 2 },
+          { name: '3_suwon_fail_2nd_2', label: '2번 경로', rank: 2 },
+          { name: '3_suwon_success_1st', label: '3번 경로', rank: 1 }
+        ]
+      },
+      daejeon : {
+        'daejeon_1': [
+          { name: '1_daejeon_1', label: '1번 경로', rank: 3 },
+          { name: '1_daejeon_2', label: '2번 경로', rank: 3 }
+        ],
+        'daejeon_2': [
+          { name: '2_daejeon_fail_2nd_1', label: '1번 경로', rank: 2 },
+          { name: '2_daejeon_success_1st', label: '2번 경로', rank: 1 },
+          { name: '2_daejeon_fail_2nd_2', label: '3번 경로', rank: 2 }
+        ],
+        'daejeon_3': [
+          { name: '3_daejeon_1', label: '1번 경로', rank: 3 },
+          { name: '3_daejeon_2', label: '2번 경로', rank: 3 }
+        ]
+      }
+    };
+
+    // VWorld 초기화 콜백
+    vw.ws3dInitCallBack = function() {
+      document.getElementById('regionSelector').style.display = 'flex';
+
+      map.getElementById('poi_road').hide();
+      map.getElementById('poi_base').hide();
+      map.getElementById('poi_bound').hide();
+    };
+
+    // 문화재 선택 후 해당 위치로 이동하고 회전 시작
+    function moveToHeritage(key) {
+      window.currentRegion = key;
+      window.currentKey = key;
+      const cfg = configs[key];
+      document.getElementById('regionSelector').style.display = 'none';
+      const dest = Cesium.Cartesian3.fromDegrees(cfg.lon, cfg.lat, cfg.alt);
+      viewer.camera.flyTo({
+        destination: dest,
+        orientation: { heading: Cesium.Math.toRadians(0), pitch: Cesium.Math.toRadians(-45), roll:0 },
+        duration:2,
+        complete: () => {
+          startRotation(cfg);
+          document.getElementById('startBtn').style.display = 'block'; 
+        }
+      });
+    }
+
+    // 출발지 시뮬레이션 시작 함수
+    function startRoute() {
+      document.getElementById('mainTitle').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+
+      // 1. 회전 중지
+      if (rotateId) {
+        clearInterval(rotateId);
+        rotateId = null;
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      }
+      
+      const region = window.currentRegion || 'seoul';
+
+      const geojsonUrl = `./${region}.geojson`;
+
+      // 2. GeoJSON 불러오기
+      $.ajax({
+        url: geojsonUrl,
+        success: function(data) {
+          const allFeatures = data.features;
+
+          const baseNames = [`${region}_1`, `${region}_2`, `${region}_3`];
+          const filtered = allFeatures.filter(f => baseNames.includes(f.properties.Name));
+
+          // ✅ 동적으로 버튼 생성
+          const container = document.getElementById('routeButtons');
+          container.innerHTML = '';
+          baseNames.forEach((name, idx) => {
+            const btn = document.createElement('button');
+            btn.textContent = `${idx + 1}번 경로`;
+            btn.onclick = () => {
+              container.style.display = 'none';
+              selectRoute(name);
+            };
+            container.appendChild(btn);
+          });
+          container.style.display = 'flex';
+          container.classList.add('show');
+
+          // 1. 저장해두기 (전역 변수 활용)
+          window.routeFeatures = allFeatures; // feature array 저장
+          window.geojsonData    = data;
+
+          if (!allFeatures || allFeatures.length === 0) {
+            alert("GeoJSON에 feature가 없습니다.");
+            return;
+          }
+
+          // 3. 첫 번째 feature의 시작 위치로 카메라 이동
+          const startCoordsTable = {
+            seoul:   [126.9890087, 37.561121, 100],     // 경복궁 근처
+            suwon:   [127.0252691, 37.2899247,    100],     // 팔달문 근처
+            daejeon: [127.3535672, 36.3507401,    100]      // 대전 엑스포 근처
+          };
+
+          const firstCoords = startCoordsTable[region]
+
+          const [lon, lat, alt = 100] = firstCoords;
+          const cameraHeight = 1000; 
+          const startPosition = Cesium.Cartesian3.fromDegrees(lon, lat, cameraHeight);
+
+          viewer.camera.flyTo({
+            destination: startPosition,
+            orientation: {
+              heading: Cesium.Math.toRadians(0),
+              pitch: Cesium.Math.toRadians(-90),
+              roll: 0
+            },
+            duration: 2,
+            complete: () => {
+              document.getElementById('routeButtons').classList.add('show');
+            }
+          });
+
+          // 5. 필터링된 결과로 FeatureCollection 생성
+          const partialGeoJSON = {
+            type: "FeatureCollection",
+            name: `${region}_filtered`,
+            crs: data.crs || {
+              type: "name",
+              properties: { name: "EPSG:4326" }
+            },
+            features: filtered
+          };
+
+          viewer.dataSources.removeAll();
+          // 7. 화면에 로드
+          Cesium.GeoJsonDataSource.load(partialGeoJSON, {
+            clampToGround: true,
+            stroke: Cesium.Color.HOTPINK,
+            fill: Cesium.Color.PINK.withAlpha(0.3),
+            strokeWidth: 3
+          }).then(function (dataSource) {
+            viewer.dataSources.removeAll();
+            viewer.dataSources.add(dataSource);
+            viewer.zoomTo(dataSource);
+          }).catch(function (error) {
+            console.error('GeoJSON 로드 오류:', error);
+          });
+        },
+        error: function () {
+          alert("GeoJSON 파일을 불러오는 데 실패했습니다.");
+        }
+      });
+
+      document.getElementById('routeButtons').style.display = 'flex';
+    }
+
+    function getLastCoordinate(feature) {
+      const geom = feature.geometry;
+
+      if (geom.type === 'LineString') {
+        const coords = geom.coordinates;
+        return coords[coords.length - 1].slice(0, 2); // [lon, lat]
+      }
+
+      if (geom.type === 'MultiLineString') {
+        const multi = geom.coordinates;
+        const lastLine = multi[multi.length - 1];
+        if (!lastLine || lastLine.length === 0) return null;
+        return lastLine[lastLine.length - 1].slice(0, 2); // [lon, lat]
+      }
+
+      return null;
+    }
+
+    function selectRoute(routeName) {
+      
+      window.currentRouteName = routeName;
+
+      if (!window.routeFeatures || routeFeatures.length === 0) {
+        alert('경로 정보가 로드되지 않았습니다.');
+        return;
+      }
+
+      const feature = routeFeatures.find(f => f.properties.Name === routeName);
+      if (!feature) {
+        alert(`경로 ${routeName} 를 찾을 수 없습니다.`);
+        return;
+      }
+
+      // ▶️ 마지막 지점 기억
+      const lastCoord = getLastCoordinate(feature);
+      if (!lastCoord) {
+        console.warn('❌ 마지막 좌표 추출 실패:', routeName);
+        return;
+      }
+
+      const raw = feature.geometry.coordinates;
+      const multi = Array.isArray(raw[0][0]) ? raw : [raw];
+
+      const geojson = {
+        type: "FeatureCollection",
+        name: "miro_geojson",
+        crs: { type: "name", properties: { name: "EPSG:4326" } },
+        features: [{
+          type: "Feature",
+          properties: { name: routeName },
+          geometry: { type: "MultiLineString", coordinates: multi }
+        }]
+      };
+
+      Cesium.GeoJsonDataSource.load(geojson, {
+        crsNames: 'EPSG:4326',
+        stroke: Cesium.Color.HOTPINK,
+        fill: Cesium.Color.PINK.withAlpha(0.3),
+        strokeWidth: 3,
+        clampToGround: true
+      }).then(function (dataSource) {
+        viewer.dataSources.removeAll();
+        viewer.dataSources.add(dataSource);
+        viewer.zoomTo(dataSource);
+      });
+
+      // 시뮬레이터 준비
+      if (!routeSimObject) {
+        routeSimObject = new RouteSimulation('routeSimObject1', 'routeSimObject1', 'DRONE');
+      } else {
+        routeSimObject.type = 'DRONE';
+      }
+
+      routeSimObject.createRouteByGeoJSON(geojson);
+      routeSimObject.playRouteSimulation(500, 0.5, '#FFFFFF', 75);
+      routeSimObject.trackedModel('fpView', true);
+
+      // ▶️ 모델 위치 추적해서 도착 감지
+      if (routeMonitorTimer) clearInterval(routeMonitorTimer);
+      routeMonitorTimer = setInterval(() => {
+        if (!routeSimObject.modelEntity) return;
+
+        const position = routeSimObject.modelEntity.position?.getValue(viewer.clock.currentTime);
+        if (!position) return;
+
+        const cartographic = Cesium.Cartographic.fromCartesian(position);
+        const lon = Cesium.Math.toDegrees(cartographic.longitude);
+        const lat = Cesium.Math.toDegrees(cartographic.latitude);
+
+        const dx = lon - lastCoord[0];
+        const dy = lat - lastCoord[1];
+        const distSq = dx * dx + dy * dy;
+
+        // 약 15m 이내일 경우 도착한 것으로 간주
+        if (distSq < 0.0000007) {
+          clearInterval(routeMonitorTimer);
+          console.log('✅ 도착 확인', lon, lat);
+          routeSimObject.pauseRouteSimulation();
+          showBranchOptions();
+        }
+      }, 1000);
+
+      console.log('📌 선택한 경로:', routeName);
+      console.log('📌 마지막 좌표:', lastCoord);
+      document.getElementById('routeButtons').style.display = 'none';
+    }
+
+    function isNear(pos, target, threshold = 0.0002) {
+      const [lon1, lat1] = pos;
+      const [lon2, lat2] = target;
+      const dLon = lon1 - lon2;
+      const dLat = lat1 - lat2;
+      return (dLon * dLon + dLat * dLat) < (threshold * threshold);
+    }
+
+    // 회전 애니메이션 실행
+    function startRotation({lon, lat, range}) {
+      if (rotateId) clearInterval(rotateId);
+      const center = Cesium.Cartesian3.fromDegrees(lon, lat, 0);
+      const pitch = Cesium.Math.toRadians(-45);
+      let hd = 0;
+      rotateId = setInterval(() => {
+        const heading = Cesium.Math.toRadians(hd);
+        viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+        hd = (hd + 0.3) % 360;
+      }, 50);
+    }
+
+    function showBranchOptions() {
+      const routeName = window.currentRouteName;
+      const region = window.currentRegion;
+      const branches = routeBranchTables[region]?.[routeName];
+
+      const container = document.getElementById('routeButtons');
+      container.innerHTML = ''; // 기존 버튼 제거
+      
+      if (!branches || branches.length === 0) {
+        container.style.display = 'none';
+        container.classList.remove('show');
+        alert("🎉 탐험 종료!");
+        return;
+      }
+
+      branches.forEach(branch => {
+        const btn = document.createElement('button');
+        btn.textContent = `${branch.label}`;
+        btn.onclick = () => {
+          container.style.display = 'none';  // 버튼 숨기기
+          container.classList.remove('show');
+          selectRoute(branch.name);
+        };
+        container.appendChild(btn);
+      });
+
+      container.style.display = 'flex';
+      container.classList.add('show');
+    }
+
+  </script>
+</body>
+</html>

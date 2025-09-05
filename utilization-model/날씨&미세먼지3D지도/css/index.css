@@ -1,0 +1,279 @@
+@font-face {
+    font-family: 'TheJamsil5Bold';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil5Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#map {
+    display: flex;
+}
+
+#map2d {
+    width: 100%;
+    height: 100vh;
+}
+
+.iconimage{
+    width: 30px;
+}
+
+#locName{
+    font-family: TheJamsil5Bold, serif;
+}
+
+#information{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    border: 1px solid #66CCCC;
+}
+
+hr{
+    border: 1px solid #66CCCC;
+}
+
+.tdline{
+    vertical-align: middle;
+}
+
+table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.info-title{
+    text-align: center;
+    font-family: TheJamsil5Bold, serif;
+    font-size: 15px;
+}
+
+th, td{
+    width: 20px;
+    padding: 10px;
+    border-bottom: 2px solid #66CCCC;
+    text-align: center;
+    font-size: 12px;
+    font-family: TheJamsil5Bold, serif;
+}
+
+.infoimg{
+    width: 20px;
+}
+
+#popup-two, #popup-three, #popup-for{
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+.ol-popup-closer:after {
+    content: "✖";
+}
+
+.nowMapType {
+    font-family: TheJamsil5Bold, serif;
+    border: 3px solid #3498db;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: white;
+    width: 50px;
+    padding: 16px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.mapType {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    display: inline-block;
+}
+
+.mapType button {
+    padding-left: 5px;
+    padding-top: 10px;
+    padding-right: 5px;
+    padding-bottom: 10px;
+}
+
+.mapTypeList {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    width: 50px;
+    border-radius: 8px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.mapTypeList a {
+    text-align: center;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-family: TheJamsil5Bold, serif;
+}
+
+.mapTypeList a:hover {
+    background-color: #c9c9c9;
+    border-radius: 8px;
+}
+
+.mapType:hover .mapTypeList {
+    display: block;
+}
+
+.mapType:hover .nowMapType {
+    background-color: #3498db;
+}
+
+#adrSearch {
+    position: fixed;
+    top: 7px;
+    left: 30px;
+    width: 350px;
+}
+
+#inputAdr {
+    width: 300px;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    padding: 10px 7px;
+    font-size: 14px;
+    font-family: TheJamsil5Bold, serif;
+}
+
+.searchgo{
+    position: absolute;
+    width: 17px;
+    top: 10px;
+    right: 45px;
+    margin: 0;
+}
+
+.mylocation{
+    position: absolute;
+    display: inline-block;
+    top: 5px;
+}
+
+.mylocation span{
+    visibility: hidden;
+    width: 50px;
+    background-color: #3498db;
+    color: #ffffff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+.mylocation:hover span {
+    visibility: visible;
+}
+
+.mylocation img{
+    width: 35px;
+    right: 0;
+}
+
+#searchList {
+    position: absolute;
+    background-color: #f9f9f9;
+    width: 300px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+#searchList {
+    margin-left: 5px;
+    width: 305px;
+}
+
+#searchList li {
+    list-style: none;
+    font-family: TheJamsil5Bold, serif;
+    font-size: 16px;
+    margin: 16px 7px;
+}
+
+#searchList li p {
+    font-size: 12px;
+    color: #999;
+}
+
+#contents{
+    position: fixed;
+    top: 0;
+    left: 50%;
+    padding-right: 5px;
+    padding-left: 5px;
+    transform: translate(-50%, 0);
+}
+
+#contents div{
+    float: left;
+    padding: 10px;
+    background-color: #FFFFFF;
+    width: 80px;
+    text-align: center;
+    font-family: TheJamsil5Bold, serif;
+    border: 1px solid #3498db;
+    color: #3498db;
+}
+
+#airPollution{
+    border-radius: 0 0 0 20px;
+}
+
+#weather{
+    border-radius: 0 0 20px 0;
+}

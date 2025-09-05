@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>날씨 & 미세먼지 — VWorld 3D 통합</title>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #app { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+    #vmap { position: absolute; inset: 0; }
+
+    /* 상단 툴바 */
+    #tools { position: absolute; top: 12px; left: 12px; z-index: 20; display: flex; gap: 8px; }
+    .card { background: rgba(255,255,255,0.9); backdrop-filter: saturate(1.2) blur(2px); border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+
+    /* 정보 패널 */
+    #information { position: absolute; right: 12px; top: 12px; z-index: 20; display: grid; gap: 10px; }
+    #information .info-title { font-weight: 700; color: #374151; margin-bottom: 6px; display:block; }
+    #information table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    #information th, #information td { border: 1px solid #e5e7eb; padding: 6px; text-align: center; background: #fff; }
+    .infoimg { width: 28px; height: 28px; }
+
+    /* 팝업 (3D 상단 고정 정보창) */
+    #popupPanel { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); z-index: 25; min-width: 280px; max-width: 92vw; }
+    #popupPanel.hidden { display: none; }
+    #popupPanel .content { padding: 12px; }
+    #popupPanel .title { font-weight: 700; color: #111827; }
+    #popupPanel .grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-top: 8px; }
+    .iconimage { width: 28px; height: 28px; }
+
+    /* 시작 안내 모달 */
+    #mainModal { z-index: 50; background-color: rgba(0,0,0,0.7); position: fixed; inset: 0; display: none; }
+    #modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; background: #fff; border-radius: 12px; padding: 10px; }
+    #modalTitle { border-bottom: 1px solid #4BACD2; display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; }
+    #modalTitle span { font-size: 18px; font-weight: bold; color: #4BACD2; }
+    #modalClose { font-size: 18px; font-weight: bold; color: #4BACD2; cursor: pointer; }
+    #modalContent { max-height: 60vh; overflow: auto; }
+    #modalButtons { text-align: center; padding: 8px; }
+    #modalButtons button { width: 120px; height: 36px; border-radius: 10px; border: 1px solid #4BACD2; background: #fff; color: #4BACD2; font-weight: bold; cursor: pointer; }
+    #modalButtons button:hover { background: #4BACD2; color: #fff; }
+  </style>
+  <!-- VWORLD WebGL 3D Map SDK -->
+  <script src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CBDA8338-FEF2-34AE-9B04-D31B3597153F"></script>
+  <!-- jQuery (주소 검색, AJAX 재사용) -->
+  <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="vmap"></div>
+
+    <!-- 정보판 -->
+    <div id="information">
+      <div id="popup-three" class="card" style="padding:10px;">
+        <span class="info-title">날씨별 단계표</span>
+        <table>
+          <thead><tr><th>맑음</th><th>흐림</th><th>비</th></tr></thead>
+          <tbody><tr>
+            <td><img class="infoimg" src="css/sun.png"></td>
+            <td><img class="infoimg" src="css/cloud.png"></td>
+            <td><img class="infoimg" src="css/rain.png"></td>
+          </tr></tbody>
+        </table>
+      </div>
+      <div id="popup-for" class="card" style="padding:10px;">
+        <span class="info-title">먼지 단계표</span>
+        <table>
+          <thead>
+            <tr><th></th><th>좋음</th><th>보통</th><th>나쁨</th><th>심각</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <td><img class="infoimg" src="css/좋음.png"></td>
+              <td><img class="infoimg" src="css/보통.png"></td>
+              <td><img class="infoimg" src="css/나쁨.png"></td>
+              <td><img class="infoimg" src="css/매우나쁨.png"></td>
+            </tr>
+            <tr><td>미세</td><td>(~30)</td><td>(31~80)</td><td>(81~150)</td><td>(150~)</td></tr>
+            <tr><td>초미세</td><td>(~15)</td><td>(16~35)</td><td>(36~75)</td><td>(76~)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 하단 팝업 패널 -->
+    <div id="popupPanel" class="card hidden">
+      <div class="content">
+        <div class="title" id="locName">위치</div>
+        <div class="grid">
+          <img class="iconimage" id="weather" src="css/cloud.png"/>
+          <div><b>기온</b> <span id="weatherV">()</span></div>
+          <div style="text-align:right"></div>
+        </div>
+        <div class="grid" style="margin-top:6px;">
+          <img class="iconimage" id="pm10Icon" src="css/보통.png"/>
+          <div>미세먼지 <span id="pm10V">()</span></div>
+          <div></div>
+        </div>
+        <div class="grid" style="margin-top:6px;">
+          <img class="iconimage" id="pm25Icon" src="css/보통.png"/>
+          <div>초미세먼지 <span id="pm25V">()</span></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+    // ===== 1) VWorld 3D 지도 초기화 =====
+    var options = {
+      mapId: "vmap",
+      initPosition: new vw.CameraPosition(
+        new vw.CoordZ(126.79071928185927, 37.56074342381346, 15000),
+        new vw.Direction(0, -60, 0)
+      ),
+      logo: true,
+      navigation: false
+    };
+    var map3d = new vw.Map();
+    map3d.setOption(options);
+    map3d.start();
+
+    // ===== 2) 공통 키값 (자체 파일 없이 이 HTML만으로 동작) =====
+    // VWorld 검색/데이터 API 키 (지도의 타일 키와 동일하게 사용 가능)
+    const apikey = 'CBDA8338-FEF2-34AE-9B04-D31B3597153F'; // 필요시 교체
+
+    // ===== 3) 주소검색 / 내 위치 =====
+    function mylocation() {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        const x = pos.coords.longitude, y = pos.coords.latitude;
+        moveTo(x, y, 12000);
+      });
+    }
+
+    // ===== 4) 기상청 단기예보 + 대기질 불러와 3D 마커로 표출 =====
+    const icons = { sun: 'css/sun.png', cloud: 'css/cloud.png', rain: 'css/rain.png' };
+
+    // 행정시군구 중심좌표 탐색 (VWorld 데이터 API)
+    $.ajax({
+      url: 'https://api.vworld.kr/req/data?', type: 'GET', dataType: 'jsonp',
+      data: { service:'data', request:'GetFeature', data:'LT_C_ADSIGG_INFO', geomfilter:'point(127 36)', size:'1000', buffer:'300000', key: apikey },
+      success: function (data) {
+        const features = (data.response && data.response.result && data.response.result.featureCollection && data.response.result.featureCollection.features) || [];
+        features.forEach(function (ft, idx) {
+          try {
+            // 좌표(경위도) 계산
+            const geom = ft.geometry;
+            var extent = getPolygonExtent(geom.coordinates);
+            var locY = (extent.minY + extent.maxY) / 2; // 위도
+            var locX = (extent.minX + extent.maxX) / 2; // 경도
+
+            // KMA 단기예보 호출 (nx, ny는 단순 정수화하여 사용)
+            fetchKMA(Math.round(locY), Math.round(locX)).then(function (wx) {
+              if(!wx) return;
+              const icon = (wx.locPty === '1') ? icons.rain : (wx.locSky === '1' ? icons.sun : icons.cloud);
+              addWeatherPoint(locX, locY, ft.properties.sig_kor_nm, icon, wx.wtmp, wx.wtmn, wx.wtmx);
+            });
+          } catch(e){ console.warn('feature 처리 중 오류', e); }
+        });
+      }
+    });
+
+    function getPolygonExtent(multiPoly){
+      // 간단한 bbox 계산 (MultiPolygon 좌표 배열)
+      var minX=180, minY=90, maxX=-180, maxY=-90;
+      multiPoly.forEach(function(poly){
+        poly[0].forEach(function(coord){ // [lon,lat]
+          if(coord[0]<minX) minX=coord[0]; if(coord[0]>maxX) maxX=coord[0];
+          if(coord[1]<minY) minY=coord[1]; if(coord[1]>maxY) maxY=coord[1];
+        });
+      });
+      return {minX,minY,maxX,maxY};
+    }
+
+    function fetchKMA(nx, ny){
+      // 오늘 08시 기준 요청 (단기)
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = (today.getMonth()+1).toString().padStart(2,'0');
+      let date = today.getDate().toString().padStart(2,'0');
+      return new Promise(function(resolve){
+        $.ajax({ url:'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?', type:'GET', dataType:'json',
+          data:{ serviceKey:'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==', pageNo:'1', numOfRows:'100', dataType:'JSON', base_date:''+year+month+date, base_time:'0800', nx:nx, ny:ny },
+          success:function(res){
+            try{
+              let wtmp, wtmn, wtmx, locSky='', locPty='';
+              (res.response.body.items.item||[]).forEach(function(it){
+                if(it.category==='SKY') locSky = it.fcstValue;
+                else if(it.category==='PTY') locPty = it.fcstValue;
+                else if(it.category==='TMP') wtmp = it.fcstValue;
+                else if(it.category==='TMN') wtmn = it.fcstValue;
+                else if(it.category==='TMX') wtmx = it.fcstValue;
+              });
+              resolve({ wtmp, wtmn, wtmx, locSky, locPty });
+            }catch(e){ resolve(null); }
+          }, error:function(){ resolve(null); }
+        });
+      });
+    }
+
+    const weatherPoints = [];
+    function addWeatherPoint(lon, lat, name, iconUrl, wtmp, wtmn, wtmx){
+      var point = new vw.geom.Point(new vw.Coord(lon, lat));
+      point.setImage(iconUrl);
+      point.setName(name + (wtmp? ` (${wtmp}℃)` : ''));
+      point.setFont('sans-serif');
+      point.setFontSize(16);
+      point.setDistanceFromTerrain(10);
+      point.create();
+      weatherPoints.push({ point, lon, lat, name, iconUrl, wtmp, wtmn, wtmx });
+    }
+
+    // ===== 5) 클릭 시 해당 지점 대기질 조회 → 하단 패널 노출 =====
+    let lastAQ = { pm10: null, pm25: null };
+    if (map3d && map3d.onClick) {
+      map3d.onClick.addEventListener(function(windowPos, ecefPos, cartographic){
+        if (!cartographic) {
+            console.warn("클릭 좌표(cartographic)가 null입니다");
+            return;
+        }
+        var x = vw.Util.toDegrees(cartographic.longitude);
+        var y = vw.Util.toDegrees(cartographic.latitude);
+        const nearest = findNearestPoint(x, y, 0.1); // 약 0.1도 내에서 근접 탐색
+        if(!nearest){ hidePanel(); return; }
+        fetchAirQuality(nearest.name).then(function(aq){
+          lastAQ = aq || lastAQ;
+          showPanel(nearest);
+        });
+
+        console.log(lastAQ);
+      });
+    }
+
+    function findNearestPoint(lon, lat, tolDeg){
+      let best=null, bestD=1e9;
+      weatherPoints.forEach(function(wp){
+        const d = Math.hypot(wp.lon - lon, wp.lat - lat);
+        if(d < bestD && d < (tolDeg||0.1)) { best = wp; bestD = d; }
+      });
+      return best;
+    }
+
+    function fetchAirQuality(sigName){
+      // 단순 규칙: 공백 포함시 두 번째 토큰을 측정소명 시도
+      let station = sigName;
+      if (sigName.indexOf(' ')!==-1) station = sigName.split(' ')[1];
+      return new Promise(function(resolve){
+        $.ajax({ url:'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?', type:'GET', dataType:'json',
+          data:{ serviceKey:'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==', returnType:'json', numOfRows:'10', pageNo:'1', stationName: station, dataTerm:'DAILY', ver:'1.3' },
+          success:function(res){
+            let pm10='-', pm25='-';
+            try{
+              (res.response.body.items||[]).forEach(function(it){
+                if(it.no2Flag==null && it.pm10Value!=='-' && it.pm25Value!=='-') { pm10 = it.pm10Value; pm25 = it.pm25Value; }
+              });
+            }catch(e){}
+            resolve({ pm10, pm25 });
+          }, error:function(){ resolve(null); }
+        });
+      });
+    }
+
+    function getDustIcon(value, type){
+      if(value==='-' || value==null) return 'css/보통.png';
+      const v = parseInt(value);
+      if(type==='pm10'){
+        if(v<=30) return 'css/좋음.png';
+        if(v<=80) return 'css/보통.png';
+        if(v<=150) return 'css/나쁨.png';
+        return 'css/매우나쁨.png';
+      } else {
+        if(v<=15) return 'css/좋음.png';
+        if(v<=35) return 'css/보통.png';
+        if(v<=75) return 'css/나쁨.png';
+        return 'css/매우나쁨.png';
+      }
+    }
+
+    function showPanel(wp){
+      document.getElementById('locName').textContent = '위치: ' + wp.name;
+      document.getElementById('weather').src = wp.iconUrl;
+      document.getElementById('weatherV').textContent = '(' + (wp.wtmp||'-') + '℃)';
+      document.getElementById('pm10V').textContent = '(' + (lastAQ.pm10||'-') + '㎍/㎥)';
+      document.getElementById('pm25V').textContent = '(' + (lastAQ.pm25||'-') + '㎍/㎥)';
+      document.getElementById('pm10Icon').src = getDustIcon(lastAQ.pm10,'pm10');
+      document.getElementById('pm25Icon').src = getDustIcon(lastAQ.pm25,'pm25');
+      document.getElementById('popupPanel').classList.remove('hidden');
+    }
+    function hidePanel(){ document.getElementById('popupPanel').classList.add('hidden'); }
+
+    // 창 크기 변경 대응
+    function resize(){ document.getElementById('vmap').style.height = window.innerHeight + 'px'; }
+    window.addEventListener('resize', resize); resize();
+  </script>
+</body>
+</html>
