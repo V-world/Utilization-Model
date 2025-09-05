@@ -119,11 +119,10 @@
     map3d.setOption(options);
     map3d.start();
 
-    // ===== 2) 공통 키값 (자체 파일 없이 이 HTML만으로 동작) =====
     // VWorld 검색/데이터 API 키 (지도의 타일 키와 동일하게 사용 가능)
     const apikey = 'CBDA8338-FEF2-34AE-9B04-D31B3597153F'; // 필요시 교체
 
-    // ===== 3) 주소검색 / 내 위치 =====
+    // 내 위치 
     function mylocation() {
       if (!navigator.geolocation) return;
       navigator.geolocation.getCurrentPosition(function (pos) {
@@ -132,7 +131,7 @@
       });
     }
 
-    // ===== 4) 기상청 단기예보 + 대기질 불러와 3D 마커로 표출 =====
+    // 기상청 단기예보 + 대기질 불러와 3D 마커로 표출 
     const icons = { sun: 'css/sun.png', cloud: 'css/cloud.png', rain: 'css/rain.png' };
 
     // 행정시군구 중심좌표 탐색 (VWorld 데이터 API)
@@ -210,7 +209,7 @@
       weatherPoints.push({ point, lon, lat, name, iconUrl, wtmp, wtmn, wtmx });
     }
 
-    // ===== 5) 클릭 시 해당 지점 대기질 조회 → 하단 패널 노출 =====
+    //클릭 시 해당 지점 대기질 조회 
     let lastAQ = { pm10: null, pm25: null };
     if (map3d && map3d.onClick) {
       map3d.onClick.addEventListener(function(windowPos, ecefPos, cartographic){
