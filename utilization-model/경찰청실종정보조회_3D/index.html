@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>경찰청 안전Dream API 연계 서비스(3D)</title>
+  <style>
+    :root { 
+      --sidebar-w: 560px; 
+      --side-current: var(--sidebar-w); 
+      --brand:#007bff; 
+      --border:#e5e7eb; 
+      --bg:#f8fafc; 
+    }
+
+    * {
+       box-sizing: border-box; 
+      }
+
+    html, body { 
+      height: 100%; 
+    }
+
+    body { 
+      margin:0; 
+      padding:0; 
+      font-size:13px; 
+      line-height:1.5; 
+      color:#1f2937; 
+      font-family:'NanumGothic';
+      overflow: hidden; 
+    }
+    body.side-collapsed { 
+      --side-current: 0px; 
+    }
+
+    #app { 
+      display:flex; 
+      height: 100vh; 
+      width:100vw; 
+      background:#fff; 
+    }
+
+    #mapWrap { 
+      flex: 1 1 auto; 
+      min-width: 0; 
+      position:relative; 
+    }
+
+    #vmap { 
+      width:100%; height:100%; 
+    }
+
+    #sideWrap { 
+      width: var(--side-current); 
+      transition: width .25s ease; 
+      overflow:hidden; 
+      display:flex; 
+      flex-direction:column; 
+      height:100vh; 
+    }
+    #sideHeader { 
+      padding:12px; 
+      border-bottom:1px solid var(--border); 
+      background:#fff; 
+      position:sticky; 
+      top:0; 
+      z-index:3; 
+    }
+    #sideHeader h2 { 
+      margin:0 0 10px; 
+      font-size:18px; 
+      font-weight:800; 
+      color:#111827; 
+    }
+
+    #tabs { 
+      display:grid; 
+      grid-template-columns: 
+      repeat(2, 1fr); /*안전지도 표출 시 repeat(3, 1fr);*/
+      width:100%; 
+      gap:0; 
+    }
+    .tab { 
+      width:100%; 
+      padding:10px 12px; 
+      border:1px solid var(--border); 
+      background:#fff; 
+      cursor:pointer; 
+      font-weight:700; 
+      color:#374151; 
+    }
+    .tab.active { 
+      background:var(--brand); 
+      color:#fff; 
+      border-color:var(--brand); 
+    }
+
+    #result { 
+      overflow:auto; 
+      padding:12px; 
+      background:#fff; 
+      flex: 1 1 auto; 
+      min-height:0; 
+    }
+
+    .filter-card { 
+      background:var(--bg); 
+      border:1px solid var(--border); 
+      border-radius:12px; 
+      padding:12px; 
+      margin-bottom:10px; 
+    }
+    .filter-row { 
+      display:flex; 
+      flex-wrap:wrap; 
+      align-items:center; 
+      gap:12px; 
+    }
+    .filter-row strong { 
+      min-width:56px; 
+    }
+    .filter-actions { 
+      margin-left:auto; 
+    }
+    .btn { 
+      display:inline-flex; 
+      align-items:center; 
+      gap:6px; 
+      padding:8px 12px; 
+      border:1px solid var(--border); 
+      background:#fff; 
+      border-radius:10px; 
+      cursor:pointer; 
+      font-weight:700; 
+    }
+    .btn.primary { 
+      background:var(--brand); 
+      color:#fff; 
+      border-color:var(--brand); 
+    }
+
+    table { 
+      width: 100%; 
+      border-collapse: 
+      collapse; 
+      background:#fff; 
+      border-radius:12px; 
+      overflow:hidden; 
+      border:1px solid var(--border); 
+    }
+    th, td { 
+      border-top:1px solid var(--border); 
+      padding:8px; 
+      text-align:center; 
+    }
+    thead th { 
+      background:#f3f4f6; 
+      font-weight:800; 
+    }
+    tbody tr:hover { 
+      background:#f9fafb; 
+    }
+    .row { 
+      cursor:pointer; 
+    }
+    .muted { 
+      color:#6b7280; 
+    }
+
+    #pager { 
+      display:flex; 
+      flex-wrap:wrap; 
+      gap:6px; 
+      margin:12px 0 4px; 
+      justify-content:center; 
+    }
+    .page-btn { 
+      min-width:34px; 
+      height:34px; 
+      padding:0 10px; 
+      display:inline-flex; 
+      align-items:center; 
+      justify-content:center; 
+      border:1px solid var(--border); 
+      background:#fff; 
+      border-radius:8px; 
+      cursor:pointer; 
+    }
+    .page-btn.active { 
+      background:var(--brand); 
+      color:#fff; 
+      border-color:var(--brand); 
+      font-weight:800; 
+    }
+
+    #loading { 
+      position:absolute; 
+      inset:0; 
+      display:none; 
+      align-items:center; 
+      justify-content:center; 
+      background:rgba(255,255,255,0.6); 
+      z-index:4; 
+    }
+    .spinner { 
+      width:48px; 
+      height:48px; 
+      border:5px solid #ddd; 
+      border-top-color:var(--brand); 
+      border-radius:50%; 
+      animation:spin 0.9s linear infinite; 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #toggleSide{ 
+      position:absolute; 
+      top:50%; 
+      right:0; 
+      transform: translateY(-50%); 
+      z-index:5; 
+      width:32px; 
+      height:80px; 
+      background:#fff; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      cursor:pointer; 
+      font-weight:800; 
+    }
+    #toggleSide:active{ transform: translateY(-50%) scale(0.96); }
+
+    /* OpenLayers 팝업 */
+    .ol-popup { 
+      position: absolute; 
+      background: #fff; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      padding: 10px; 
+      min-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12); 
+      transform: translate(-50%, -100%);
+    }
+
+    .ol-popup .popup-closer{
+      position:absolute; 
+      top:6px; 
+      right:6px; 
+      width:28px; 
+      height:28px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center;
+      background:transparent; 
+      border:0; 
+      font-size:18px; 
+      line-height:1; 
+      color:#6b7280; 
+      cursor:pointer; 
+    }
+    .ol-popup .popup-closer:hover{ color:#111827; }
+
+  </style>
+  <!-- VWorld 3D API -->
+  <script src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CBDA8338-FEF2-34AE-9B04-D31B3597153F"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="mapWrap">
+      <div id="vmap"></div>
+      <div id="loading"><div class="spinner" aria-label="loading"></div></div>
+      <button id="toggleSide" aria-expanded="true" title="사이드 닫기">◀</button>
+    </div>
+    <aside id="sideWrap">
+      <div id="sideHeader">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <h2>실종/경보 조회(3D)</h2>
+          <span class="muted" style="font-size:12px;">[출처 : 경찰청]</span>
+        </div>
+        <div id="tabs">
+          <button class="tab active" data-tab="FIND">실종검색</button>
+          <button class="tab" data-tab="AMBER">실종경보</button>
+          <!--<button class="tab" data-tab="SAFEMAP">안전지도</button>-->
+        </div>
+      </div>
+
+      <div id="result">
+        <div id="filters" class="filter-card">
+          <div class="filter-row" id="safemapFilter">
+            <strong>분류</strong>
+            <label><input type="radio" name="clRadio" value="09" checked> 아동안전지킴이어린이집</label>
+            <label><input type="radio" name="clRadio" value="23"> 노인보호시설</label>
+            <div class="filter-actions">
+              <button id="safemapSearchBtn" class="btn primary">화면 범위로 검색</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="legend" class="muted" style="margin:4px 2px 8px; font-size:12px;">
+          대상구분: 010-정상아동(18세미만) · 060-지적장애인 · 070-치매질환자
+        </div>
+        <div id="countBar" class="muted" style="margin:6px 2px 8px;">총 0건</div>
+        <div id="tableWrap"></div>
+        <div id="pager"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+  const VWORLD_KEY  = 'CEB52025-E065-364C-9DBA-44880E3B02B8'; // WMTS API
+
+
+    // ===== 상태 =====
+    let map;
+    let dataset = [];
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    const coordCache = new Map();
+    let activeTab = 'FIND'; // 'FIND' | 'AMBER' | 'SAFEMAP'
+
+    function todayYmd() {
+      const d = new Date();
+      return String(d.getFullYear()) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    }
+    
+    function showLoading(on=true){ document.getElementById('loading').style.display = on? 'flex':'none'; }
+    
+    function updateLegend(){
+      const el = document.getElementById('legend');
+      if (!el) return;
+      el.style.display = (activeTab === 'SAFEMAP') ? 'none' : 'block';
+    }
+
+    // ===== 지도 =====
+    function initMap() {
+      const options = {
+        mapId: 'vmap',
+        initPosition: new vw.CameraPosition(
+          new vw.CoordZ(126.92775802528264, 37.52501881993892, 12416),
+          new vw.Direction(0, -90, 0)
+        ),
+        logo: true,
+        navigation: true
+      };
+      map = new vw.Map();
+      map.setOption(options);
+      map.start();
+    }
+    function move(x,y,z){
+      const movePo = new vw.CoordZ(Number(x), Number(y), Number(z||1500));
+      const mPosi = new vw.CameraPosition(movePo, new vw.Direction(0,-90,0));
+      map.moveTo(mPosi);
+    }
+
+    // ===== 데이터(FIND) =====  실종자 검색 브이월드 프록시 
+
+    async function fetchFindPage(pageNum) {
+      const writngTrgetDscds = ['010','060','070'];
+      //const params = new URLSearchParams({ rowSize: '100', page: String(pageNum) });
+
+      const params = new URLSearchParams({ rowSize: '100', page: String(pageNum), esntlId : '10000831', authKey: '2a3a75f6fbb149a0' });
+
+      writngTrgetDscds.forEach(v => params.append('writngTrgetDscds', v));
+      //const r = await fetch('/api/find?' + params.toString());
+      
+      const r = await fetch('https://map.vworld.kr/proxy.do?url=' + encodeURIComponent("https://www.safe182.go.kr/api/lcm/findChildList.do?"+params.toString()));
+      
+
+      const text = await r.text();
+      if (!r.ok) throw new Error('find fetch failed: ' + r.status + ' ' + text);
+      const data = JSON.parse(text);
+      return Array.isArray(data.list) ? data.list : [];
+    }
+    async function fetchAllFindList(maxPages = 50) {
+      const all = [];
+      for (let p = 1; p <= maxPages; p++) {
+        const list = await fetchFindPage(p); all.push(...list);
+        if (list.length < 100) break;
+      }
+      return all;
+    }
+
+    // ===== 데이터(AMBER) =====
+    async function fetchAmberPage(pageNum) {
+      const params = new URLSearchParams({ rowSize:'100', page:String(pageNum), esntlId : '10000831', authKey: '2a3a75f6fbb149a0' });
+
+      const r = await fetch('https://map.vworld.kr/proxy.do?url=' + encodeURIComponent("https://www.safe182.go.kr/api/lcm/amberList.do?"+params.toString()));
+      const text = await r.text();
+      if (!r.ok) throw new Error('amber fetch failed: ' + r.status + ' ' + text);
+      const data = JSON.parse(text);
+      return Array.isArray(data.list) ? data.list : [];
+    }
+    async function fetchAllAmber(maxPages=50){
+      const all=[];
+      for (let p=1; p<=maxPages; p++){
+        const list = await fetchAmberPage(p); all.push(...list);
+        if (list.length < 100) break;
+      }
+      return all;
+    }
+
+    // ===== 데이터(SAFEMAP) =====
+    function getSafeMapSelectedCodes(){
+      const v = document.querySelector('input[name="clRadio"]:checked')?.value;
+      return v ? [v] : ['09'];
+    }
+    async function fetchSafeMapPage(pageIndex, clArr){
+      const endpoint = 'https://www.safe182.go.kr/api/lcm/safeMap.do';
+
+      // 반드시 x-www-form-urlencoded 본문으로 전송
+      const form = new URLSearchParams();
+      form.set('esntlId',  '10000831');        // ← 프론트 노출 위험, 운영은 서버 프록시 권장
+      form.set('authKey',  '2a3a75f6fbb149a0');
+      form.set('pageIndex', String(pageIndex));
+      form.set('pageUnit',  '100');
+
+      // 최소 1개 필수
+      (clArr && clArr.length ? clArr : ['09']).forEach(v => form.append('clArray', v));
+
+      const r = await fetch(
+        'https://map.vworld.kr/proxy.do?url=' + encodeURIComponent(endpoint),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          body: form
+        }
+      );
+
+      const text = await r.text();
+      if (!r.ok) throw new Error('safemap fetch failed: ' + r.status + ' ' + text);
+
+      let data;
+      try { data = JSON.parse(text); }
+      catch { data = JSON.parse(text.replace(/<br\s*\/?>/gi, ' ')); }
+
+      return Array.isArray(data.list) ? data.list : [];
+    }
+
+    async function fetchAllSafeMap(maxPages=50, clArr=['09']){
+      const all=[];
+      for (let p=1; p<=maxPages; p++){
+        const list = await fetchSafeMapPage(p, clArr); all.push(...list);
+        if (list.length < 100) break;
+      }
+      return all;
+    }
+
+    // ===== 지오코딩(FIND/AMBER만) =====
+    function geocode(address, addressType = 'road') {
+      return new Promise((resolve) => {
+        if (!address) return resolve(null);
+        if (coordCache.has(address)) return resolve(coordCache.get(address));
+
+        $.ajax({
+          url: 'https://api.vworld.kr/req/address',
+          dataType: 'jsonp',            // 핵심: JSONP
+          timeout: 8000,
+          data: {
+            service: 'address',
+            request: 'getCoord',
+            version: '2.0',
+            crs: 'epsg:4326',           // WGS84 lon/lat
+            address: address,
+            type: addressType,          // 'road' or 'parcel'
+            refine: true,
+            simple: false,
+            format: 'json',
+            key: VWORLD_KEY
+          },
+          success: function (g) {
+            const status = g?.response?.status || 'ERROR';
+            const result = (status === 'OK')
+              ? {
+                  status: 'OK',
+                  x: g.response.result.point.x, // 경도
+                  y: g.response.result.point.y  // 위도
+                }
+              : null;
+            coordCache.set(address, result);
+            resolve(result);
+          },
+          error: function () {
+            coordCache.set(address, null);
+            resolve(null);
+          }
+        });
+      });
+    }
+
+    // ===== 표 렌더 =====
+    function clLabel(code){
+      const dict = {
+        '09':'09-아동안전지킴이어린이집',
+        '23':'23-노인보호시설',
+        /*
+        '22':'22-아동보호시설',
+        '20':'20-우범지역 및 공폐허가',
+        '18':'18-학교여성폭력피해자 원스톱지원센터',
+        '17':'17-청소년지원시설'
+        */
+      };
+      return dict[String(code)] || '';
+    }
+    function buildRowFIND_AMBER(item, idxGlobal) {
+      const hasImg = (item.tknphotolength !== '0');
+      const imgCell = hasImg
+        ? '<a target="_blank" href="https://www.safe182.go.kr/home/lcm/lcmMssGet.do?gnbMenuCd=014000000000&lnbMenuCd=014001000000&rptDscd=2&msspsnIdntfccd='+(item.msspsnIdntfccd||'')+'">\
+             <img style="width:48px;height:64px;object-fit:cover" src="https://www.safe182.go.kr/api/lcm/imgView.do?msspsnIdntfccd='+(item.msspsnIdntfccd||'')+'" />\
+           </a>'
+        : '&nbsp;';
+      return (
+        '<tr class="row" id="row_'+idxGlobal+'" data-gidx="'+idxGlobal+'" data-x="" data-y="">\
+          <td>'+(item.occrde||'')+'</td>\
+          <td>'+(item.nm||'')+'</td>\
+          <td>'+(item.sexdstnDscd||'')+'</td>\
+          <td>'+(item.occrAdres||'')+'</td>\
+          <td>'+imgCell+'</td>\
+        </tr>'
+      );
+    }
+    function buildRowSAFEMAP(item, idxGlobal){
+      return (
+        '<tr class="row" id="row_'+idxGlobal+'" data-gidx="'+idxGlobal+'" data-x="'+(item.lcinfoLo||'')+'" data-y="'+(item.lcinfoLa||'')+'">\
+          <td>'+(clLabel(item.cl)||item.clNm||'')+'</td>\
+          <td>'+(item.bsshNm||'')+'</td>\
+          <td>'+(item.adres||'')+'</td>\
+          <td>'+(item.telno||'')+'</td>\
+        </tr>'
+      );
+    }
+    function buildRowByTab(item, idxGlobal){
+      return (activeTab==='SAFEMAP') ? buildRowSAFEMAP(item, idxGlobal) : buildRowFIND_AMBER(item, idxGlobal);
+    }
+
+    function buildDetailTableFIND_AMBER(item) {
+      const hasImg = (item.tknphotolength !== '0');
+      const imgCell = hasImg
+        ? '<a target="_blank" href="https://www.safe182.go.kr/home/lcm/lcmMssGet.do?gnbMenuCd=014000000000&lnbMenuCd=014001000000&rptDscd=2&msspsnIdntfccd='+(item.msspsnIdntfccd||'')+'">\
+             <img style="width:96px;height:128px;object-fit:cover" src="https://www.safe182.go.kr/api/lcm/imgView.do?msspsnIdntfccd='+(item.msspsnIdntfccd||'')+'" />\
+           </a>'
+        : '&nbsp;';
+      return (
+        '<div style="font-weight:700;margin:2px 0 10px;">실종자 상세 정보</div>'+
+        '<table style="width:100%;border-collapse:collapse;">'+
+        '<tr><td>발생일시</td><td>'+(item.occrde||'')+'</td><td>착의사항</td><td>'+(item.alldressingDscd||'')+'</td></tr>'+
+        '<tr><td>현재나이</td><td>'+(item.ageNow||'')+'</td><td>당시나이</td><td>'+(item.age||'')+'</td></tr>'+
+        '<tr><td>대상구분</td><td>'+(item.writngTrgetDscd||'')+'</td><td>성별구분</td><td>'+(item.sexdstnDscd||'')+'</td></tr>'+
+        '<tr><td>발생장소</td><td>'+(item.occrAdres||'')+'</td><td>성명</td><td>'+(item.nm||'')+'</td></tr>'+
+        '<tr><td>키</td><td>'+(item.height||'')+'</td><td>몸무게</td><td>'+(item.bdwgh||'')+'</td></tr>'+
+        '<tr><td>체격</td><td>'+(item.frmDscd||'')+'</td><td>얼굴형</td><td>'+(item.faceshpeDscd||'')+'</td></tr>'+
+        '<tr><td>두발형태</td><td>'+(item.hairshpeDscd||'')+'</td><td>두발색상</td><td>'+(item.haircolrDscd||'')+'</td></tr>'+
+        '<tr><td>사진</td><td colspan="3">'+imgCell+'</td></tr>'+
+        '</table>'
+      );
+    }
+    function buildDetailTableSAFEMAP(item){
+      return (
+        '<div style="font-weight:700;margin:2px 0 10px;">안전시설 상세 정보</div>'+
+        '<table style="width:100%;border-collapse:collapse;">'+
+        '<tr><td>분류</td><td>'+(item.clNm||'')+'</td><td>명칭</td><td>'+(item.bsshNm||'')+'</td></tr>'+
+        '<tr><td>주소</td><td colspan="3">'+(item.adres||'')+' '+(item.etcAdres||'')+'</td></tr>'+
+        '<tr><td>전화</td><td>'+(item.telno||'')+'</td><td>일련번호</td><td>'+(item.lcSn||'')+'</td></tr>'+
+        //'<tr><td>좌표</td><td colspan="3">'+(item.lcinfoLo||'')+', '+(item.lcinfoLa||'')+'</td></tr>'+
+        '</table>'
+      );
+    }
+    function buildDetailByTab(item){ return (activeTab==='SAFEMAP') ? buildDetailTableSAFEMAP(item) : buildDetailTableFIND_AMBER(item); }
+
+    // ===== 카운터/페이저/테이블 =====
+    function updateCounters(total, page) {
+      const totalPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      document.getElementById('countBar').textContent = '총 '+total+'건 / 페이지 '+page+' / '+totalPage;
+    }
+    function renderPager(total, page){
+      const totalPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const pager = document.getElementById('pager');
+      const blockSize = 10;
+      const blockStart = Math.floor((page-1)/blockSize)*blockSize + 1;
+      const blockEnd = Math.min(blockStart + blockSize - 1, totalPage);
+      const btn = (p, label, cls) => '<button class="page-btn '+(cls||'')+'" data-page="'+p+'">'+label+'</button>';
+      const parts = [];
+      if (page > 1) parts.push(btn(1, '<<'));
+      if (blockStart > 1) parts.push(btn(Math.max(1, blockStart - blockSize), '<'));
+      for (let i=blockStart; i<=blockEnd; i++) parts.push(btn(i, String(i), (i===page?'active':'')));
+      if (blockEnd < totalPage) parts.push(btn(Math.min(totalPage, blockStart + blockSize), '>'));
+      if (page < totalPage) parts.push(btn(totalPage, '>>'));
+      pager.innerHTML = parts.join('');
+    }
+    function renderTable(page = 1) {
+      currentPage = page;
+      const total = dataset.length;
+      updateCounters(total, page);
+      const start = (page - 1) * PAGE_SIZE;
+      const pageItems = dataset.slice(start, start + PAGE_SIZE);
+      const thead = (activeTab==='SAFEMAP')
+        ? '<tr><th>분류</th><th>명칭</th><th>주소</th><th>전화</th></tr>'
+        : '<tr><th>발생일시</th><th>성명</th><th>성별</th><th>발생장소</th><th>사진</th></tr>';
+      const rowsHtml = pageItems.map((it, i) => buildRowByTab(it, start + i)).join('');
+      document.getElementById('tableWrap').innerHTML = (
+        '<table>\
+          <thead>'+thead+'</thead>\
+          <tbody>'+rowsHtml+'</tbody>\
+        </table>'
+      );
+      renderPager(total, page);
+      renderMarkersForPage(pageItems, start);
+    }
+
+    // ===== 마커 =====
+    const POLICE_PIN_URL = 'https://www.vworld.kr/img/marker/static/img01.png';
+    const liveMarkerIds = new Set();
+    function createMarker(rec, idxGlobal) {
+      const x = Number(rec.x), y = Number(rec.y);
+      const labelOptions = {
+        text: (activeTab==='SAFEMAP') ? (rec.bsshNm || rec.clNm || '') : (rec.occrAdres || ''),
+        font: '16px Noto Sans KR, sans-serif',
+        fillColor: ws3d.common.Color.fromCssColorString('#FFFFFF'),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        style: ws3d.common.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new ws3d.common.Cartesian2(0, 70)
+      };
+      const id = 'poi_'+idxGlobal;
+      liveMarkerIds.add(id);
+      const popupHtml = buildDetailByTab(rec);
+      const popupWidth = (activeTab==='SAFEMAP') ? 400 : 450;
+      const popupHeight = (activeTab==='SAFEMAP') ? 200 : 420;
+      map.createMarker(id, x, y, popupHtml, (activeTab==='SAFEMAP'? POLICE_PIN_URL : 'https://www.vworld.kr/img/marker/static/img09.png'), popupWidth, popupHeight, 100, labelOptions);
+    }
+    function clearMarkers() {
+      try {
+        if (typeof map.removeObjectById === 'function') {
+          for (const id of Array.from(liveMarkerIds)) { try { map.removeObjectById(id); } catch(e){} }
+          liveMarkerIds.clear(); return;
+        }
+        if (typeof map.removeMarker === 'function') {
+          for (const id of Array.from(liveMarkerIds)) { try { map.removeMarker(id); } catch(e){} }
+          liveMarkerIds.clear(); return;
+        }
+        if (typeof map.removeAllMarker === 'function') { map.removeAllMarker(); liveMarkerIds.clear(); return; }
+        if (typeof map.clearMarker     === 'function') { map.clearMarker();     liveMarkerIds.clear(); return; }
+        console.warn('마커 제거 API를 찾지 못했습니다. removeObjectById 지원 여부 확인');
+      } catch (e) { console.warn('마커 제거 중 오류', e); }
+    }
+    async function renderMarkersForPage(pageItems, startIndex) {
+      showLoading(true);
+      clearMarkers();
+      let moved = false;
+      for (let i = 0; i < pageItems.length; i++) {
+        const item = pageItems[i];
+        const idxGlobal = startIndex + i;
+        const rowEl = document.getElementById('row_' + idxGlobal);
+        try {
+          if (activeTab==='SAFEMAP') {
+            const x = parseFloat(item.lcinfoLo), y = parseFloat(item.lcinfoLa);
+            if (isFinite(x) && isFinite(y)) {
+              item.x = x; item.y = y; if (rowEl) { rowEl.dataset.x = x; rowEl.dataset.y = y; }
+              createMarker(item, idxGlobal);
+              if (!moved) { move(x, y, 1500); moved = true; }
+            } else if (rowEl) { rowEl.dataset.x = ''; rowEl.dataset.y = ''; }
+          } else {
+            const info = await geocode(item.occrAdres || '');
+            if (info && info.status === 'OK') {
+              const x = info.x, y = info.y;
+              item.x = x; item.y = y; if (rowEl) { rowEl.dataset.x = x; rowEl.dataset.y = y; }
+              createMarker(item, idxGlobal);
+              if (!moved) { move(x, y, 1500); moved = true; }
+            } else if (rowEl) { rowEl.dataset.x = ''; rowEl.dataset.y = ''; }
+          }
+        } catch (e) { if (rowEl) { rowEl.dataset.x = ''; rowEl.dataset.y = ''; } }
+      }
+      showLoading(false);
+    }
+
+    // ===== 이벤트 =====
+    function updateFiltersVisibility(){
+      const filters = document.getElementById('filters');
+      const safemapRow = document.getElementById('safemapFilter');
+      if (!filters) return;
+
+      if (activeTab === 'SAFEMAP') {
+        filters.style.display = 'block';
+        if (safemapRow) safemapRow.style.display = 'flex';  
+      } else {
+        filters.style.display = 'none';
+        if (safemapRow) safemapRow.style.display = 'none';  
+      }
+    }
+
+    document.getElementById('tableWrap').addEventListener('click', async (e) => {
+      const tr = e.target.closest('tr.row');
+      if (!tr) return;
+      const gidx = Number(tr.getAttribute('data-gidx'));
+      const rec = dataset[gidx];
+      let x = parseFloat(tr.dataset.x), y = parseFloat(tr.dataset.y);
+      if (!(isFinite(x) && isFinite(y)) && rec && activeTab!=='SAFEMAP') {
+        const info = await geocode(rec.occrAdres || '');
+        if (info && info.status === 'OK') {
+          x = info.x; y = info.y; tr.dataset.x = x; tr.dataset.y = y;
+          const id = 'poi_'+gidx;
+          if (!liveMarkerIds.has(id)) { rec.x = x; rec.y = y; createMarker(rec, gidx); }
+        }
+      }
+      if (isFinite(x) && isFinite(y)) move(x, y, 1500);
+    });
+    document.getElementById('pager').addEventListener('click', (e)=>{
+      const btn = e.target.closest('.page-btn');
+      if (!btn) return;
+      const p = Number(btn.dataset.page);
+      if (p && p !== currentPage) renderTable(p);
+    });
+    document.getElementById('tabs').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.tab');
+      if (!btn) return;
+      document.querySelectorAll('#tabs .tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.dataset.tab;
+      updateFiltersVisibility();
+      updateLegend();
+      await loadAndPlot();
+    });
+    document.getElementById('safemapSearchBtn').addEventListener('click', async () => {
+      if (activeTab !== 'SAFEMAP') {
+        document.querySelectorAll('#tabs .tab').forEach(b => b.classList.remove('active'));
+        document.querySelector('#tabs .tab[data-tab="SAFEMAP"]').classList.add('active');
+        activeTab = 'SAFEMAP';
+        updateFiltersVisibility();
+        updateLegend();
+      }
+      await loadAndPlot();
+    });
+
+    async function loadAndPlot() {
+      try {
+        showLoading(true);
+        if (activeTab === 'FIND') {
+          dataset = await fetchAllFindList(50);
+        } else if (activeTab === 'AMBER') {
+          dataset = await fetchAllAmber(50);
+        } else if (activeTab === 'SAFEMAP') {
+          const cl = getSafeMapSelectedCodes();
+          dataset = await fetchAllSafeMap(50, cl);
+        }
+        renderTable(1);
+      } catch (e) {
+        alert('데이터 로딩 실패: ' + (e && e.message ? e.message : e));
+      } finally { showLoading(false); }
+    }
+
+    // 초기화 
+    if (document.readyState === 'complete' || (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
+      initMap();
+    } else {
+      document.addEventListener('DOMContentLoaded', initMap);
+    }
+
+    (function initAmberDate(){
+      const el = document.getElementById('amberDate');
+      if (!el) return;           // ✅ 가드
+      const d = new Date();
+      const v = d.getFullYear()+ '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      el.value = v;
+    })();
+
+    (async function(){ 
+      showLoading(true); 
+      updateFiltersVisibility();
+      updateLegend();
+      await loadAndPlot(); 
+    })();
+  </script>
+</body>
+</html>
