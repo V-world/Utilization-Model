@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>실시간 교통정보, 교통안전 지도</title>
+  <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=CBDA8338-FEF2-34AE-9B04-D31B3597153F"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #map {
+    width: 100%;
+    height: 100vh;
+    }
+
+    /* 좌측 상단 컨트롤 박스 */
+    #controls {
+      position: fixed;
+      z-index: 10;
+      top: 16px;
+      left: 16px;
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 16px 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    /* 제목 */
+    #controls h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #222;
+      letter-spacing: 0.1px;
+      align-self: center;  
+      text-align: center;  
+      width: 100%;
+    }
+
+    /* 체크박스 그룹 */
+    #toggleRow {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 체크박스 라벨 */
+    #controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #111;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    #controls label:hover {
+      color: #0066cc;
+    }
+
+    /* 체크박스 */
+    #controls input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #0078ff;
+      cursor: pointer;
+    }
+
+    /* “현재 지역에서 검색” 버튼 */
+    #btnFrelgSearch {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 11;
+      background: linear-gradient(145deg, #0078ff, #00bfff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      box-shadow: 0 3px 12px rgba(0, 120, 255, 0.25);
+      transition: all 0.25s ease;
+    }
+
+    #btnFrelgSearch:hover {
+      transform: translateX(-50%) scale(1.05);
+      box-shadow: 0 5px 16px rgba(0, 120, 255, 0.35);
+    }
+    #btnFrelgSearch b {
+      font-weight: 600;
+    }
+
+    /* 출처 */
+    .credit {
+      align-self: center;
+      text-align: center;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #444;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: inline-block;
+      width: auto;
+    }
+
+    /* 팝업 테이블 스타일은 그대로 유지 */
+    #popup {
+      box-sizing: border-box;
+      width: 420px;
+      max-width: calc(100vw - 24px);
+      overflow: hidden;
+    }
+
+    #popup table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    #popup th {
+      width: 96px;
+      white-space: nowrap;
+    }
+
+    #popup td {
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 480px) {
+      #popup th { width: 84px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <h1>실시간 교통정보, 교통안전 지도</h1>
+
+    <div id="toggleRow">
+      <label>
+        <input type="checkbox" id="toggleITS">
+        실시간 교통소통정보
+      </label>
+      <label>
+        <input type="checkbox" id="toggleOutbreak">
+        실시간 돌발상황정보
+      </label>
+      <label>
+        <input type="checkbox" id="toggleFrelg">
+        지자체별 사고다발지역(2024)
+      </label>
+    </div>
+    <div id="credit" class="credit">
+      출처 : 국토교통부 국가교통정보센터(ITS)</br>
+      한국도로교통공단(TaaS)-공공데이터포털
+    </div>
+  </div>
+
+  <button id="btnFrelgSearch"><b>현재 지역에서 검색</br>(사고다발지역)</b></button>
+
+  <div id="map"></div>
+
+  <div id="popup" style="
+    position: fixed; z-index: 100000; display:none;
+    min-width: 260px; max-width: 360px; max-height: 60vh;
+    background: #fff; border-radius: 10px; 
+    box-shadow: 0 12px 28px rgba(0,0,0,.22);
+    border: 1px solid rgba(0,0,0,.08);
+    padding: 10px 12px;
+    font: 13px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    overflow: auto; pointer-events: auto;">
+    <div id="popupHeader" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; cursor:move;">
+      <strong style="font-size:13px;">상세정보</strong>
+      <button id="popupCloseBtn" style="appearance:none;border:0;background:#f2f2f2;cursor:pointer;padding:4px 8px;border-radius:6px;font-size:12px;">닫기</button>
+    </div>
+    <div id="popupBody"></div>
+  </div>
+
+  <script>
+    // --------------------- 지도 기본 설정 ---------------------
+    var map;
+    var options = {
+      mapId: 'map',
+      initPosition: new vw.CameraPosition(
+        new vw.CoordZ(126.9401465303777, 37.519874413465715, 1500),
+        new vw.Direction(0, -90, 0)
+      ),
+      logo: false,
+      navigation: true
+    };
+    map = new vw.Map();
+    map.setOption(options);
+    map.start();
+
+    // Cesium Viewer 핸들 (V-World 3D 내부)
+    const viewer = ws3d.viewer;
+
+    // --------------------- 배경 WMS (ITS 실시간 레이어) ---------------------
+    vw.ws3dInitCallBack = function () {
+      try { map.getElementById('facility_build').hide(); } catch(e){}
+      try { map.getElementById('facility_build_all').show(); } catch(e){}
+
+      // 클릭 피킹 품질 설정
+      viewer.scene.pickTranslucentDepth = true;
+      viewer.scene.globe.depthTestAgainstTerrain = true; // ← 지형 깊이 테스트 켜기
+    };
+
+    var wmsLayer = new vw.Layers();
+    var wmsSource = new vw.source.TileWMS();
+    wmsSource.setParams("tilesize=256");
+    wmsSource.setLayers("ntic:N_LEVEL_{z}");
+    wmsSource.setStyles("ntic:REALTIME");
+    wmsSource.setFormat("image/png");
+    wmsSource.setUrl("https://its.go.kr:9443/geoserver/ntic/wms?service=WMS&request=GetMap&transparent=true&version=1.3.0&tiled=true&PALETTE=safe&WIDTH=256&HEIGHT=256&CRS=EPSG:4326&");
+    var wmsTile = new vw.layer.Tile(wmsSource);
+    wmsTile.setAlias("소통정보");
+    
+    const toggleITS = document.getElementById('toggleITS');
+    toggleITS.addEventListener('change', () => {
+      if (!wmsLayer) return;
+      if (toggleITS.checked) {
+        wmsLayer.add(wmsTile);
+      } else {
+        map.removeLayerElement("소통정보");
+      }
+    });
+
+    // --------------------- ITS eventInfo 호출/표출 ---------------------
+    const ITS_API = "https://openapi.its.go.kr:9443/eventInfo";
+    const ITS_KEY = "a22a723a8bde4abdb5c77f77748f20dc";
+
+    const EVENT_TAG = "ITS_EVENT_ENTITY";
+    let currentEntities = [];
+
+    function clearEvents() {
+      currentEntities.forEach(e => viewer.entities.remove(e));
+      currentEntities = [];
+    }
+
+    function pick(it, keys, fallback='-') {
+      for (const k of keys) {
+        if (it && it[k] != null && it[k] !== '') return String(it[k]);
+      }
+      return fallback;
+    }
+
+    function createDescription(it) {
+      const eventType   = pick(it, ['eventType','incidentType','type','event_type']);
+      const detailType  = pick(it, ['eventDetailType','incidentDetailType','typeDetail','event_type_detail']);
+      const roadName    = pick(it, ['roadName','roadname','road','routeName']);
+      const message     = pick(it, ['message','memo','eventMessage','content','msg']);
+
+      const rows = [
+        ['유형', eventType],
+        ['상세유형', detailType],
+        ['도로명', roadName],
+        ['메시지', message],
+      ];
+
+      const trs = rows.map(([k,v]) =>
+         `<tr><th style="text-align:left;padding:4px 8px;width:90px;background:#f7f7f7;border-bottom:1px solid #eee;">${k}</th><td style="padding:4px 8px;border-bottom:1px solid #eee;word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap;">${v}</td></tr>`
+      ).join('');
+
+      return `
+        <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;">
+          <div style="font-weight:700;margin-bottom:6px;">돌발상황 상세정보</div>
+          <table style="border-collapse:collapse;width:100%;">${trs}</table>
+          <div style="margin-top:8px;color:#666;font-size:12px;">출처 : 국토교통부 국가교통정보센터(ITS)</div>
+        </div>
+      `;
+    }
+
+    function renderEvents(data) {
+      clearEvents();
+      const items = data?.body?.items;
+      if (!Array.isArray(items) || items.length === 0) return;
+
+      items.forEach((it) => {
+        const lon = parseFloat(it.coordX ?? it.lon);
+        const lat = parseFloat(it.coordY ?? it.lat);
+        if (!isFinite(lon) || !isFinite(lat)) return;
+
+        const title = `${pick(it, ['eventType','incidentType','type'],'Event')}${it.roadName ? ` / ${it.roadName}` : ''}`;
+
+        const entity = viewer.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+          billboard: {
+            image: "./src/warning.png",
+            scale: 0.1,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new Cesium.NearFarScalar(500, 1.0, 50000, 0.4)
+          },
+          label: {
+            text: title,
+            font: "12px sans-serif",
+            showBackground: true,
+            backgroundPadding: new Cesium.Cartesian2(6, 4),
+            pixelOffset: new Cesium.Cartesian2(0, -38),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          },
+          description: createDescription(it),
+          properties: new Cesium.PropertyBag({ tag: EVENT_TAG, raw: it })
+        });
+
+        currentEntities.push(entity);
+      });
+    }
+
+    function fetchAndRenderEvents() {
+      $.ajax({
+        url: ITS_API,
+        method: "GET",
+        data: {
+          apiKey: ITS_KEY,
+          type: "all",
+          eventType: "all",
+          getType: "json"
+        },
+        dataType: "json",
+        timeout: 20000
+      })
+      .done(function (res) {
+        renderEvents(res);
+      })
+      .fail(function () {
+        alert("ITS API 호출에 실패했습니다. (CORS 환경이라면 서버 프록시를 사용하세요)");
+      });
+    }
+
+    const toggle = document.getElementById('toggleOutbreak');
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        fetchAndRenderEvents();
+      } else {
+        clearEvents();
+      }
+    });
+
+    // --------------------- 팝업 ---------------------
+    const popupEl = document.getElementById('popup');
+    const popupBodyEl = document.getElementById('popupBody');
+    const popupCloseBtn = document.getElementById('popupCloseBtn');
+
+    function showPopup(windowPosition, html) {
+      const margin = 12;
+      const FIXED_WIDTH = 420;
+
+      popupBodyEl.innerHTML = html;
+      popupEl.style.display = 'block';
+
+      const usableW = Math.max(120, window.innerWidth - margin * 2);
+      const width   = Math.min(FIXED_WIDTH, usableW);
+      popupEl.style.width    = width + 'px';
+      popupEl.style.maxWidth = width + 'px';
+      popupEl.style.maxHeight = (window.innerHeight - margin * 2) + 'px';
+      popupEl.style.overflow  = 'auto';
+
+      popupEl.style.left = '-9999px';
+      popupEl.style.top  = '-9999px';
+
+      const rect = popupEl.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      const prefX = windowPosition.x + 8;
+      const prefY = windowPosition.y + 8;
+
+      const left = Math.min(Math.max(margin, prefX), Math.max(margin, window.innerWidth  - w - margin));
+      const top  = Math.min(Math.max(margin, prefY), Math.max(margin, window.innerHeight - h - margin));
+
+      popupEl.style.left = left + 'px';
+      popupEl.style.top  = top  + 'px';
+    }
+
+    function hidePopup() {
+      popupEl.style.display = 'none';
+      popupBodyEl.innerHTML = '';
+    }
+
+    window.addEventListener('resize', () => {
+      if (popupEl.style.display !== 'block') return;
+      const margin = 12;
+      const usableW = Math.max(120, window.innerWidth - margin * 2);
+      const width   = Math.min(420, usableW);
+      popupEl.style.width    = width + 'px';
+      popupEl.style.maxWidth = width + 'px';
+      popupEl.style.maxHeight= (window.innerHeight - margin * 2) + 'px';
+
+      const rect = popupEl.getBoundingClientRect();
+      let left = rect.left, top = rect.top;
+      const maxX = window.innerWidth  - rect.width  - margin;
+      const maxY = window.innerHeight - rect.height - margin;
+      left = Math.max(margin, Math.min(maxX, left));
+      top  = Math.max(margin, Math.min(maxY,  top ));
+      popupEl.style.left = left + 'px';
+      popupEl.style.top  = top  + 'px';
+    });
+
+    popupCloseBtn.addEventListener('click', hidePopup);
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePopup(); });
+
+    // --------------------- ITS BBOX 도우미 ---------------------
+    function getBufferFromCamera() {
+      const pos = map.getCurrentPosition().position;
+      const z = pos.z;
+      const baseLon = 1 / (111000 / z * 1.48 * 50);
+      const baseLat = 1 / (111000 / z * 1.85 * 50);
+      const SCALE = 1.8;
+      let mLon = baseLon * SCALE;
+      let mLat = baseLat * SCALE;
+      const MIN_DEG = 0.0008;
+      mLon = Math.max(mLon, MIN_DEG);
+      mLat = Math.max(mLat, MIN_DEG);
+      return [mLon, mLat];
+    }
+
+    function getEntityLonLat(entity) {
+      const time = Cesium.JulianDate.now();
+      const cartesian = entity.position.getValue(time);
+      if (!cartesian) return null;
+      const carto = Cesium.Cartographic.fromCartesian(cartesian);
+      return [Cesium.Math.toDegrees(carto.longitude), Cesium.Math.toDegrees(carto.latitude)];
+    }
+
+    function pickEntitiesInBbox(bbox) {
+      const [minLon, minLat, maxLon, maxLat] = bbox;
+      const hits = [];
+      for (const ent of currentEntities) {
+        const ll = getEntityLonLat(ent);
+        if (!ll) continue;
+        const [lon, lat] = ll;
+        if (lon >= minLon && lon <= maxLon && lat >= minLat && lat <= maxLat) {
+          hits.push(ent);
+        }
+      }
+      return hits;
+    }
+
+    function buildPopupHTML(entities) {
+      if (!entities || entities.length === 0) return '';
+      if (entities.length === 1) {
+        const raw = entities[0].properties?.raw?.getValue
+          ? entities[0].properties.raw.getValue(Cesium.JulianDate.now())
+          : entities[0].properties?.raw || {};
+        return createDescription(raw);
+      }
+      const items = entities.slice(0, 10).map((ent, idx) => {
+        const raw = ent.properties?.raw?.getValue
+          ? ent.properties.raw.getValue(Cesium.JulianDate.now())
+          : ent.properties?.raw || {};
+        const title = (pick(raw, ['eventType','incidentType','type'],'Event')) +
+                      (raw.roadName ? ` / ${raw.roadName}` : '');
+        return `<li data-idx="${idx}" style="padding:6px 0;border-bottom:1px solid #eee;cursor:pointer">${title}</li>`;
+      }).join('');
+      return `
+        <div style="font-weight:700;margin-bottom:6px;">돌발상황 ${entities.length}건</div>
+        <ul style="list-style:none;margin:0;padding:0">${items}</ul>
+        <div style="margin-top:8px;color:#666;font-size:12px;">목록을 클릭하면 상세를 표시합니다.</div>
+      `;
+    }
+
+    function bindListClick(windowPosition, entities) {
+      popupEl.querySelectorAll('li[data-idx]').forEach(li => {
+        li.addEventListener('click', () => {
+          const idx = Number(li.getAttribute('data-idx'));
+          const ent = entities[idx];
+          const raw = ent.properties?.raw?.getValue
+            ? ent.properties.raw.getValue(Cesium.JulianDate.now())
+            : ent.properties?.raw || {};
+          popupBodyEl.innerHTML = createDescription(raw);
+
+          const margin = 12;
+          popupEl.style.maxWidth  = (window.innerWidth  - margin * 2) + 'px';
+          popupEl.style.maxHeight = (window.innerHeight - margin * 2) + 'px';
+
+          const rect = popupEl.getBoundingClientRect();
+          const w = rect.width, h = rect.height;
+          const left = Math.min(Math.max(margin, rect.left), Math.max(margin, window.innerWidth  - w - margin));
+          const top  = Math.min(Math.max(margin, rect.top ), Math.max(margin, window.innerHeight - h - margin));
+          popupEl.style.left = left + 'px';
+          popupEl.style.top  = top  + 'px';
+        });
+      });
+    }
+
+    // --------------------- 다발지역(공단 REST) ---------------------
+    const VWORLD_DATA_KEY = 'CBDA8338-FEF2-34AE-9B04-D31B3597153F';
+    const FZ_SERVICE_KEY  = 'yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW+4ADeoHWXkF1j8TrQ+rBNRikicwGB7wGc4AUQtWishlRlSuhMw==';
+    const FZ_YEAR         = '2024';
+
+    function getViewBBoxDeg(){
+      const rect = viewer.camera.computeViewRectangle();
+      if (!rect) {
+        const pos = map.getCurrentPosition().position;
+        const dx = 0.1, dy = 0.1;
+        return [pos.x - dx, pos.y - dy, pos.x + dx, pos.y + dy];
+      }
+      const west  = Cesium.Math.toDegrees(rect.west);
+      const south = Cesium.Math.toDegrees(rect.south);
+      const east  = Cesium.Math.toDegrees(rect.east);
+      const north = Cesium.Math.toDegrees(rect.north);
+      return [west, south, east, north];
+    }
+
+    async function fetchSigunguCodesInView(){
+      const [minx, miny, maxx, maxy] = getViewBBoxDeg();
+      const VWORLD_PROXY = 'https://map.vworld.kr/proxy.do?url=';
+
+      const inner = 'https://api.vworld.kr/req/data?' + new URLSearchParams({
+        service: 'data',
+        version: '2.0',
+        request: 'getfeature',       
+        data: 'LT_C_ADSIGG_INFO',
+        format: 'json',
+        size: '1000',
+        crs: 'EPSG:4326',
+        key: VWORLD_DATA_KEY,
+        geomFilter: `BOX(${minx},${miny},${maxx},${maxy})`
+      }).toString();
+
+      const url = VWORLD_PROXY + encodeURIComponent(inner);
+      const res = await fetch(url, { cache: 'no-cache' });
+      if(!res.ok) throw new Error('VWorld 시군구 API 실패');
+      const json = await res.json();
+
+      const feats = json?.response?.result?.featureCollection?.features || [];
+      const codes = new Set();
+      feats.forEach(f=>{
+        const p = f?.properties || {};
+        const cd = (p.sig_cd || p.SIG_CD || '').toString().trim();
+        if (/^\d{5}$/.test(cd)) codes.add(cd);
+      });
+      return Array.from(codes);
+    }
+
+    async function fetchFrequentzoneBySigungu(sig5){
+      const siDo  = sig5.slice(0,2);
+      const guGun = sig5.slice(2,5);
+
+      const base = 'https://apis.data.go.kr/B552061/frequentzoneLg/getRestFrequentzoneLg?';
+      const url  = base + 'serviceKey=' + encodeURIComponent(FZ_SERVICE_KEY) + '&' + new URLSearchParams({
+        searchYearCd: FZ_YEAR,
+        siDo,
+        guGun,
+        type: 'json',
+        numOfRows: '1000',
+        pageNo: '1'
+      }).toString();
+
+      const res = await fetch(url, { cache: 'no-cache' });
+      if (!res.ok) throw new Error('공단 REST 호출 실패');
+
+      const txt = await res.text();
+
+      try {
+        const obj = JSON.parse(txt);
+        if (obj?.resultCode && obj.resultCode !== '00') {
+          console.warn('[FRELG] API resultCode:', obj.resultCode, obj.resultMsg);
+          return [];
+        }
+        let raw =
+            obj?.items?.item
+        ?? obj?.response?.body?.items?.item
+        ?? obj?.response?.body?.items
+        ?? obj?.items
+        ?? [];
+        const items = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+        return items;
+      } catch (e) {
+        const dom = new DOMParser().parseFromString(txt, 'text/xml');
+        const rows = [...dom.querySelectorAll('item')];
+        return rows.map(node=>{
+          const get = tag => node.querySelector(tag)?.textContent ?? '';
+          return {
+            spot_nm: get('spot_nm'),
+            occrrnc_cnt: get('occrrnc_cnt'),
+            dth_dnv_cnt: get('dth_dnv_cnt'),
+            se_dnv_cnt: get('se_dnv_cnt'),
+            sl_dnv_cnt: get('sl_dnv_cnt'),
+            wnd_dnv_cnt: get('wnd_dnv_cnt'),
+            geom_json: get('geom_json'),
+            lo_crd: get('lo_crd'),
+            la_crd: get('la_crd')
+          };
+        });
+      }
+    }
+
+    // ----- 다발지역 도형/엔티티 관리 -----
+    let frelgDataSources = [];
+    let frelgPolys = []; // ← 폴리곤 링/원본 저장
+
+    function buildFrelgDescription(it){
+      const rows = [
+        ['다발지점', it.spot_nm || '-'],
+        ['사고건수', it.occrrnc_cnt || '-'],
+        ['사망자', it.dth_dnv_cnt || '-'],
+        ['중상자', it.se_dnv_cnt || '-'],
+        ['경상자', it.sl_dnv_cnt || '-'],
+        ['부상신고', it.wnd_dnv_cnt || '-'],
+      ];
+      const trs = rows.map(([k,v])=> `<tr><th style="text-align:left;padding:4px 8px;background:#f7f7f7;border-bottom:1px solid #eee;">${k}</th><td style="padding:4px 8px;border-bottom:1px solid #eee;">${v}</td></tr>`).join('');
+      return `<div style="font:13px system-ui"><div style="font-weight:700;margin-bottom:6px;">교통사고 다발지역</div><table style="border-collapse:collapse;width:100%">${trs}</table><div style="margin-top:8px;color:#666;font-size:12px;">출처 : 도로교통공단</div></div>`;
+    }
+
+    function safeParseGeomJson(s){
+      if (!s || typeof s !== 'string') return null;
+      try { return JSON.parse(s); } catch(e) {}
+      try { return JSON.parse(s.replace(/\\'/g, '"').replace(/'/g, '"')); } catch(e2) {}
+      try { return JSON.parse(s.replace(/\s+/g, ' ')); } catch(e3) {}
+      return null;
+    }
+
+    function wktToGeoJSON(wkt){
+      if (!wkt || typeof wkt !== 'string') return null;
+      const W = wkt.trim().toUpperCase();
+      const toRing = (txt) =>
+        txt.split(',').map(pair=>{
+          const [x,y] = pair.trim().split(/\s+/).map(Number);
+          return [x,y];
+        });
+
+      if (W.startsWith('POLYGON(')) {
+        const body = wkt.slice(wkt.indexOf('(')+1, wkt.lastIndexOf(')'));
+        const ringsTxt = body.replace(/^\(/,'').replace(/\)$/,'').split('),(');
+        const rings = ringsTxt.map(toRing);
+        return { type:'Polygon', coordinates: rings };
+      }
+      if (W.startsWith('MULTIPOLYGON(')) {
+        const body = wkt.slice(wkt.indexOf('(')+1, wkt.lastIndexOf(')'));
+        const polysTxt = body.split(')),((').map(t=>t.replace(/^\(/,'').replace(/\)$/,''));
+        const polys = polysTxt.map(p=>{
+          const ringsTxt = p.split('),(');
+          return ringsTxt.map(toRing);
+        });
+        return { type:'MultiPolygon', coordinates: polys };
+      }
+      return null;
+    }
+
+    function wrapAsFC(geom){
+      if (!geom) return null;
+      if (geom.type === 'FeatureCollection') return geom;
+      if (geom.type === 'Feature') return { type:'FeatureCollection', features:[geom] };
+      if (geom.type) return { type:'FeatureCollection', features:[{ type:'Feature', geometry: geom, properties:{} }] };
+      return null;
+    }
+
+    function maybeSwapLonLat(coords){
+      if (typeof coords?.[0] === 'number' && typeof coords?.[1] === 'number'){
+        const [a,b] = coords;
+        const looksLatLon = (a>20 && a<45) && (b>120 && b<135);
+        const looksLonLat = (a>120 && a<135) && (b>20 && b<45);
+        return (looksLatLon && !looksLonLat) ? [b,a] : [a,b];
+      }
+      return coords.map(maybeSwapLonLat);
+    }
+
+    function wrapAsFeature(geom){
+      if (geom.type && !geom.features){
+        return { type:'FeatureCollection', features:[{ type:'Feature', geometry: geom, properties:{} }] };
+      }
+      if (geom.type === 'Feature' || geom.type === 'FeatureCollection') return geom;
+      return null;
+    }
+
+    // 포인트-인-폴리곤 검사(레이 캐스팅)
+    function pointInPolygon(lon, lat, ring){
+      let inside = false;
+      for (let i=0, j=ring.length-1; i<ring.length; j=i++){
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > lat) !== (yj > lat)) &&
+                          (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    async function drawFrequentzoneItems(items){
+      let firstAdded = false;
+
+      for (const it of (items||[])) {
+        // 1) geom_json 파싱
+        let geom;
+        try {
+          geom = (typeof it.geom_json === 'string') ? JSON.parse(it.geom_json) : it.geom_json;
+        } catch (e) {
+          console.warn('[FRELG] geom_json parse 실패:', String(it.geom_json).slice(0, 120));
+          geom = null;
+        }
+
+        if (geom && geom.type === 'Polygon' && Array.isArray(geom.coordinates)) {
+          // 2) 첫 외곽 링을 폴리곤 엔티티로 추가
+          const ring = geom.coordinates[0];
+          if (Array.isArray(ring) && ring.length >= 3) {
+            const flat = [];
+            for (const pt of ring) {
+              const lon = Number(pt[0]), lat = Number(pt[1]);
+              if (!isFinite(lon) || !isFinite(lat)) continue;
+              flat.push(lon, lat);
+            }
+
+            if (flat.length >= 6) {
+              const ent = viewer.entities.add({
+                polygon: {
+                  hierarchy: Cesium.Cartesian3.fromDegreesArray(flat),
+                  material: Cesium.Color.fromCssColorString('#ff2d55').withAlpha(0.35),
+                  outline: true,
+                  outlineColor: Cesium.Color.fromCssColorString('#ff2d55')
+                },
+                properties: new Cesium.PropertyBag({ tag: 'FRELG', raw: it }),
+                description: new Cesium.ConstantProperty(buildFrelgDescription(it))
+              });
+
+              // ← 클릭 폴백을 위해 링과 원본 저장
+              frelgPolys.push({
+                entity: ent,
+                ring: ring.map(([lo,la]) => [Number(lo), Number(la)]),
+                raw: it
+              });
+
+              // 중심 포인트/라벨 (선택)
+              const lonC = Number(it.lo_crd ?? it.lon ?? it.x);
+              const latC = Number(it.la_crd ?? it.lat ?? it.y);
+              if (isFinite(lonC) && isFinite(latC)) {
+                viewer.entities.add({
+                  position: Cesium.Cartesian3.fromDegrees(lonC, latC, 0),
+                  point: { pixelSize: 8, color: Cesium.Color.YELLOW },
+                  label: {
+                    text: it.spot_nm ? String(it.spot_nm) : '다발지역',
+                    font: '12px sans-serif',
+                    showBackground: true,
+                    backgroundPadding: new Cesium.Cartesian2(6,4),
+                    pixelOffset: new Cesium.Cartesian2(0, -18),
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+                  },
+                  properties: new Cesium.PropertyBag({ tag:'FRELG', raw: it }),
+                  description: new Cesium.ConstantProperty(buildFrelgDescription(it))
+                });
+              }
+
+              if (!firstAdded) {
+                firstAdded = true;
+                viewer.flyTo(ent, { duration: 1.0 }).catch(()=>{});
+              }
+
+              continue;
+            }
+          }
+        }
+
+        // 3) 폴리곤이 없으면 포인트 표시
+        const lon = Number(it.lo_crd ?? it.lon ?? it.x);
+        const lat = Number(it.la_crd ?? it.lat ?? it.y);
+        if (isFinite(lon) && isFinite(lat)) {
+          const ent = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+            point: { pixelSize: 10 },
+            label: {
+              text: it.spot_nm ? String(it.spot_nm) : '다발지역',
+              font: '12px sans-serif',
+              showBackground: true,
+              backgroundPadding: new Cesium.Cartesian2(6,4),
+              pixelOffset: new Cesium.Cartesian2(0, -18),
+              disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            properties: new Cesium.PropertyBag({ tag:'FRELG', raw: it }),
+            description: new Cesium.ConstantProperty(buildFrelgDescription(it))
+          });
+          if (!firstAdded) {
+            firstAdded = true;
+            viewer.flyTo(ent, { duration: 1.0 }).catch(()=>{});
+          }
+        } else {
+          console.warn('[FRELG] geometry/point 없음. keys=', Object.keys(it||{}));
+        }
+      }
+
+      if (!firstAdded) {
+        console.warn('[FRELG] 그릴 도형이 없습니다 (items 길이:', items?.length, ')');
+      }
+    }
+
+    function clearFrelgGraphics() {
+      try {
+        // 1) FRELG 태그 엔티티 제거
+        const all = viewer.entities.values.slice();
+        for (const e of all) {
+          const tag = e?.properties?.tag;
+          if (tag && String(tag) === 'FRELG') {
+            viewer.entities.remove(e);
+          }
+        }
+        // 2) 데이터소스 제거
+        if (Array.isArray(frelgDataSources) && frelgDataSources.length) {
+          frelgDataSources.forEach(ds => {
+            try { viewer.dataSources.remove(ds, true); } catch {}
+          });
+          frelgDataSources = [];
+        }
+        // 3) 폴리곤 링 저장소 초기화
+        frelgPolys = [];
+      } catch (err) {
+        console.error('[FRELG] clearFrelgGraphics 오류:', err);
+      }
+    }
+
+    async function toggleFrelg(on){
+      if (!on){
+        clearFrelgGraphics();
+        return;
+      }
+      let sigs = [];
+      try {
+        sigs = await fetchSigunguCodesInView();
+      } catch(e){
+        alert('시군구 코드 조회 실패: ' + e.message);
+        return;
+      }
+      if (!sigs.length){
+        alert('현재 화면에서 시군구를 찾지 못했습니다.');
+        return;
+      }
+      for (const sig of sigs){
+        const items = await fetchFrequentzoneBySigungu(sig);
+        if (!items || items.length === 0) continue;
+        await drawFrequentzoneItems(items);
+      }
+    }
+
+    if (typeof frelgDataSources === 'undefined') window.frelgDataSources = [];
+
+    async function runFrelgSearchInView(){
+      clearFrelgGraphics();
+      let sigs = [];
+      try {
+        sigs = await fetchSigunguCodesInView();
+      } catch(e){
+        alert('시군구 코드 조회 실패: ' + e.message);
+        return;
+      }
+      if (!sigs.length){
+        alert('현재 화면에서 시군구를 찾지 못했습니다.');
+        return;
+      }
+      for (const sig of sigs){
+        const items = await fetchFrequentzoneBySigungu(sig);
+        await drawFrequentzoneItems(items);
+      }
+    }
+
+    const btnFrelg = document.getElementById('btnFrelgSearch');
+    const toggleFrelgEl = document.getElementById('toggleFrelg');
+
+    toggleFrelgEl.addEventListener('change', (e)=>{
+      const on = e.target.checked;
+      btnFrelg.style.display = on ? 'inline-flex' : 'none';
+      if (!on) {
+        clearFrelgGraphics();
+      }
+    });
+
+    btnFrelg.addEventListener('click', runFrelgSearchInView);
+
+    // --------------------- 클릭 처리 ---------------------
+    function wfsEvent(windowPosition, ecefPosition, cartographic, featureInfo, event) {
+      // 1) FRELG 드릴픽(엔티티 직접 선택)
+      const clickPos = new Cesium.Cartesian2(windowPosition.x, windowPosition.y);
+      const picks = viewer.scene.drillPick(clickPos, 10);
+      let hitEntity = null;
+
+      for (const p of (picks || [])) {
+        const cand = p?.id || p?.primitive?.id || p?.primitive;
+        if (cand && cand.properties && cand.properties.tag === 'FRELG') {
+          hitEntity = cand;
+          break;
+        }
+      }
+
+      if (hitEntity) {
+        const it = hitEntity.properties.raw;
+        showPopup(windowPosition, buildFrelgDescription(it));
+        return;
+      }
+
+      // 2) 폴백: 장판(폴리곤 면) 내부 클릭 검사
+      if (cartographic) {
+        const lon = cartographic.longitudeDD;
+        const lat = cartographic.latitudeDD;
+        for (const poly of frelgPolys) {
+          if (!poly?.ring || poly.ring.length < 3) continue;
+          if (pointInPolygon(lon, lat, poly.ring)) {
+            showPopup(windowPosition, buildFrelgDescription(poly.raw));
+            return;
+          }
+        }
+      }
+
+      // 3) ITS 엔티티 BBOX 기반 팝업 (기존 로직)
+      hidePopup();
+      if (!cartographic) return;
+
+      const [mLon, mLat] = getBufferFromCamera();
+      const minLon = cartographic.longitudeDD - mLon;
+      const minLat = cartographic.latitudeDD - mLat;
+      const maxLon = cartographic.longitudeDD + mLon;
+      const maxLat = cartographic.latitudeDD + mLat;
+
+      const hits = pickEntitiesInBbox([minLon, minLat, maxLon, maxLat]);
+      if (!hits || hits.length === 0) return;
+
+      const html = buildPopupHTML(hits);
+      showPopup(windowPosition, html);
+      if (hits.length > 1) bindListClick(windowPosition, hits);
+    }
+
+    map.onClick.addEventListener(wfsEvent);
+
+    // --------------------- 팝업 드래그 ---------------------
+    (function enablePopupDrag() {
+      const header = document.getElementById('popupHeader');
+      if (!header) return;
+      const el = document.getElementById('popup');
+
+      let dragging = false;
+      let startX = 0, startY = 0, origLeft = 0, origTop = 0;
+      let dragWidth = null, dragHeight = null;
+
+      function clampToViewport(left, top, w, h, margin=8){
+        const maxX = window.innerWidth  - w - margin;
+        const maxY = window.innerHeight - h - margin;
+        return [
+          Math.max(margin, Math.min(maxX, left)),
+          Math.max(margin, Math.min(maxY, top))
+        ];
+      }
+
+      function onMouseMove(e) {
+        if (!dragging) return;
+        let nx = origLeft + (e.clientX - startX);
+        let ny = origTop  + (e.clientY - startY);
+        [nx, ny] = clampToViewport(nx, ny, dragWidth, dragHeight);
+        el.style.left = nx + 'px';
+        el.style.top  = ny + 'px';
+      }
+
+      function onMouseUp() {
+        dragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+
+      header.addEventListener('mousedown', (e) => {
+        if (el.style.display === 'none') return;
+        dragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+
+        const rect = el.getBoundingClientRect();
+        origLeft = rect.left;
+        origTop  = rect.top;
+
+        dragWidth  = rect.width;
+        dragHeight = rect.height;
+
+        const usableW = Math.max(120, window.innerWidth - 16);
+        const fixed = Math.min(420, usableW - 8);
+        el.style.width    = fixed + 'px';
+        el.style.maxWidth = fixed + 'px';
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        e.preventDefault();
+      });
+    })();
+  </script>
+</body>
+</html>
