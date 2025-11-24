@@ -77,7 +77,7 @@
       border: 1px solid #ffffff;
       border-radius: 16px;
       padding: 4px 10px;
-      font-size: 11px;
+      font-size: 13px;
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
       white-space: nowrap;
@@ -318,15 +318,17 @@
 
     .tooltip-content {
         position: absolute;
-        top: 26px;
-        right: 0;
-        width: 300px;
+        top: 120%;              /* 아이콘 바로 아래로 */
+        left: 50%;              /* 아이콘 가운데 기준 */
+        transform: translateX(-50%);  /* 가운데 정렬 보정 */
+        right: auto;            /* 기존 right:0 쓰지 말기 */
+        width: 330px;           /* 너가 말한 것처럼 조금 넓게 */
         background: #2c3e50;
         color: #ecf0f1;
         padding: 10px 12px;
         border-radius: 8px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-        font-size: 11px;
+        font-size: 13px;
         line-height: 1.4;
         z-index: 1500;
         display: none;
@@ -342,6 +344,12 @@
         border-top: 1px solid #34495e;
         margin: 6px 0;
       }
+
+      .header-tooltip {
+        position: relative;
+        margin-left: 4px;  /* 버튼과 간격 정도만 */
+      }
+
 
       .header-tooltip:hover .tooltip-content {
         display: block;
