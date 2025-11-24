@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>전국 해수욕장 서핑·안전 지도</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <!-- MarkerCluster CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"
+  />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      margin: 0 auto;
+      background-color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    header {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    .header-content {
+      display: flex;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+      gap: 8px;
+    }
+    .logo {
+      font-size: 24px;
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+    }
+    .header-buttons {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .header-buttons button {
+      background-color: #ffffff;
+      color: #2980b9;
+      border: 1px solid #ffffff;
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .header-buttons button:hover {
+      background-color: #1abc9c;
+      color: #ffffff;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+    }
+    #map {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 오른쪽 리스트 패널 */
+    #beach-list {
+      width: 260px;
+      border-left: 1px solid #e0e0e0;
+      background-color: #fafafa;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    #beach-list-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 4px 0 8px 0;
+      color: #333;
+    }
+    .scroll-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    .scroll-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+    .scroll-item h3 {
+      margin: 0 0 2px 0;
+      font-size: 13px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .scroll-item .code {
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 6px;
+    }
+    .scroll-item .tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #555;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-safe {
+      background-color: #2ecc71;
+      color: #fff;
+    }
+    .badge-caution {
+      background-color: #f1c40f;
+      color: #fff;
+    }
+    .badge-danger {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+    .badge-unknown {
+      background-color: #95a5a6;
+      color: #fff;
+    }
+    .surf-label {
+      font-weight: 600;
+      color: #2980b9;
+    }
+    .mini-info {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.8em;
+    }
+
+    /* 팝업 스타일 */
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: #2c3e50;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.5;
+      border-radius: 10px;
+    }
+    .custom-popup .leaflet-popup-tip {
+      background: #2c3e50;
+    }
+    .beach-popup h3 {
+      margin: 0 0 8px 0;
+      color: #ecf0f1;
+      font-size: 16px;
+      border-bottom: 1px solid #34495e;
+      padding-bottom: 4px;
+    }
+    .beach-popup p {
+      margin: 4px 0;
+    }
+    .popup-section {
+      margin-top: 6px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #34495e;
+    }
+    .popup-label {
+      color: #bdc3c7;
+      font-size: 12px;
+    }
+    .popup-value {
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .popup-desc {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #ecf0f1;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+      }
+      #beach-list {
+        width: 100%;
+        height: 200px;
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+      }
+    }
+
+    /* 전체 화면 덮는 로딩 오버레이 */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    /* 로딩 박스 */
+    #loading-box {
+      width: 320px;
+      background: #ffffff;
+      padding: 20px 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    }
+
+    #loading-title {
+      font-size: 18px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    #loading-progressbar {
+      width: 100%;
+      height: 14px;
+      background: #eee;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    #loading-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4CAF50, #2e8e41);
+      transition: width 0.25s ease;
+    }
+
+    #loading-count {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .header-buttons {
+      display: flex;
+      align-items: center;   
+      gap: 6px;
+    }
+    
+    .tooltip-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      font-size: 13px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3); 
+      color: #c0392b; 
+      cursor: pointer;
+    }
+
+    .tooltip-content {
+        position: absolute;
+        top: 26px;
+        right: 0;
+        width: 300px;
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        font-size: 11px;
+        line-height: 1.4;
+        z-index: 1500;
+        display: none;
+      }
+
+      .tooltip-content ul {
+        padding-left: 18px;
+        margin: 4px 0;
+      }
+
+      .tooltip-content hr {
+        border: 0;
+        border-top: 1px solid #34495e;
+        margin: 6px 0;
+      }
+
+      .header-tooltip:hover .tooltip-content {
+        display: block;
+      }
+
+      .header-source {
+        font-size: 10px;
+        color: rgba(255,255,255,0.8);
+        padding-left: 10px;
+        white-space: nowrap;
+      }
+
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-content">
+      <div class="logo">🌊</div>
+      <h1>전국 해수욕장 서핑·안전 지도</h1>
+
+      <div class="header-buttons">
+        <div class="header-tooltip">
+        <span class="tooltip-icon">i</span>
+        <div class="tooltip-content">
+          <strong>서핑 안전도 안내</strong>
+          <ul>
+            <li><b>안전</b> – 풍속 약함, 수온/조위 안정적인 상태</li>
+            <li><b>주의</b> – 바람이 다소 강하거나 수온·조위가 다소 불안정</li>
+            <li><b>위험</b> – 강한 바람 또는 극단적인 수온·조위 (입수 비추천)</li>
+          </ul>
+          <hr />
+          <strong>서핑 레벨</strong>
+          <ul>
+            <li><b>서핑 불가</b> – 파도 거의 없음 또는 너무 거침</li>
+            <li><b>입문자</b> – 작은 파도, 초급 연습용</li>
+            <li><b>중급</b> – 어느 정도 힘 있는 파도</li>
+            <li><b>상급</b> – 큰 파도, 경험자 권장</li>
+            <li><b>매우 위험</b> – 풍속·파고 모두 거친 상태</li>
+          </ul>
+        </div>
+      </div>
+      
+        <button id="btn-korea">전국</button>
+        <button id="btn-west">서해안</button>
+        <button id="btn-east">동해안</button>
+        <button id="btn-south">남해안</button>
+        <button id="btn-jeju">제주</button>
+      </div>
+
+      <div class="header-source">데이터 출처 : 해양수산부 바다누리 해양정보 서비스</div>
+    </div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+    <div id="beach-list">
+      <div id="beach-list-title">현재 화면 내 해수욕장</div>
+      <!-- 카드 리스트 -->
+    </div>
+  </main>
+
+  <footer></footer>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay">
+  <div id="loading-box">
+    <div id="loading-title">데이터 불러오는 중...</div>
+    <div id="loading-progressbar">
+      <div id="loading-progress"></div>
+    </div>
+    <div id="loading-count">0 / 0</div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+<!-- MarkerCluster JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+
+<script>
+  const VWORLD_KEY    = "CEB52025-E065-364C-9DBA-44880E3B02B8";  
+  const BEACH_GEOJSON = "beach.geojson"; 
+  const KHOA_KEY      = "6fZi/tPHX0zju9slU5YlfQ==";
+  const VWORLD_PROXY  = "https://map.vworld.kr/proxy.do?url=";
+
+  // ------------------------------
+  // 1. 안전/서핑 레벨 계산 (풍속·수온·조위(+파고 있으면) 기반)
+  // ------------------------------
+  function calcSurfLevel(waveHeight, windSpeed) {
+    if (waveHeight == null && windSpeed == null) return "unknown";
+
+    // 파고가 있으면 파고 + 풍속 기준
+    if (waveHeight != null) {
+      if (waveHeight < 0.3) return "none";
+      if (waveHeight < 0.7 && (windSpeed == null || windSpeed < 8)) return "beginner";
+      if (waveHeight < 1.5 && (windSpeed == null || windSpeed < 10)) return "intermediate";
+      if (waveHeight >= 1.5 && (windSpeed == null || windSpeed < 12)) return "advanced";
+      return "danger";
+    }
+
+    // 파고 없으면 풍속만 기준 (간단 버전)
+    if (windSpeed != null) {
+      if (windSpeed < 4) return "none";
+      if (windSpeed < 8) return "beginner";
+      if (windSpeed < 12) return "intermediate";
+      return "danger";
+    }
+
+    return "unknown";
+  }
+
+  // 풍속·수온·조위(+파고) 기반 안전도
+  function calcSafetyLevel(waveHeight, windSpeed, waterTemp, tide) {
+    if (waveHeight == null && windSpeed == null && waterTemp == null && tide == null) {
+      return "unknown";
+    }
+
+    let score = 0;
+
+    // 파고 (있으면)
+    if (waveHeight != null) {
+      if (waveHeight < 0.5) score += 0;
+      else if (waveHeight < 1.5) score += 1;
+      else score += 2;
+    }
+
+    // 풍속
+    if (windSpeed != null) {
+      if (windSpeed < 6) score += 0;
+      else if (windSpeed < 10) score += 1;
+      else score += 2;
+    }
+
+    // 수온 (너무 차갑거나 / 너무 뜨거우면 리스크 +1)
+    if (waterTemp != null) {
+      if (waterTemp < 18 || waterTemp > 28) {
+        score += 1;
+      }
+    }
+
+    // 조위 (매우 높거나/낮으면 +1 - 단순 기준)
+    if (tide != null) {
+      if (tide < 50 || tide > 250) {
+        score += 1;
+      }
+    }
+
+    if (score <= 1) return "safe";
+    if (score === 2) return "caution";
+    return "danger";
+  }
+
+  function safetyDetailText(safetyLevel, windSpeed, waterTemp, tide) {
+    if (safetyLevel === "unknown") return "- 관측값이 부족해 안전지수를 계산할 수 없습니다.";
+
+    const parts = [];
+
+    if (windSpeed != null) {
+      if (windSpeed < 6) parts.push("- 바람이 비교적 약해요.");
+      else if (windSpeed < 10) parts.push("- 바람이 다소 강해서 파도가 거칠 수 있어요.");
+      else parts.push("- 바람이 강하게 불어 해상 상태가 불안정해요.");
+    }
+
+    if (waterTemp != null) {
+      if (waterTemp < 18) parts.push("- 수온이 낮아 체온 저하에 주의가 필요해요.");
+      else if (waterTemp > 28) parts.push("- 수온이 높아 더위와 탈수에 유의하세요.");
+      else parts.push("- 수온은 대체로 무난한 편이에요.");
+    }
+
+    if (tide != null) {
+      if (tide < 50) parts.push("- 조위가 낮아 여밭·암초 등에 주의하세요.");
+      else if (tide > 250) parts.push("- 조위가 높아 해변 경계가 좁아질 수 있어요.");
+    }
+
+    if (!parts.length) {
+      if (safetyLevel === "safe") return "- 현재 조건은 비교적 안전한 편입니다.";
+      if (safetyLevel === "caution") return "- 일부 조건이 좋지 않아 주의가 필요합니다.";
+      return "- 조건이 좋지 않아 물놀이·서핑 시 각별한 주의가 필요합니다.";
+    }
+
+    return parts.join("<br>");
+  }
+
+  function colorBySafety(level) {
+    switch (level) {
+      case "safe":    return "#2ecc71";
+      case "caution": return "#f1c40f";
+      case "danger":  return "#e74c3c";
+      default:        return "#7f8c8d";
+    }
+  }
+
+  function labelSurfLevel(level) {
+    switch (level) {
+      case "none":         return "서핑 불가";
+      case "beginner":     return "입문자";
+      case "intermediate": return "중급";
+      case "advanced":     return "상급";
+      case "danger":       return "매우 위험";
+      default:             return "정보 없음";
+    }
+  }
+
+  // 로딩 오버레이
+  function showLoading(total) {
+    const overlay = document.getElementById("loading-overlay");
+    overlay.style.display = "flex";
+    document.getElementById("loading-title").textContent = "데이터 불러오는 중...";
+    document.getElementById("loading-count").innerText = `0 / ${total}`;
+    document.getElementById("loading-progress").style.width = "0%";
+  }
+
+  function hideLoading() {
+    document.getElementById("loading-overlay").style.display = "none";
+  }
+
+  function updateLoading(current, total) {
+    const percent = Math.round((current / total) * 100);
+    document.getElementById("loading-count").innerText = `${current} / ${total}`;
+    document.getElementById("loading-progress").style.width = percent + "%";
+  }
+
+
+  // ------------------------------
+  // 2. BeachMap 클래스
+  // ------------------------------
+  class BeachMap {
+    constructor(mapId, listId) {
+      this.map = L.map(mapId, { minZoom: 6 }).setView([36.5, 127], 7);
+      L.tileLayer(
+        "https://api.vworld.kr/req/wmts/1.0.0/" +
+          VWORLD_KEY +
+          "/Base/{z}/{y}/{x}.png",
+        {
+          maxZoom: 18,
+          attribution: '배경지도 &copy; <a href="https://www.vworld.kr/">브이월드</a>',
+        }
+      ).addTo(this.map);
+      this.map.removeControl(this.map.zoomControl);
+
+      this.listContainer = document.getElementById(listId);
+      this.cluster = L.markerClusterGroup();
+      this.map.addLayer(this.cluster);
+
+      // 파도 아이콘 (조금 더 "진짜 파도" 느낌)
+      this.iconBeach = L.icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+        iconSize: [26, 26],
+        iconAnchor: [13, 26],
+        popupAnchor: [0, -24],
+      });
+
+      // beachMarkers: { beach_code: { marker, props, obs } }
+      this.beachMarkers = {};
+
+      this.map.on("moveend", () => this.updateList());
+    }
+
+    async loadBeaches() {
+      const res = await fetch(BEACH_GEOJSON);
+      const geojson = await res.json();
+
+      L.geoJSON(geojson, {
+        pointToLayer: (feature, latlng) => {
+          const props = feature.properties || {};
+          const marker = L.marker(latlng, { icon: this.iconBeach });
+
+          const obs = {
+            wave_height: null,
+            wind_speed: null,
+            water_temp: null,
+            tide: null,
+            obs_time: null,
+            wind_direct: null,
+            safety: "unknown",
+            surf: "unknown",
+          };
+
+          const beachCode = props.beach_code;
+          this.beachMarkers[beachCode] = { marker, props, obs };
+
+          marker.on("click", () => this.showPopup(beachCode));
+          marker.addTo(this.cluster);
+
+          return marker;
+        },
+      });
+
+      this.updateList();
+    }
+
+    getAllMarkers() {
+      const markers = [];
+      this.cluster.eachLayer((layer) => {
+        if (layer instanceof L.Marker) markers.push(layer);
+      });
+      return markers;
+    }
+
+    moveTo(lat, lng, zoom = 13) {
+      this.map.setView([lat, lng], zoom);
+    }
+
+    updateList() {
+      const bounds = this.map.getBounds();
+      const title = document.getElementById("beach-list-title");
+      this.listContainer.innerHTML = "";
+      if (title) this.listContainer.appendChild(title);
+
+      const markers = this.getAllMarkers();
+
+      markers.forEach((marker) => {
+        const latlng = marker.getLatLng();
+        if (!bounds.contains(latlng)) return;
+
+        let foundCode = null;
+        for (const [code, obj] of Object.entries(this.beachMarkers)) {
+          if (obj.marker === marker) {
+            foundCode = code;
+            break;
+          }
+        }
+        if (!foundCode) return;
+
+        const { props, obs } = this.beachMarkers[foundCode];
+
+        const safety = obs.safety || "unknown";
+        const surf   = obs.surf   || "unknown";
+
+        const div = document.createElement("div");
+        div.className = "scroll-item";
+        div.onclick = () => {
+          this.moveTo(latlng.lat, latlng.lng, 14);
+          this.showPopup(foundCode);
+        };
+
+        const badgeClass =
+          safety === "safe"
+            ? "badge-safe"
+            : safety === "caution"
+            ? "badge-caution"
+            : safety === "danger"
+            ? "badge-danger"
+            : "badge-unknown";
+
+        const windTxt  = obs.wind_speed  != null ? obs.wind_speed  + " m/s" : "-";
+        const tempTxt  = obs.water_temp  != null ? obs.water_temp  + " ℃"   : "-";
+        const tideTxt  = obs.tide        != null ? obs.tide        + " cm"  : "-";
+
+        div.innerHTML = `
+          <h3>${props.beach_name || "-"}</h3>
+          <div class="code">${props.beach_code || ""}</div>
+          <div class="tag-row">
+            <span class="badge ${badgeClass}">
+              ${
+                safety === "safe"
+                  ? "안전"
+                  : safety === "caution"
+                  ? "주의"
+                  : safety === "danger"
+                  ? "위험"
+                  : "정보 없음"
+              }
+            </span>
+            <span class="surf-label">${labelSurfLevel(surf)}</span>
+          </div>
+          <div class="mini-info">
+            <span>풍속: ${windTxt}</span>
+            <span>수온: ${tempTxt}</span>
+            <span>조위: ${tideTxt}</span>
+          </div>
+        `;
+        this.listContainer.appendChild(div);
+      });
+    }
+
+    showPopup(beachCode) {
+      const obj = this.beachMarkers[beachCode];
+      if (!obj) return;
+      const { marker, props, obs } = obj;
+
+      const waveTxt  = obs.wave_height != null ? obs.wave_height + " m" : "-";
+      const windTxt  = obs.wind_speed  != null ? obs.wind_speed  + " m/s" : "-";
+      const tempTxt  = obs.water_temp  != null ? obs.water_temp  + " ℃" : "-";
+      const tideTxt  = obs.tide        != null ? obs.tide        + " cm" : "-";
+      const timeTxt  = obs.obs_time    || "-";
+      const dirTxt   = obs.wind_direct || "-";
+
+      const safety   = obs.safety || "unknown";
+      const surf     = obs.surf   || "unknown";
+
+      const safetyLabel =
+        safety === "safe"
+          ? "안전"
+          : safety === "caution"
+          ? "주의"
+          : safety === "danger"
+          ? "위험"
+          : "정보 없음";
+
+      const descText = safetyDetailText(
+        safety,
+        obs.wind_speed,
+        obs.water_temp,
+        obs.tide
+      );
+
+      const html = `
+        <div class="beach-popup">
+          <h3>${props.beach_name || ""}</h3>
+          <p class="popup-label">코드: <span class="popup-value">${props.beach_code || ""}</span></p>
+          <p class="popup-label">관측시간: <span class="popup-value">${timeTxt}</span></p>
+          <div class="popup-section">
+            <p class="popup-label">풍향: <span class="popup-value">${dirTxt}</span></p>
+            <p class="popup-label">파고: <span class="popup-value">${waveTxt}</span></p>
+            <p class="popup-label">풍속: <span class="popup-value">${windTxt}</span></p>
+            <p class="popup-label">수온: <span class="popup-value">${tempTxt}</span></p>
+            <p class="popup-label">조위: <span class="popup-value">${tideTxt}</span></p>
+          </div>
+          <div class="popup-section" style="margin-top:6px;">
+            <p class="popup-label">안전도: <span class="popup-value">${safetyLabel}</span></p>
+            <p class="popup-label">서핑 레벨: <span class="popup-value">${labelSurfLevel(surf)}</span></p>
+            <div class="popup-desc">${descText}</div>
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(html, {
+        className: "custom-popup",
+        maxWidth: 280,
+      }).openPopup();
+    }
+
+    // ------------------------------
+    // KHOA 관측 호출 (프록시 + 새 응답 구조)
+    // ------------------------------
+    async refreshAllObservations() {
+      const codes = Object.keys(this.beachMarkers); // beach_code 배열
+      const total = codes.length;
+      let current = 0;
+
+      showLoading(total);
+
+      for (const code of codes) {
+        await this.fetchObservation(code).catch(() => {});
+        current++;
+        updateLoading(current, total);
+      }
+
+      hideLoading();
+      this.updateList(); // 관측값 다 갱신 후 리스트 다시 그림 (선택)
+    }
+
+    async fetchObservation(beachCode) {
+      const obj = this.beachMarkers[beachCode];
+      if (!obj) return;
+
+      const props = obj.props;
+      const base  = "http://www.khoa.go.kr/api/oceangrid/beach/search.do";
+
+      // KHOA 실제 URL
+      const khoaUrl =
+        base +
+        "?ServiceKey=" + encodeURIComponent(KHOA_KEY) +
+        "&BeachCode=" + encodeURIComponent(props.beach_code) +
+        "&ResultType=json";
+
+      // 프록시로 감싸기 (전체 URL 인코딩)
+      const finalUrl = VWORLD_PROXY + encodeURIComponent(khoaUrl);
+
+      try {
+        const res = await fetch(finalUrl);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+
+        const meta = json?.result?.meta || {};
+        const dataArr = json?.result?.data || [];
+        if (!dataArr.length) return;
+
+        const latest = dataArr[0]; // 이 API는 1건만 반환
+
+        const wave = latest.wave_height != null ? Number(latest.wave_height) : null;
+        const wind = latest.wind_speed  != null ? Number(latest.wind_speed)  : null;
+        const temp = latest.water_temp  != null ? Number(latest.water_temp)  : null;
+        const tide = latest.tide        != null ? Number(latest.tide)        : null;
+        const time = latest.obs_time    || null;
+        const dir  = latest.wind_direct || null;
+
+        const safety = calcSafetyLevel(wave, wind, temp, tide);
+        const surf   = calcSurfLevel(wave, wind);
+
+        obj.obs = {
+          wave_height: wave,
+          wind_speed:  wind,
+          water_temp:  temp,
+          tide,
+          obs_time:    time,
+          wind_direct: dir,
+          safety,
+          surf,
+          meta
+        };
+
+        const color = colorBySafety(safety);
+        obj.marker.setIcon(
+          L.divIcon({
+            html:
+              `<div style="width:18px;height:18px;border-radius:50%;
+              background:${color};border:2px solid #fff;
+              box-shadow:0 0 4px rgba(0,0,0,.6)"></div>`,
+            className: "",
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          })
+        );
+
+      } catch (e) {
+        console.error("관측값 조회 실패:", beachCode, e);
+      }
+    }
+  }
+
+  // ------------------------------
+  // 초기화
+  // ------------------------------
+  document.addEventListener("DOMContentLoaded", async () => {
+    const beachMap = new BeachMap("map", "beach-list");
+    await beachMap.loadBeaches();
+    await beachMap.refreshAllObservations();
+
+    document.getElementById("btn-korea").onclick = () =>
+      beachMap.moveTo(36.5, 127, 7);
+    document.getElementById("btn-west").onclick = () =>
+      beachMap.moveTo(36.5, 126.3, 8); 
+    document.getElementById("btn-east").onclick = () =>
+      beachMap.moveTo(37.6, 129.3, 8);
+    document.getElementById("btn-south").onclick = () =>
+      beachMap.moveTo(34.5, 128, 8);
+    document.getElementById("btn-jeju").onclick = () =>
+      beachMap.moveTo(33.4, 126.5, 9);
+  });
+</script>
+</body>
+</html>

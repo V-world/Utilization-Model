@@ -1,0 +1,3921 @@
+{
+   "type": "FeatureCollection",
+   "features": [
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.731,38.005 ]
+    },
+    "properties": {
+    "beach_code":"BCH110",
+    "beach_name":"38(기사문)해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.354,34.434 ]
+    },
+    "properties": {
+    "beach_code":"BCH226",
+    "beach_name":"가계해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.408,35.398 ]
+    },
+    "properties": {
+    "beach_code":"BCH243",
+    "beach_name":"가마미해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.928,34.37 ]
+    },
+    "properties": {
+    "beach_code":"BCH216",
+    "beach_name":"가사해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.509,38.373 ]
+    },
+    "properties": {
+    "beach_code":"BCH092",
+    "beach_name":"가진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.152,36.696 ]
+    },
+    "properties": {
+    "beach_code":"BCH261",
+    "beach_name":"갈음이해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.126,37.514 ]
+    },
+    "properties": {
+    "beach_code":"BCH528",
+    "beach_name":"감추해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.918,37.794 ]
+    },
+    "properties": {
+    "beach_code":"BCH126",
+    "beach_name":"강문해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.781,37.945 ]
+    },
+    "properties": {
+    "beach_code":"BCH118",
+    "beach_name":"갯마을해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.304,34.02 ]
+    },
+    "properties": {
+    "beach_code":"BCH201",
+    "beach_name":"거문도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.455,38.444 ]
+    },
+    "properties": {
+    "beach_code":"BCH090",
+    "beach_name":"거진11리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.465,38.447 ]
+    },
+    "properties": {
+    "beach_code":"BCH089",
+    "beach_name":"거진1리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.469,35.63 ]
+    },
+    "properties": {
+    "beach_code":"BCH249",
+    "beach_name":"격포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.433,36.482 ]
+    },
+    "properties": {
+    "beach_code":"BCH168",
+    "beach_name":"경정해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.91,37.803 ]
+    },
+    "properties": {
+    "beach_code":"BCH031",
+    "beach_name":"경포대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.277,37.159 ]
+    },
+    "properties": {
+    "beach_code":"BCH349",
+    "beach_name":"계남해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.41,36.598 ]
+    },
+    "properties": {
+    "beach_code":"BCH048",
+    "beach_name":"고래불해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.122,37.527 ]
+    },
+    "properties": {
+    "beach_code":"BCH505",
+    "beach_name":"고불개해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.504,35.659 ]
+    },
+    "properties": {
+    "beach_code":"BCH248",
+    "beach_name":"고사포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.363,37.146 ]
+    },
+    "properties": {
+    "beach_code":"BCH524",
+    "beach_name":"고포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.29,36.586 ]
+    },
+    "properties": {
+    "beach_code":"BCH260",
+    "beach_name":"곰섬해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.508,38.358 ]
+    },
+    "properties": {
+    "beach_code":"BCH093",
+    "beach_name":"공현진1리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.511,38.35 ]
+    },
+    "properties": {
+    "beach_code":"BCH094",
+    "beach_name":"공현진2리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.304,33.451 ]
+    },
+    "properties": {
+    "beach_code":"BCH021",
+    "beach_name":"곽지과물해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.05,34.24 ]
+    },
+    "properties": {
+    "beach_code":"BCH229",
+    "beach_name":"관매도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.451,35.659 ]
+    },
+    "properties": {
+    "beach_code":"BCH043",
+    "beach_name":"관성솔밭해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.118,35.153 ]
+    },
+    "properties": {
+    "beach_code":"BCH002",
+    "beach_name":"광안리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.497,35.101 ]
+    },
+    "properties": {
+    "beach_code":"BCH173",
+    "beach_name":"광암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.764,37.965 ]
+    },
+    "properties": {
+    "beach_code":"BCH117",
+    "beach_name":"광진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.546,38.291 ]
+    },
+    "properties": {
+    "beach_code":"BCH098",
+    "beach_name":"교암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.198,36.886 ]
+    },
+    "properties": {
+    "beach_code":"BCH267",
+    "beach_name":"구례포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.566,35.997 ]
+    },
+    "properties": {
+    "beach_code":"BCH071",
+    "beach_name":"구룡포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.152,36.836 ]
+    },
+    "properties": {
+    "beach_code":"BCH266",
+    "beach_name":"구름포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.684,37.668 ]
+    },
+    "properties": {
+    "beach_code":"BCH316",
+    "beach_name":"구리동해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.468,36.753 ]
+    },
+    "properties": {
+    "beach_code":"BCH163",
+    "beach_name":"구산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.435,35.445 ]
+    },
+    "properties": {
+    "beach_code":"BCH245",
+    "beach_name":"구시포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.691,35.031 ]
+    },
+    "properties": {
+    "beach_code":"BCH185",
+    "beach_name":"구영해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.692,34.806 ]
+    },
+    "properties": {
+    "beach_code":"BCH066",
+    "beach_name":"구조라해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.557,37.062 ]
+    },
+    "properties": {
+    "beach_code":"BCH519",
+    "beach_name":"국화리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.978,37.188 ]
+    },
+    "properties": {
+    "beach_code":"BCH323",
+    "beach_name":"굴업해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.267,37.324 ]
+    },
+    "properties": {
+    "beach_code":"BCH151",
+    "beach_name":"궁촌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.685,37.12 ]
+    },
+    "properties": {
+    "beach_code":"BCH353",
+    "beach_name":"궁평리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.278,34.394 ]
+    },
+    "properties": {
+    "beach_code":"BCH227",
+    "beach_name":"금갑해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.963,34.312 ]
+    },
+    "properties": {
+    "beach_code":"BCH222",
+    "beach_name":"금곡해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.235,33.389 ]
+    },
+    "properties": {
+    "beach_code":"BCH277",
+    "beach_name":"금능해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.061,34.333 ]
+    },
+    "properties": {
+    "beach_code":"BCH214",
+    "beach_name":"금일명사십리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.164,34.434 ]
+    },
+    "properties": {
+    "beach_code":"BCH206",
+    "beach_name":"금장해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.044,37.639 ]
+    },
+    "properties": {
+    "beach_code":"BCH138",
+    "beach_name":"금진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.435,36.842 ]
+    },
+    "properties": {
+    "beach_code":"BCH073",
+    "beach_name":"기성망양해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.322,36.562 ]
+    },
+    "properties": {
+    "beach_code":"BCH253",
+    "beach_name":"기지포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.759,33.557 ]
+    },
+    "properties": {
+    "beach_code":"BCH025",
+    "beach_name":"김녕해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.336,36.497 ]
+    },
+    "properties": {
+    "beach_code":"BCH015",
+    "beach_name":"꽃지해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.292,36.935 ]
+    },
+    "properties": {
+    "beach_code":"BCH268",
+    "beach_name":"꾸지나무골해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.371,37.126 ]
+    },
+    "properties": {
+    "beach_code":"BCH158",
+    "beach_name":"나곡해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.47,34.466 ]
+    },
+    "properties": {
+    "beach_code":"BCH209",
+    "beach_name":"나로우주해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.491,35.782 ]
+    },
+    "properties": {
+    "beach_code":"BCH069",
+    "beach_name":"나정고운모래해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.635,38.115 ]
+    },
+    "properties": {
+    "beach_code":"BCH005",
+    "beach_name":"낙산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.423,37.046 ]
+    },
+    "properties": {
+    "beach_code":"BCH269",
+    "beach_name":"난지섬해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.787,37.939 ]
+    },
+    "properties": {
+    "beach_code":"BCH120",
+    "beach_name":"남애1해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.784,37.946 ]
+    },
+    "properties": {
+    "beach_code":"BCH119",
+    "beach_name":"남애3해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.486,34.579 ]
+    },
+    "properties": {
+    "beach_code":"BCH064",
+    "beach_name":"남열해돋이해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.096,34.926 ]
+    },
+    "properties": {
+    "beach_code":"BCH190",
+    "beach_name":"남일대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.954,37.764 ]
+    },
+    "properties": {
+    "beach_code":"BCH134",
+    "beach_name":"남항진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.38,36.327 ]
+    },
+    "properties": {
+    "beach_code":"BCH165",
+    "beach_name":"남호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.555,34.592 ]
+    },
+    "properties": {
+    "beach_code":"BCH514",
+    "beach_name":"낭도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.1,37.587 ]
+    },
+    "properties": {
+    "beach_code":"BCH142",
+    "beach_name":"노봉해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.389,33.237 ]
+    },
+    "properties": {
+    "beach_code":"BCH343",
+    "beach_name":"논짓물해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.701,35.004 ]
+    },
+    "properties": {
+    "beach_code":"BCH177",
+    "beach_name":"농소해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.965,35.046 ]
+    },
+    "properties": {
+    "beach_code":"BCH013",
+    "beach_name":"다대포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.294,36.657 ]
+    },
+    "properties": {
+    "beach_code":"BCH034",
+    "beach_name":"달산포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.071,35.103 ]
+    },
+    "properties": {
+    "beach_code":"BCH059",
+    "beach_name":"대광해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.271,34.713 ]
+    },
+    "properties": {
+    "beach_code":"BCH211",
+    "beach_name":"대전해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.424,38.504 ]
+    },
+    "properties": {
+    "beach_code":"BCH086",
+    "beach_name":"대진1리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.429,38.496 ]
+    },
+    "properties": {
+    "beach_code":"BCH087",
+    "beach_name":"대진5리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.109,37.581 ]
+    },
+    "properties": {
+    "beach_code":"BCH144",
+    "beach_name":"대진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.426,36.565 ]
+    },
+    "properties": {
+    "beach_code":"BCH164",
+    "beach_name":"대진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.513,36.31 ]
+    },
+    "properties": {
+    "beach_code":"BCH014",
+    "beach_name":"대천해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.238,34.235 ]
+    },
+    "properties": {
+    "beach_code":"BCH512",
+    "beach_name":"대풍해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.236,34.635 ]
+    },
+    "properties": {
+    "beach_code":"BCH313",
+    "beach_name":"덕동해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.243,37.385 ]
+    },
+    "properties": {
+    "beach_code":"BCH150",
+    "beach_name":"덕산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.575,34.778 ]
+    },
+    "properties": {
+    "beach_code":"BCH181",
+    "beach_name":"덕원해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.71,34.91 ]
+    },
+    "properties": {
+    "beach_code":"BCH179",
+    "beach_name":"덕포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.459,34.527 ]
+    },
+    "properties": {
+    "beach_code":"BCH210",
+    "beach_name":"덕흥해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.442,35.992 ]
+    },
+    "properties": {
+    "beach_code":"BCH169",
+    "beach_name":"도구해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.076,37.602 ]
+    },
+    "properties": {
+    "beach_code":"BCH139",
+    "beach_name":"도직해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.827,34.608 ]
+    },
+    "properties": {
+    "beach_code":"BCH239",
+    "beach_name":"돈목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.441,35.086 ]
+    },
+    "properties": {
+    "beach_code":"BCH242",
+    "beach_name":"돌머리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.88,34.329 ]
+    },
+    "properties": {
+    "beach_code":"BCH215",
+    "beach_name":"동고해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.459,37.592 ]
+    },
+    "properties": {
+    "beach_code":"BCH309",
+    "beach_name":"동막해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.756,37.982 ]
+    },
+    "properties": {
+    "beach_code":"BCH114",
+    "beach_name":"동산포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.756,37.982 ]
+    },
+    "properties": {
+    "beach_code":"BCH113",
+    "beach_name":"동산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.483,35.518 ]
+    },
+    "properties": {
+    "beach_code":"BCH124",
+    "beach_name":"동호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.683,38.058 ]
+    },
+    "properties": {
+    "beach_code":"BCH246",
+    "beach_name":"동호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.907,34.768 ]
+    },
+    "properties": {
+    "beach_code":"BCH193",
+    "beach_name":"두곡월포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.329,36.542 ]
+    },
+    "properties": {
+    "beach_code":"BCH305",
+    "beach_name":"두여해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.598,38.214 ]
+    },
+    "properties": {
+    "beach_code":"BCH104",
+    "beach_name":"등대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.016,37.704 ]
+    },
+    "properties": {
+    "beach_code":"BCH137",
+    "beach_name":"등명해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.176,37.212 ]
+    },
+    "properties": {
+    "beach_code":"BCH322",
+    "beach_name":"떼뿌루해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.287,36.618 ]
+    },
+    "properties": {
+    "beach_code":"BCH259",
+    "beach_name":"마검포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.419,38.51 ]
+    },
+    "properties": {
+    "beach_code":"BCH085",
+    "beach_name":"마차진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.14,36.784 ]
+    },
+    "properties": {
+    "beach_code":"BCH033",
+    "beach_name":"만리포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.745,34.778 ]
+    },
+    "properties": {
+    "beach_code":"BCH040",
+    "beach_name":"만성리검은모래해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.744,34.774 ]
+    },
+    "properties": {
+    "beach_code":"BCH195",
+    "beach_name":"만성리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.08,37.598 ]
+    },
+    "properties": {
+    "beach_code":"BCH141",
+    "beach_name":"망상오토캠핑리조트해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.09,37.593 ]
+    },
+    "properties": {
+    "beach_code":"BCH004",
+    "beach_name":"망상해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.412,36.969 ]
+    },
+    "properties": {
+    "beach_code":"BCH161",
+    "beach_name":"망양정해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.666,34.811 ]
+    },
+    "properties": {
+    "beach_code":"BCH180",
+    "beach_name":"망치해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.232,37.39 ]
+    },
+    "properties": {
+    "beach_code":"BCH049",
+    "beach_name":"맹방해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.603,34.726 ]
+    },
+    "properties": {
+    "beach_code":"BCH174",
+    "beach_name":"명사해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.403,38.545 ]
+    },
+    "properties": {
+    "beach_code":"BCH084",
+    "beach_name":"명파해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 124.684,37.812 ]
+    },
+    "properties": {
+    "beach_code":"BCH318",
+    "beach_name":"모래울"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.756,34.796 ]
+    },
+    "properties": {
+    "beach_code":"BCH197",
+    "beach_name":"모사금해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.334,33.945 ]
+    },
+    "properties": {
+    "beach_code":"BCH329",
+    "beach_name":"모진이해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.507,35.582 ]
+    },
+    "properties": {
+    "beach_code":"BCH250",
+    "beach_name":"모항해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.286,36.669 ]
+    },
+    "properties": {
+    "beach_code":"BCH003",
+    "beach_name":"몽산포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.776,34.683 ]
+    },
+    "properties": {
+    "beach_code":"BCH200",
+    "beach_name":"무슬목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.536,36.245 ]
+    },
+    "properties": {
+    "beach_code":"BCH035",
+    "beach_name":"무창포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.107,37.178 ]
+    },
+    "properties": {
+    "beach_code":"BCH324",
+    "beach_name":"문갑해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.547,38.297 ]
+    },
+    "properties": {
+    "beach_code":"BCH097",
+    "beach_name":"문암2리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.289,37.309 ]
+    },
+    "properties": {
+    "beach_code":"BCH152",
+    "beach_name":"문암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.652,35.01 ]
+    },
+    "properties": {
+    "beach_code":"BCH175",
+    "beach_name":"물안해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.608,38.152 ]
+    },
+    "properties": {
+    "beach_code":"BCH106",
+    "beach_name":"물치해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.669,34.144 ]
+    },
+    "properties": {
+    "beach_code":"BCH340",
+    "beach_name":"미라해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.333,37.651 ]
+    },
+    "properties": {
+    "beach_code":"BCH310",
+    "beach_name":"민머루해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.375,36.412 ]
+    },
+    "properties": {
+    "beach_code":"BCH256",
+    "beach_name":"바람아래해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.462,38.42 ]
+    },
+    "properties": {
+    "beach_code":"BCH091",
+    "beach_name":"반암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.355,34.491 ]
+    },
+    "properties": {
+    "beach_code":"BCH207",
+    "beach_name":"발포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.33,36.53 ]
+    },
+    "properties": {
+    "beach_code":"BCH254",
+    "beach_name":"밧개해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.141,37.215 ]
+    },
+    "properties": {
+    "beach_code":"BCH321",
+    "beach_name":"밧지름해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.576,37.288 ]
+    },
+    "properties": {
+    "beach_code":"BCH354",
+    "beach_name":"방아머리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.155,36.811 ]
+    },
+    "properties": {
+    "beach_code":"BCH264",
+    "beach_name":"방주골해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.793,34.63 ]
+    },
+    "properties": {
+    "beach_code":"BCH199",
+    "beach_name":"방죽포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.332,36.509 ]
+    },
+    "properties": {
+    "beach_code":"BCH079",
+    "beach_name":"방포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.427,34.689 ]
+    },
+    "properties": {
+    "beach_code":"BCH302",
+    "beach_name":"배낭기미해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.039,34.849 ]
+    },
+    "properties": {
+    "beach_code":"BCH234",
+    "beach_name":"백길해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.546,38.3 ]
+    },
+    "properties": {
+    "beach_code":"BCH083",
+    "beach_name":"백도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.306,35.242 ]
+    },
+    "properties": {
+    "beach_code":"BCH038",
+    "beach_name":"백바위해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.314,36.576 ]
+    },
+    "properties": {
+    "beach_code":"BCH016",
+    "beach_name":"백사장해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.222,37.181 ]
+    },
+    "properties": {
+    "beach_code":"BCH350",
+    "beach_name":"벌안해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.336,36.967 ]
+    },
+    "properties": {
+    "beach_code":"BCH521",
+    "beach_name":"벌천포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.53,35.68 ]
+    },
+    "properties": {
+    "beach_code":"BCH247",
+    "beach_name":"변산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.483,35.739 ]
+    },
+    "properties": {
+    "beach_code":"BCH171",
+    "beach_name":"봉길대왕암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.527,38.323 ]
+    },
+    "properties": {
+    "beach_code":"BCH078",
+    "beach_name":"봉수대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.512,34.759 ]
+    },
+    "properties": {
+    "beach_code":"BCH314",
+    "beach_name":"봉암몽돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.413,37.043 ]
+    },
+    "properties": {
+    "beach_code":"BCH160",
+    "beach_name":"봉평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.569,38.248 ]
+    },
+    "properties": {
+    "beach_code":"BCH101",
+    "beach_name":"봉포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.251,37.362 ]
+    },
+    "properties": {
+    "beach_code":"BCH156",
+    "beach_name":"부남해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.378,36.055 ]
+    },
+    "properties": {
+    "beach_code":"BCH517",
+    "beach_name":"북부해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.749,37.987 ]
+    },
+    "properties": {
+    "beach_code":"BCH123",
+    "beach_name":"북분리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.98,34.871 ]
+    },
+    "properties": {
+    "beach_code":"BCH235",
+    "beach_name":"분계해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.92,34.776 ]
+    },
+    "properties": {
+    "beach_code":"BCH529",
+    "beach_name":"비금원평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.459,34.72 ]
+    },
+    "properties": {
+    "beach_code":"BCH188",
+    "beach_name":"비진도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.31,33.231 ]
+    },
+    "properties": {
+    "beach_code":"BCH342",
+    "beach_name":"사계해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.571,34.898 ]
+    },
+    "properties": {
+    "beach_code":"BCH176",
+    "beach_name":"사곡해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 124.721,37.952 ]
+    },
+    "properties": {
+    "beach_code":"BCH317",
+    "beach_name":"사곶해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.578,34.32 ]
+    },
+    "properties": {
+    "beach_code":"BCH224",
+    "beach_name":"사구미해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.897,37.813 ]
+    },
+    "properties": {
+    "beach_code":"BCH125",
+    "beach_name":"사근진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.556,34.592 ]
+    },
+    "properties": {
+    "beach_code":"BCH523",
+    "beach_name":"사도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.212,34.85 ]
+    },
+    "properties": {
+    "beach_code":"BCH189",
+    "beach_name":"사량대항해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.291,36.919 ]
+    },
+    "properties": {
+    "beach_code":"BCH516",
+    "beach_name":"사목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.873,37.843 ]
+    },
+    "properties": {
+    "beach_code":"BCH128",
+    "beach_name":"사천진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.878,37.831 ]
+    },
+    "properties": {
+    "beach_code":"BCH132",
+    "beach_name":"사천해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.855,34.743 ]
+    },
+    "properties": {
+    "beach_code":"BCH192",
+    "beach_name":"사촌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 124.677,37.814 ]
+    },
+    "properties": {
+    "beach_code":"BCH506",
+    "beach_name":"사탄동해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.315,36.57 ]
+    },
+    "properties": {
+    "beach_code":"BCH057",
+    "beach_name":"삼봉해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.586,33.525 ]
+    },
+    "properties": {
+    "beach_code":"BCH023",
+    "beach_name":"삼양검은모래해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.169,37.467 ]
+    },
+    "properties": {
+    "beach_code":"BCH009",
+    "beach_name":"삼척해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.531,38.318 ]
+    },
+    "properties": {
+    "beach_code":"BCH095",
+    "beach_name":"삼포2리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.535,38.315 ]
+    },
+    "properties": {
+    "beach_code":"BCH077",
+    "beach_name":"삼포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.479,35.601 ]
+    },
+    "properties": {
+    "beach_code":"BCH507",
+    "beach_name":"상록해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.211,37.403 ]
+    },
+    "properties": {
+    "beach_code":"BCH148",
+    "beach_name":"상맹방해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.988,34.72 ]
+    },
+    "properties": {
+    "beach_code":"BCH041",
+    "beach_name":"상주은모래비치해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.335,36.448 ]
+    },
+    "properties": {
+    "beach_code":"BCH255",
+    "beach_name":"샛별해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.295,34.055 ]
+    },
+    "properties": {
+    "beach_code":"BCH515",
+    "beach_name":"서도(이금포)해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.946,33.5 ]
+    },
+    "properties": {
+    "beach_code":"BCH028",
+    "beach_name":"서빈백사해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.113,37.221 ]
+    },
+    "properties": {
+    "beach_code":"BCH272",
+    "beach_name":"서포리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.378,37.439 ]
+    },
+    "properties": {
+    "beach_code":"BCH308",
+    "beach_name":"선녀바위해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.412,35.823 ]
+    },
+    "properties": {
+    "beach_code":"BCH252",
+    "beach_name":"선유도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.026,34.706 ]
+    },
+    "properties": {
+    "beach_code":"BCH194",
+    "beach_name":"설리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.622,38.13 ]
+    },
+    "properties": {
+    "beach_code":"BCH108",
+    "beach_name":"설악해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.861,33.525 ]
+    },
+    "properties": {
+    "beach_code":"BCH030",
+    "beach_name":"세화해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.842,33.331 ]
+    },
+    "properties": {
+    "beach_code":"BCH336",
+    "beach_name":"소금막해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.825,37.906 ]
+    },
+    "properties": {
+    "beach_code":"BCH531",
+    "beach_name":"소돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.131,34.508 ]
+    },
+    "properties": {
+    "beach_code":"BCH339",
+    "beach_name":"소록도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.602,38.19 ]
+    },
+    "properties": {
+    "beach_code":"BCH052",
+    "beach_name":"속초해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.36,34.287 ]
+    },
+    "properties": {
+    "beach_code":"BCH513",
+    "beach_name":"손죽해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.016,35.075 ]
+    },
+    "properties": {
+    "beach_code":"BCH012",
+    "beach_name":"송도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.151,35.273 ]
+    },
+    "properties": {
+    "beach_code":"BCH244",
+    "beach_name":"송이도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.658,38.092 ]
+    },
+    "properties": {
+    "beach_code":"BCH325",
+    "beach_name":"송전해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.023,34.722 ]
+    },
+    "properties": {
+    "beach_code":"BCH191",
+    "beach_name":"송정솔바람해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.937,37.779 ]
+    },
+    "properties": {
+    "beach_code":"BCH300",
+    "beach_name":"송정해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.199,35.178 ]
+    },
+    "properties": {
+    "beach_code":"BCH010",
+    "beach_name":"송정해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.527,38.331 ]
+    },
+    "properties": {
+    "beach_code":"BCH082",
+    "beach_name":"송지호오토캠핑장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.527,38.33 ]
+    },
+    "properties": {
+    "beach_code":"BCH081",
+    "beach_name":"송지호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.471,34.435 ]
+    },
+    "properties": {
+    "beach_code":"BCH225",
+    "beach_name":"송평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.518,34.315 ]
+    },
+    "properties": {
+    "beach_code":"BCH223",
+    "beach_name":"송호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.622,33.251 ]
+    },
+    "properties": {
+    "beach_code":"BCH338",
+    "beach_name":"쇠소깍해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.431,37.544 ]
+    },
+    "properties": {
+    "beach_code":"BCH315",
+    "beach_name":"수기해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.034,34.635 ]
+    },
+    "properties": {
+    "beach_code":"BCH213",
+    "beach_name":"수문해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.893,37.817 ]
+    },
+    "properties": {
+    "beach_code":"BCH133",
+    "beach_name":"순긋해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.954,34.672 ]
+    },
+    "properties": {
+    "beach_code":"BCH238",
+    "beach_name":"시목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.766,34.818 ]
+    },
+    "properties": {
+    "beach_code":"BCH518",
+    "beach_name":"신덕해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.973,34.588 ]
+    },
+    "properties": {
+    "beach_code":"BCH303",
+    "beach_name":"신도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.189,36.84 ]
+    },
+    "properties": {
+    "beach_code":"BCH054",
+    "beach_name":"신두리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.92,33.435 ]
+    },
+    "properties": {
+    "beach_code":"BCH019",
+    "beach_name":"신양섭지코지해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.074,34.284 ]
+    },
+    "properties": {
+    "beach_code":"BCH228",
+    "beach_name":"신전해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.812,34.326 ]
+    },
+    "properties": {
+    "beach_code":"BCH061",
+    "beach_name":"신지명사십리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.648,33.551 ]
+    },
+    "properties": {
+    "beach_code":"BCH333",
+    "beach_name":"신흥리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.908,34.183 ]
+    },
+    "properties": {
+    "beach_code":"BCH218",
+    "beach_name":"신흥해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.402,37.403 ]
+    },
+    "properties": {
+    "beach_code":"BCH307",
+    "beach_name":"실미해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.485,37.281 ]
+    },
+    "properties": {
+    "beach_code":"BCH273",
+    "beach_name":"십리포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.553,38.276 ]
+    },
+    "properties": {
+    "beach_code":"BCH099",
+    "beach_name":"아야진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.812,34.49 ]
+    },
+    "properties": {
+    "beach_code":"BCH202",
+    "beach_name":"안도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.328,36.549 ]
+    },
+    "properties": {
+    "beach_code":"BCH011",
+    "beach_name":"안면해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.948,37.772 ]
+    },
+    "properties": {
+    "beach_code":"BCH127",
+    "beach_name":"안목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.39,35.139 ]
+    },
+    "properties": {
+    "beach_code":"BCH341",
+    "beach_name":"안악해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.99,37.734 ]
+    },
+    "properties": {
+    "beach_code":"BCH136",
+    "beach_name":"안인해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.117,37.568 ]
+    },
+    "properties": {
+    "beach_code":"BCH143",
+    "beach_name":"어달해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.129,36.752 ]
+    },
+    "properties": {
+    "beach_code":"BCH263",
+    "beach_name":"어은돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.625,34.713 ]
+    },
+    "properties": {
+    "beach_code":"BCH186",
+    "beach_name":"여차해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.853,37.859 ]
+    },
+    "properties": {
+    "beach_code":"BCH131",
+    "beach_name":"연곡해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.396,34.734 ]
+    },
+    "properties": {
+    "beach_code":"BCH520",
+    "beach_name":"연대도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.116,34.447 ]
+    },
+    "properties": {
+    "beach_code":"BCH205",
+    "beach_name":"연소해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.21,36.693 ]
+    },
+    "properties": {
+    "beach_code":"BCH056",
+    "beach_name":"연포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.99,37.734 ]
+    },
+    "properties": {
+    "beach_code":"BCH135",
+    "beach_name":"염전해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.492,34.432 ]
+    },
+    "properties": {
+    "beach_code":"BCH208",
+    "beach_name":"염포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.378,36.055 ]
+    },
+    "properties": {
+    "beach_code":"BCH044",
+    "beach_name":"영일대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.845,37.869 ]
+    },
+    "properties": {
+    "beach_code":"BCH129",
+    "beach_name":"영진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 124.735,37.752 ]
+    },
+    "properties": {
+    "beach_code":"BCH320",
+    "beach_name":"예동(소청)해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.562,34.14 ]
+    },
+    "properties": {
+    "beach_code":"BCH219",
+    "beach_name":"예송해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.509,35.821 ]
+    },
+    "properties": {
+    "beach_code":"BCH070",
+    "beach_name":"오류고아라해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.432,36.44 ]
+    },
+    "properties": {
+    "beach_code":"BCH167",
+    "beach_name":"오보해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.401,36.367 ]
+    },
+    "properties": {
+    "beach_code":"BCH504",
+    "beach_name":"오봉산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.191,37.426 ]
+    },
+    "properties": {
+    "beach_code":"BCH155",
+    "beach_name":"오분해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.664,38.09 ]
+    },
+    "properties": {
+    "beach_code":"BCH109",
+    "beach_name":"오산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.049,37.627 ]
+    },
+    "properties": {
+    "beach_code":"BCH140",
+    "beach_name":"옥계해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.63,34.977 ]
+    },
+    "properties": {
+    "beach_code":"BCH183",
+    "beach_name":"옥계해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.372,37.529 ]
+    },
+    "properties": {
+    "beach_code":"BCH271",
+    "beach_name":"옹암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.708,34.812 ]
+    },
+    "properties": {
+    "beach_code":"BCH067",
+    "beach_name":"와현해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.369,37.455 ]
+    },
+    "properties": {
+    "beach_code":"BCH275",
+    "beach_name":"왕산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.527,37.045 ]
+    },
+    "properties": {
+    "beach_code":"BCH270",
+    "beach_name":"왜목마을해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.297,34.781 ]
+    },
+    "properties": {
+    "beach_code":"BCH230",
+    "beach_name":"외달도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.608,38.183 ]
+    },
+    "properties": {
+    "beach_code":"BCH105",
+    "beach_name":"외옹치해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.18,34.631 ]
+    },
+    "properties": {
+    "beach_code":"BCH203",
+    "beach_name":"용동해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.548,36.265 ]
+    },
+    "properties": {
+    "beach_code":"BCH503",
+    "beach_name":"용두해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.304,37.289 ]
+    },
+    "properties": {
+    "beach_code":"BCH153",
+    "beach_name":"용화해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.137,34.971 ]
+    },
+    "properties": {
+    "beach_code":"BCH060",
+    "beach_name":"우전해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.667,34.747 ]
+    },
+    "properties": {
+    "beach_code":"BCH196",
+    "beach_name":"웅천친수공원"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.442,36.359 ]
+    },
+    "properties": {
+    "beach_code":"BCH502",
+    "beach_name":"원산도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.913,34.775 ]
+    },
+    "properties": {
+    "beach_code":"BCH236",
+    "beach_name":"원평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.272,37.32 ]
+    },
+    "properties": {
+    "beach_code":"BCH157",
+    "beach_name":"원평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.791,37.932 ]
+    },
+    "properties": {
+    "beach_code":"BCH121",
+    "beach_name":"원포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.796,33.555 ]
+    },
+    "properties": {
+    "beach_code":"BCH026",
+    "beach_name":"월정리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.371,36.201 ]
+    },
+    "properties": {
+    "beach_code":"BCH045",
+    "beach_name":"월포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.283,35.603 ]
+    },
+    "properties": {
+    "beach_code":"BCH251",
+    "beach_name":"위도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.089,34.67 ]
+    },
+    "properties": {
+    "beach_code":"BCH063",
+    "beach_name":"율포솔밭해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.051,34.786 ]
+    },
+    "properties": {
+    "beach_code":"BCH527",
+    "beach_name":"은점몽돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.372,37.446 ]
+    },
+    "properties": {
+    "beach_code":"BCH032",
+    "beach_name":"을왕리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.159,36.828 ]
+    },
+    "properties": {
+    "beach_code":"BCH265",
+    "beach_name":"의항해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.301,37.165 ]
+    },
+    "properties": {
+    "beach_code":"BCH331",
+    "beach_name":"이일레해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.451,33.497 ]
+    },
+    "properties": {
+    "beach_code":"BCH022",
+    "beach_name":"이호테우해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.145,34.429 ]
+    },
+    "properties": {
+    "beach_code":"BCH204",
+    "beach_name":"익금해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.762,37.969 ]
+    },
+    "properties": {
+    "beach_code":"BCH116",
+    "beach_name":"인구해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.233,35.26 ]
+    },
+    "properties": {
+    "beach_code":"BCH008",
+    "beach_name":"일광해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.43,35.495 ]
+    },
+    "properties": {
+    "beach_code":"BCH068",
+    "beach_name":"일산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.264,35.319 ]
+    },
+    "properties": {
+    "beach_code":"BCH172",
+    "beach_name":"임랑해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.341,37.226 ]
+    },
+    "properties": {
+    "beach_code":"BCH154",
+    "beach_name":"임원해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.547,38.297 ]
+    },
+    "properties": {
+    "beach_code":"BCH096",
+    "beach_name":"자작도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.257,37.17 ]
+    },
+    "properties": {
+    "beach_code":"BCH346",
+    "beach_name":"작은풀안해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.175,37.464 ]
+    },
+    "properties": {
+    "beach_code":"BCH146",
+    "beach_name":"작은후진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.742,37.993 ]
+    },
+    "properties": {
+    "beach_code":"BCH111",
+    "beach_name":"잔교해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.448,37.272 ]
+    },
+    "properties": {
+    "beach_code":"BCH351",
+    "beach_name":"장경리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.315,37.249 ]
+    },
+    "properties": {
+    "beach_code":"BCH326",
+    "beach_name":"장골해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.366,36.416 ]
+    },
+    "properties": {
+    "beach_code":"BCH522",
+    "beach_name":"장돌(장곡)해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.61,34.644 ]
+    },
+    "properties": {
+    "beach_code":"BCH198",
+    "beach_name":"장등해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.376,36.281 ]
+    },
+    "properties": {
+    "beach_code":"BCH047",
+    "beach_name":"장사해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.36,36.422 ]
+    },
+    "properties": {
+    "beach_code":"BCH257",
+    "beach_name":"장삼포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.538,36.199 ]
+    },
+    "properties": {
+    "beach_code":"BCH501",
+    "beach_name":"장안해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.314,37.285 ]
+    },
+    "properties": {
+    "beach_code":"BCH074",
+    "beach_name":"장호해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.453,36.356 ]
+    },
+    "properties": {
+    "beach_code":"BCH510",
+    "beach_name":"저두해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.491,35.786 ]
+    },
+    "properties": {
+    "beach_code":"BCH170",
+    "beach_name":"전촌솔밭해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.237,34.218 ]
+    },
+    "properties": {
+    "beach_code":"BCH511",
+    "beach_name":"정강해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.035,37.691 ]
+    },
+    "properties": {
+    "beach_code":"BCH050",
+    "beach_name":"정동진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.616,38.138 ]
+    },
+    "properties": {
+    "beach_code":"BCH107",
+    "beach_name":"정암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.617,37.167 ]
+    },
+    "properties": {
+    "beach_code":"BCH352",
+    "beach_name":"제부도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.333,34.994 ]
+    },
+    "properties": {
+    "beach_code":"BCH526",
+    "beach_name":"조금나루해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.898,33.512 ]
+    },
+    "properties": {
+    "beach_code":"BCH328",
+    "beach_name":"종달리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.818,37.911 ]
+    },
+    "properties": {
+    "beach_code":"BCH051",
+    "beach_name":"주문진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.76,37.973 ]
+    },
+    "properties": {
+    "beach_code":"BCH115",
+    "beach_name":"죽도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.586,34.837 ]
+    },
+    "properties": {
+    "beach_code":"BCH301",
+    "beach_name":"죽림해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.718,38.027 ]
+    },
+    "properties": {
+    "beach_code":"BCH112",
+    "beach_name":"중광정해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.59,34.162 ]
+    },
+    "properties": {
+    "beach_code":"BCH220",
+    "beach_name":"중리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.411,33.245 ]
+    },
+    "properties": {
+    "beach_code":"BCH017",
+    "beach_name":"중문해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.161,37.474 ]
+    },
+    "properties": {
+    "beach_code":"BCH145",
+    "beach_name":"증산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.802,37.923 ]
+    },
+    "properties": {
+    "beach_code":"BCH122",
+    "beach_name":"지경해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 124.672,37.819 ]
+    },
+    "properties": {
+    "beach_code":"BCH319",
+    "beach_name":"지두리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.862,34.196 ]
+    },
+    "properties": {
+    "beach_code":"BCH217",
+    "beach_name":"지리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.352,36.345 ]
+    },
+    "properties": {
+    "beach_code":"BCH509",
+    "beach_name":"진너머해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.334,37.55 ]
+    },
+    "properties": {
+    "beach_code":"BCH311",
+    "beach_name":"진촌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.345,35.381 ]
+    },
+    "properties": {
+    "beach_code":"BCH006",
+    "beach_name":"진하해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.135,34.988 ]
+    },
+    "properties": {
+    "beach_code":"BCH233",
+    "beach_name":"짱뚱어해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.15,36.803 ]
+    },
+    "properties": {
+    "beach_code":"BCH055",
+    "beach_name":"천리포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.561,38.26 ]
+    },
+    "properties": {
+    "beach_code":"BCH076",
+    "beach_name":"천진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.559,38.265 ]
+    },
+    "properties": {
+    "beach_code":"BCH100",
+    "beach_name":"청간해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.301,36.639 ]
+    },
+    "properties": {
+    "beach_code":"BCH258",
+    "beach_name":"청포대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.433,38.487 ]
+    },
+    "properties": {
+    "beach_code":"BCH532",
+    "beach_name":"초도리마을해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.429,38.492 ]
+    },
+    "properties": {
+    "beach_code":"BCH088",
+    "beach_name":"초도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.159,37.477 ]
+    },
+    "properties": {
+    "beach_code":"BCH075",
+    "beach_name":"추암해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.068,34.802 ]
+    },
+    "properties": {
+    "beach_code":"BCH241",
+    "beach_name":"추포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.524,36.163 ]
+    },
+    "properties": {
+    "beach_code":"BCH036",
+    "beach_name":"춘장대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.399,36.132 ]
+    },
+    "properties": {
+    "beach_code":"BCH072",
+    "beach_name":"칠포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.572,38.245 ]
+    },
+    "properties": {
+    "beach_code":"BCH102",
+    "beach_name":"캔싱턴리조트해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.984,37.193 ]
+    },
+    "properties": {
+    "beach_code":"BCH327",
+    "beach_name":"큰말해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.263,37.169 ]
+    },
+    "properties": {
+    "beach_code":"BCH337",
+    "beach_name":"큰풀안해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.386,34.968 ]
+    },
+    "properties": {
+    "beach_code":"BCH232",
+    "beach_name":"톱머리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.143,36.729 ]
+    },
+    "properties": {
+    "beach_code":"BCH306",
+    "beach_name":"통개해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.578,34.157 ]
+    },
+    "properties": {
+    "beach_code":"BCH221",
+    "beach_name":"통리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.439,34.819 ]
+    },
+    "properties": {
+    "beach_code":"BCH187",
+    "beach_name":"통영공설해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.439,34.819 ]
+    },
+    "properties": {
+    "beach_code":"BCH348",
+    "beach_name":"통영수륙해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.133,36.739 ]
+    },
+    "properties": {
+    "beach_code":"BCH262",
+    "beach_name":"파도리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.84,33.533 ]
+    },
+    "properties": {
+    "beach_code":"BCH345",
+    "beach_name":"평대리해변"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.837,33.327 ]
+    },
+    "properties": {
+    "beach_code":"BCH018",
+    "beach_name":"표선해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 127.229,34.664 ]
+    },
+    "properties": {
+    "beach_code":"BCH212",
+    "beach_name":"풍류해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.958,33.514 ]
+    },
+    "properties": {
+    "beach_code":"BCH027",
+    "beach_name":"하고수동해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.409,37.384 ]
+    },
+    "properties": {
+    "beach_code":"BCH276",
+    "beach_name":"하나개해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.899,33.513 ]
+    },
+    "properties": {
+    "beach_code":"BCH029",
+    "beach_name":"하도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.225,37.394 ]
+    },
+    "properties": {
+    "beach_code":"BCH149",
+    "beach_name":"하맹방해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.26,33.211 ]
+    },
+    "properties": {
+    "beach_code":"BCH334",
+    "beach_name":"하모해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.407,36.389 ]
+    },
+    "properties": {
+    "beach_code":"BCH166",
+    "beach_name":"하저해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.725,38.023 ]
+    },
+    "properties": {
+    "beach_code":"BCH007",
+    "beach_name":"하조대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.895,34.75 ]
+    },
+    "properties": {
+    "beach_code":"BCH237",
+    "beach_name":"하트해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.873,37.843 ]
+    },
+    "properties": {
+    "beach_code":"BCH130",
+    "beach_name":"하평해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.641,34.774 ]
+    },
+    "properties": {
+    "beach_code":"BCH042",
+    "beach_name":"학동몽돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.213,36.898 ]
+    },
+    "properties": {
+    "beach_code":"BCH053",
+    "beach_name":"학암포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.31,33.461 ]
+    },
+    "properties": {
+    "beach_code":"BCH332",
+    "beach_name":"한담해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.346,37.528 ]
+    },
+    "properties": {
+    "beach_code":"BCH312",
+    "beach_name":"한들해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.122,37.52 ]
+    },
+    "properties": {
+    "beach_code":"BCH530",
+    "beach_name":"한섬해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.205,37.408 ]
+    },
+    "properties": {
+    "beach_code":"BCH147",
+    "beach_name":"한재밑해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.669,33.543 ]
+    },
+    "properties": {
+    "beach_code":"BCH024",
+    "beach_name":"함덕서우봉해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.652,34.74 ]
+    },
+    "properties": {
+    "beach_code":"BCH182",
+    "beach_name":"함목해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.159,35.158 ]
+    },
+    "properties": {
+    "beach_code":"BCH001",
+    "beach_name":"해운대해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.239,33.394 ]
+    },
+    "properties": {
+    "beach_code":"BCH020",
+    "beach_name":"협재해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.265,36.297 ]
+    },
+    "properties": {
+    "beach_code":"BCH508",
+    "beach_name":"호도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.345,37.169 ]
+    },
+    "properties": {
+    "beach_code":"BCH525",
+    "beach_name":"호산해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.336,35.062 ]
+    },
+    "properties": {
+    "beach_code":"BCH231",
+    "beach_name":"홀통해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 125.19,34.684 ]
+    },
+    "properties": {
+    "beach_code":"BCH304",
+    "beach_name":"홍도몽돌해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.334,33.239 ]
+    },
+    "properties": {
+    "beach_code":"BCH278",
+    "beach_name":"화순금모래해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.514,38.343 ]
+    },
+    "properties": {
+    "beach_code":"BCH103",
+    "beach_name":"화진포콘도해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.439,38.478 ]
+    },
+    "properties": {
+    "beach_code":"BCH080",
+    "beach_name":"화진포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.373,36.251 ]
+    },
+    "properties": {
+    "beach_code":"BCH046",
+    "beach_name":"화진해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.056,34.533 ]
+    },
+    "properties": {
+    "beach_code":"BCH240",
+    "beach_name":"황성금리해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 126.55,33.241 ]
+    },
+    "properties": {
+    "beach_code":"BCH335",
+    "beach_name":"황우지해안"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.674,35.02 ]
+    },
+    "properties": {
+    "beach_code":"BCH184",
+    "beach_name":"황포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.41,37.074 ]
+    },
+    "properties": {
+    "beach_code":"BCH159",
+    "beach_name":"후정해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 129.442,36.675 ]
+    },
+    "properties": {
+    "beach_code":"BCH162",
+    "beach_name":"후포해수욕장"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 128.715,34.959 ]
+    },
+    "properties": {
+    "beach_code":"BCH178",
+    "beach_name":"흥남해수욕장"
+    }
+  }
+]
+}
