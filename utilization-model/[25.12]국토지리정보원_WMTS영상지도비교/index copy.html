@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!-- 
+	브이월드 좌표체계에 지리원 타일을 적용 
+  -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>브이월드 WMTS 배경지도 지리원 WMTS 확인</title>  
+<script src="https://openlayers.org/en/v6.15.1/build/ol.js"></script>
+<link rel="stylesheet" 	href="https://openlayers.org/en/v6.15.1/css/ol.css" type="text/css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.4.4/proj4.js"></script>
+<!--
+https://openlayers.org/en/v6.4.3/build/ol.js
+https://openlayers.org/en/v5.3.0/build/ol.js
+https://openlayers.org/en/v4.6.5/build/ol.js
+https://openlayers.org/en/v3.20.1/build/ol.js
+
+https://openlayers.org/en/v6.4.3/css/ol.css
+https://openlayers.org/en/v5.3.0/css/ol.css
+https://openlayers.org/en/v4.6.5/css/ol.css
+https://openlayers.org/en/v3.20.1/css/ol.css
+-->
+
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+</head>
+<style type="text/css">
+    .ol-mycontrol {
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 4px;
+        padding: 4px;
+        margin-left: 10px;
+        position: block;
+        width:163px;
+        top: 5px;
+        left:40px;
+    }
+	.ol-mycontrol2{
+		width:55px;
+	}
+    .ol-mycontrol button {
+        float:left;
+    }
+    .ol-mycontrol button.on {
+        background-color:rgba(124,60,55,.5);
+    }
+    </style>
+<body>
+
+<div style="display: flex;">
+    <div style="float: left; width: 50%;">
+        <div id="map" style="width: 100%; height: 700px;"></div>
+    </div>
+    <div style="float: left; width: 50%;">
+        <div id="map2" style="width: 100%; height: 700px;"></div>
+    </div>	
+</div>
+<div>브이월드 좌표 기반 브이월드 지리원 타일 비교 <br />
+	주요상권<input type="checkbox" id="WMS_LAYER">
+</div>
+
+<script type="text/javascript">
+
+	//바로이맵 설정
+	var epsg5179 ="+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+    proj4.defs("EPSG:5179", epsg5179);
+    ol.proj.proj4.register(proj4)
+    var view_projection = ol.proj.get("EPSG:5179");
+    var view_extent = [743623.1161898939, 1456333.7988633565, 1394868.4484408265, 2070228.7850445202];
+	var oo78 = [-200000, -28024123.62, 31824123.62, 4000000]; //
+
+	ol.proj.get("EPSG:5179").setExtent(oo78)
+
+	//	var view_extent = [13887536.0793924, 3904296.7081297645, 14697533.102725917, 4656728.245734523]
+	var view_resolutions = [1954.597389,977.2986945, 488.64934725,	244.324673625, 122.1623368125, 61.08116840625,30.540584203125, 15.2702921015625, 7.63514605078125,3.817573025390625, 1.9087865126953125, 0.9543932563476563,0.47719662817382813, 0.23859831408691407];
+    var key = "48B39DEAF1939913FAD957A5BA699048";
+    var s_resolutions =  [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25] //14
+
+    var geotileGrid = new ol.tilegrid.WMTS({ //기본지도 설정
+            origin : [ -200000.0, 4000000.0 ],
+            resolutions: [2088.96, 1044.48, 522.24, 261.12, 130.56, 65.28, 32.64, 16.32, 8.16, 4.08, 2.04, 1.02, 0.51, 0.255],//properties.wmtEmapOption.serverResolutions,
+            matrixIds : [ 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11',
+                    'L12', 'L13', 'L14', 'L15', 'L16', 'L17', 'L18' ]
+    })
+	var geotileGrid2 = new ol.tilegrid.WMTS({ //영상지도 설정
+            origin : [ -200000.0, 4000000.0 ],
+            resolutions: [2088.96, 1044.48, 522.24, 261.12, 130.56, 65.28, 32.64, 16.32, 8.16, 4.08, 2.04, 1.02, 0.51, 0.255],//properties.wmtEmapOption.serverResolutions,
+            matrixIds : [ '5','6', '7', '8', '9', '10', '11',
+                    '12', '13', '14', '15', '16', '17', '18' ]
+    })
+
+    var source = new ol.source.WMTS({
+        //layer : ["korean_map", "color_map", "lowV_map", "english_map", "white_map", "chinese_map", "japanese_map", "white_edu_map", "base_hd"],
+        layer: "korean_map",
+        url : `http://map.ngii.go.kr/openapi/Gettile.do?apikey=${key}`,
+        service : 'WMTS',
+        format : 'image/png',
+        matrixSet : 'korean',
+        tileGrid : geotileGrid,
+		projection: 'EPSG:5179',
+    });
+
+	var source2 = new ol.source.WMTS({
+        //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
+        layer: "AIRPHOTO",
+        url : `http://210.117.198.120:8081/o2map/services`,
+        service : 'WMTS',
+        matrixSet : 'NGIS_AIR',
+		style:"_null",
+		format:"image/jpg", //
+		projection: 'EPSG:5179',
+        tileGrid : geotileGrid2,
+    });
+
+	var source12 = new ol.source.WMTS({
+        //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
+        layer: "AIRPHOTO_2012",
+        url : `http://210.117.198.120:8081/o2map/services`,
+        service : 'WMTS',
+        matrixSet : 'NGIS_AIR',
+		style:"_null",
+		format:"image/jpg", //
+		projection: 'EPSG:5179',
+        tileGrid : geotileGrid2,
+    });
+
+	
+
+	var sourcev = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Satellite/{z}/{y}/{x}.jpeg'
+		,attributions : attr
+	});
+
+	// source.setRenderReprojectionEdges(false);
+	// source2.setRenderReprojectionEdges(false);
+    var view = new ol.View({
+        projection : "EPSG:3857",
+ //     resolutions : view_resolutions,
+        center:  ol.proj.transform([127.100616,37.402142], 'EPSG:4326', 'EPSG:3857'),
+        // maxZoom : 17,
+        // minZoom : 7,
+        zoom: 0
+    });
+
+    var baro_map = new ol.layer.Tile({
+        source : source,
+        id : 'baro_map',
+        name : "mapLayer"
+    });
+
+    let tileDebug =  new ol.source.TileDebug({
+        projection: 'EPSG:5179',
+        tileGrid: source.getTileGrid()
+    })
+
+
+     var debug = new ol.layer.Tile({ 
+	 	name : "debug",
+	 	source: new ol.source.TileDebug() //ol 6버전에 생김
+     }); // 타일의 넘버링을 확인할 수 있음 z: 레벨  / y 위 아래 , x 좌 우    /{z}7/{y}47/{x}111.png
+    
+	 
+	 let baro_debug = new ol.layer.Tile({ 
+	 	name : "debug",
+	 	//source: tileDebug //ol 6버전에 생김 , 5179 용 타일 디버그
+
+		 source: new ol.source.TileDebug() 
+    }); // 타일의 넘버링을 확인할 수 있음 z: 레벨  / y 위 아래 , x 좌 우    /{z}7/{y}47/{x}111.png
+
+
+	
+
+    var VworldBase,VworldSatellite,VworldGray,VworldMidnight,VworldHybrid;
+	var attr = '&copy; <a href="http://dev.vworld.kr">vworld</a>';
+	var VworldHybrid = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Hybrid/{z}/{y}/{x}.png'
+	}); //문자 타일 레이어
+	
+	var VworldSatellite = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Satellite/{z}/{y}/{x}.jpeg'
+		,attributions : attr
+	}); //항공사진 레이어 타일
+
+	var VworldBase = new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/Base/{z}/{y}/{x}.png'
+		,attributions : attr
+	}); // 기본지도 타일
+
+	var VworldGray =  new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/gray/{z}/{y}/{x}.png'
+		,attributions : attr
+	}); //회색지도 타일
+	
+	var VworldMidnight =  new ol.source.XYZ({
+		url: 'https://api.vworld.kr/req/wmts/1.0.0/CEB52025-E065-364C-9DBA-44880E3B02B8/midnight/{z}/{y}/{x}.png'
+		,attributions : attr
+	})
+	
+	/*
+		control 설정
+	*/
+	var element = document.createElement('div');
+	element.className = 'rotate-north ol-unselectable ol-control ol-mycontrol';
+	var base_button = document.createElement('button');
+	base_button.innerHTML = 'B';
+	var gray_button = document.createElement('button');
+	gray_button.innerHTML = 'G';
+	var midnight_button = document.createElement('button');
+	midnight_button.innerHTML = 'M';
+	var hybrid_button = document.createElement('button');
+	hybrid_button.innerHTML = 'H';
+	hybrid_button.className='on';
+	var sate_button = document.createElement('button');
+    sate_button.innerHTML = 'S';
+    
+    var debug_button = document.createElement('button');
+	debug_button.innerHTML = 'D';
+    debug_button.className='on';
+
+    var follow_button = document.createElement('button');
+	follow_button.innerHTML = 'F';
+    follow_button.className='on';
+
+    
+    base_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldBase)
+			}
+	    })
+    }
+    gray_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldGray)
+			}
+	    })
+    }
+    midnight_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldMidnight)
+			}
+	    })
+    }
+    sate_button.onclick=function(){
+        map.getLayers().forEach(function(layer){
+			if(layer.get("name")=="vworld"){
+				layer.setSource(VworldSatellite)
+			}
+	    })
+    }
+    hybrid_button.onclick=function(){
+    	var _this = this;
+   		map.getLayers().forEach(function(layer){
+   			if(layer.get("name")=="hybrid"){
+   				if(_this.className == "on"){
+    				layer.setSource(null)
+    				_this.className ="";
+   				}else{
+   					_this.className ="on";
+   					
+   					layer.setSource(VworldHybrid)
+   				}
+   			}
+   	    })
+    }
+
+    debug_button.onclick=function(){
+    	var _this = this;
+   		map.getLayers().forEach(function(layer){
+   			if(layer.get("name")=="debug"){
+   				if(_this.className == "on"){
+                    _this.className ="";
+    				layer.setVisible(false)
+   				}else{
+   					_this.className ="on";
+   					layer.setVisible(true)
+   				}
+   			}
+   	    })
+    }
+    
+    element.appendChild(base_button);
+    element.appendChild(gray_button);
+    element.appendChild(midnight_button);
+    element.appendChild(sate_button);
+    element.appendChild(hybrid_button);
+    element.appendChild(debug_button);
+    //element.appendChild(follow_button);
+    var layerControl = new ol.control.Control({element: element});
+    
+    let olView = new ol.View({
+			center: ol.proj.transform([127.100616,37.402142], 'EPSG:4326', 'EPSG:900913'),
+			zoom: 7,
+			minZoom : 0,
+			maxZoom : 19,
+			//extent: oo78
+    })
+
+
+	map = new ol.Map({
+		controls: ol.control.defaults().extend([
+			layerControl, new ol.control.OverviewMap({
+                layers:[new ol.layer.Tile({
+				source: VworldBase,
+				name:"vworld"
+			})],
+            }),new ol.control.ZoomSlider()
+		]),
+		layers: [
+		    new ol.layer.Tile({
+				source: new ol.source.OSM()
+			}),
+			new ol.layer.Tile({
+				source: VworldSatellite,
+				name:"vworld"
+			}),new ol.layer.Tile({
+				source: VworldHybrid,
+				name:"hybrid"
+			}),debug
+		],
+		target: 'map',
+		view: olView
+		
+    });
+    
+	var baro_button = document.createElement('button');
+	baro_button.innerHTML = 'B';
+	var air_button = document.createElement('button');
+	air_button.innerHTML = 'mg';
+	var air12_button = document.createElement('button');
+	air12_button.innerHTML = '12';
+	var v_button = document.createElement('button');
+	v_button.innerHTML = 'vw';
+
+
+    var element2 = document.createElement('div');
+    element2.className = 'rotate-north ol-unselectable ol-control ol-mycontrol ol-mycontrol2';
+	
+    element2.appendChild(baro_button);
+	element2.appendChild(air_button);
+	element2.appendChild(air12_button);
+	element2.appendChild(v_button);
+
+	var layerControl2 = new ol.control.Control({element: element2});
+
+    let map2 = new ol.Map({ 
+		controls: ol.control.defaults().extend([
+			layerControl2,new ol.control.ZoomSlider()
+		]),
+        layers: [baro_map,baro_debug], //[OSM,Base,debug] 
+        target: 'map2',
+        view: olView
+    });
+	
+	baro_button.onclick=function(){
+		baro_map.setSource(source)
+    }
+    air_button.onclick=function(){
+        baro_map.setSource(source2)
+    }
+
+	air12_button.onclick=function(){
+        baro_map.setSource(source12)
+    }
+
+	v_button.onclick=function(){
+        baro_map.setSource(sourcev)
+    }
+
+
+	let wms_title = '주요상권';
+	let wms_val = 'lt_c_dgmainbiz';
+
+	let wms_tile = new ol.layer.Tile({
+		name : "WMS_LAYER",
+		source : new ol.source.TileWMS({
+			url : "http://api.vworld.kr/req/wms?",
+			params : {
+				LAYERS : wms_val,
+				STYLES : wms_val,
+				CRS : "EPSG:900913",
+				apikey : "CEB52025-E065-364C-9DBA-44880E3B02B8",
+				DOMAIN : "http://loacalhost:8080",
+				title : wms_title,
+				FORMAT : "image/png",
+				domain : "http://localhost"
+			}
+		})
+	});
+	// map.addLayer(wms_tile);
+	// map2.addLayer(wms_tile);
+	
+
+	$('[type=checkbox]').on("click",function(){
+		let layer = $(this).attr("id");
+		
+		if($(this).is(":checked")){
+			map.addLayer(wms_tile);
+			map2.addLayer(wms_tile);
+		}else{
+			
+			map.removeLayer(wms_tile);
+			map2.removeLayer(wms_tile);
+			// map.getLayers().forEach(function(layer){ //기존검색결과 제거 
+            //     if(layer.get("name")=="WMS_LAYER"){
+            //         map.removeLayer(layer);
+            //     }
+            // });
+			// map2.getLayers().forEach(function(layer){ //기존검색결과 제거 
+            //     if(layer.get("name")=="WMS_LAYER"){
+            //         map2.removeLayer(layer);
+            //     }
+            // });
+		}
+	})
+
+</script>
+</body>
+</html>
