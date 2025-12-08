@@ -196,61 +196,60 @@
     }
 
     /* ===== OpenLayers 커스텀 컨트롤 스타일 ===== */
-	/* 공통 컨트롤 박스 스타일 */
-	.ol-mycontrol,
-	.ol-mycontrol2 {
-	position: absolute;
-	top: 10px;
-	left: 70px; /* 줌 버튼과 겹치지 않게 오른쪽 */
-	
-	display: flex;
-	flex-direction: row; /* 🔥 가로 배치 */
-	gap: 6px;
+    /* 공통 컨트롤 박스 스타일 */
+    .ol-mycontrol,
+    .ol-mycontrol2 {
+      position: absolute;
+      top: 10px;
+      left: 70px; /* 줌 버튼과 겹치지 않게 오른쪽 */
+      
+      display: flex;
+      flex-direction: row; /* 🔥 가로 배치 */
+      gap: 6px;
 
-	background: rgba(20, 60, 40, 0.8);  /* 짙은 녹색 톤 */
-	padding: 6px 8px;
-	border-radius: 12px;
-	backdrop-filter: blur(3px);
-	box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-	z-index: 1000;
-	}
+      background: rgba(20, 60, 40, 0.8);  /* 짙은 녹색 톤 */
+      padding: 6px 8px;
+      border-radius: 12px;
+      backdrop-filter: blur(3px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+      z-index: 1000;
+    }
 
-	/* 오른쪽 지도용도 동일 UI 유지 */
-	.ol-mycontrol2 {
-	left: 70px;
-	}
+    /* 오른쪽 지도용도 동일 UI 유지 */
+    .ol-mycontrol2 {
+     left: 70px;
+    }
 
-	/* 버튼 자체 스타일 */
-	.ol-mycontrol button,
-	.ol-mycontrol2 button {
-	width: 34px;
-	height: 34px;
-	font-size: 14px;
-	font-weight: bold;
+    /* 버튼 자체 스타일 */
+    .ol-mycontrol button,
+    .ol-mycontrol2 button {
+      width: 34px;
+      height: 34px;
+      font-size: 14px;
+      font-weight: bold;
 
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
 
-	background: #1f7d52;  /* 진한 녹색 버튼 */
-	color: white;
-	transition: 0.2s;
-	}
+      background: #1f7d52;  /* 진한 녹색 버튼 */
+      color: white;
+      transition: 0.2s;
+    }
 
-	/* hover 효과 */
-	.ol-mycontrol button:hover,
-	.ol-mycontrol2 button:hover {
-	background: #29a06a;
-	transform: translateY(-2px);
-	}
+    /* hover 효과 */
+    .ol-mycontrol button:hover,
+    .ol-mycontrol2 button:hover {
+      background: #29a06a;
+      transform: translateY(-2px);
+    }
 
-	/* on 버튼 표시 */
-	.ol-mycontrol button.on,
-	.ol-mycontrol2 button.on {
-	background: #ffcc00;
-	color: #000;
-	}
-
+    /* on 버튼 표시 */
+    .ol-mycontrol button.on,
+    .ol-mycontrol2 button.on {
+      background: #ffcc00;
+      color: #000;
+    }
 
     /* 줌슬라이더 색도 녹색 계열로 */
     .ol-zoomslider {
@@ -269,6 +268,27 @@
         flex-direction: column;
       }
     }
+
+    #map2 {
+      position: relative; /* 자식 오버레이 기준점 */
+    }
+
+    .map-notice {
+      position: absolute;
+      inset: 0; /* top:0; right:0; bottom:0; left:0; */
+      display: none; /* 기본은 숨김 */
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #f9f9f9;
+      font-size: 13px;
+      line-height: 1.5;
+      z-index: 2000;
+    }
+
   </style>
 </head>
 <body>
@@ -291,7 +311,11 @@
       </div>
       <div class="map-panel">
         <div class="map-title">국토지리정보원</div>
-        <div id="map2"></div>
+        <div id="map2">
+          <div id="ngii-notice" class="map-notice">
+            HTTPS 호출로 인해 로컬에서 소스를 다운받아 사용하시기 바랍니다.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -315,6 +339,8 @@
 </div>
 
 <script type="text/javascript">
+  const isHttps = location.protocol === "https:";
+
   //바로이맵 설정
   var epsg5179 = "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
   proj4.defs("EPSG:5179", epsg5179);
@@ -363,6 +389,7 @@
   });
 
   var source12 = new ol.source.WMTS({
+    //layer : ["AIRPHOTO", "AIRPHOTO_2011", "AIRPHOTO_2012", "AIRPHOTO_2013", "AIRPHOTO_2014", "AIRPHOTO_2015", "AIRPHOTO_2016", "AIRPHOTO_2017", "AIRPHOTO_2018", "AIRPHOTO_2019"],
     layer: "AIRPHOTO_2012",
     url : "http://210.117.198.120:8081/o2map/services",
     service : 'WMTS',
@@ -577,18 +604,41 @@
     view: olView
   });
 
-  baro_button.onclick=function(){
-    baro_map.setSource(source)
+  const noticeEl = document.getElementById("ngii-notice");
+
+  // 공통: 안내 숨기는 함수
+  function hideNotice() {
+    if (noticeEl) noticeEl.style.display = "none";
   }
-  air_button.onclick=function(){
-    baro_map.setSource(source2)
-  }
-  air12_button.onclick=function(){
-    baro_map.setSource(source12)
-  }
-  v_button.onclick=function(){
-    baro_map.setSource(sourcev)
-  }
+
+  baro_button.onclick = function(){
+    hideNotice();
+    baro_map.setSource(source);
+  };
+
+  air_button.onclick = function(){
+    if (isHttps) {
+      if (noticeEl) noticeEl.style.display = "flex";
+    } else {
+      hideNotice();
+      baro_map.setSource(source2);  // 지리원 AIRPHOTO
+    }
+  };
+
+  air12_button.onclick = function(){
+    if (isHttps) {
+      if (noticeEl) noticeEl.style.display = "flex";
+    } else {
+      hideNotice();
+      baro_map.setSource(source12); // 지리원 AIRPHOTO_2012
+    }
+  };
+
+  v_button.onclick = function(){
+    hideNotice();
+    baro_map.setSource(sourcev);
+  };
+
 
   let wms_title = '주요상권';
   let wms_val = 'lt_c_dgmainbiz';
