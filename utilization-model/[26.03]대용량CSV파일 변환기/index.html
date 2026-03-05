@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/Utilization-Model/utilization_model/csv-converter/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV → Excel 변환기</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- zip.js: ZIP 전체 다운로드용 -->
+  <script src="zip.min.js"></script>
+
+  <!-- ZIP 전체 다운로드 헬퍼 (Flutter ConversionService에서 호출) -->
+  <script>
+    window.downloadAllFilesAsZip = async function(fileNames, fileContents) {
+      const { BlobWriter, ZipWriter, Uint8ArrayReader } = zip;
+      const blobWriter = new BlobWriter("application/zip");
+      const zipWriter = new ZipWriter(blobWriter);
+      for (let i = 0; i < fileNames.length; i++) {
+        await zipWriter.add(
+          fileNames[i],
+          new Uint8ArrayReader(new Uint8Array(fileContents[i]))
+        );
+      }
+      await zipWriter.close();
+      const blob = await blobWriter.getData();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "converted_excel_files.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  </script>
+
+  <!-- 메인 스레드 메모리 측정 함수 (Worker는 performance.memory=0 Chrome 버그 우회) -->
+  <script>
+    function _jsGetPerformanceMemory() {
+      if (typeof performance === 'undefined' || !performance.memory) return null;
+      const m = performance.memory;
+      if (m.jsHeapSizeLimit <= 0) return null;
+      return {
+        usedMB:  m.usedJSHeapSize  / 1024 / 1024,
+        totalMB: m.jsHeapSizeLimit / 1024 / 1024,
+      };
+    }
+  </script>
+</head>
+<body>
+
+<script src="flutter_bootstrap.js"></script>
+</body>
+</html>
