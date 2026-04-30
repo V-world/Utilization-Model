@@ -1,0 +1,1065 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>건축부지 입지분석 프로토타입</title>
+
+  <script src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE"></script>
+  <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/slope/slope_analysis_api.js"></script>
+  <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/profileTerrain_analysis_api.js"></script>
+  <script src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/buildingcontrol/buildingControl_api.js"></script>
+  <script src="https://map.vworld.kr/js/ws3dmap/WS3DRelease3/WS3DExtension/modeler.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid #d9dee5;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: 1fr 320px;
+      min-width: 0;
+    }
+
+    .map-wrap {
+      position: relative;
+      background: #d8dee6;
+    }
+
+    #vmap3d {
+      width: 100%;
+      height: 100%;
+    }
+
+    .result-wrap {
+      background: #fff;
+      border-top: 1px solid #d9dee5;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .search-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .search-box select,
+    .search-box input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .search-box button {
+      width: 100%;
+      padding: 10px;
+      background: #1664ff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .card-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .card .title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #1664ff;
+    }
+
+    .analysis-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+
+    .analysis-panel {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    .analysis-panel label {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .analysis-panel select,
+    .analysis-panel input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .analysis-tab {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .analysis-tab button {
+      flex: 1;
+      padding: 10px;
+      background: #1664ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+
+    .analysis-panel button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      background: #00a86b;
+      color: white;
+    }
+
+    #profileUI button {
+      background: #ff7a00;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    .analysis-buttons {
+      margin-top: 10px;
+    }
+
+    .analysis-buttons button {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    #slopeResult {
+      margin-top: 12px;
+      padding: 10px;
+      background: #f4f6f8;
+      border-radius: 8px;
+      border: 1px solid #e1e5ea;
+    }
+
+    #slopeResult h3 {
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    #slopeResult p {
+      font-size: 13px;
+      margin: 2px 0;
+    }
+
+    #profileUI {
+      margin-top: 10px;
+    }
+
+    #profileUI button {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    #slopeResultTable {
+      margin-top: 10px;
+      padding: 6px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    #slopeResultTable li {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    #slopeResultTable .th {
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>건축부지 입지분석 프로토타입</h1>
+
+      <div class="search-box">
+        <select id="searchType">
+          <option value="parcel">지번주소 검색</option>
+          <option value="pnu">PNU 검색</option>
+        </select>
+        <input id="searchInput" placeholder="지번주소 또는 PNU 입력">
+        <button onclick="handleSearch()">검색</button>
+      </div>
+
+      <div class="analysis-box" style="margin-bottom:12px; border:2px dashed #1664ff;">
+
+        <h3>사용자 건물 가시화</h3>
+
+        <input type="file" id="glbUpload" accept=".glb" />
+
+        <div class="analysis-buttons">
+          <button id="btnUploadGlb">GLB 업로드</button>
+          <button id="btnPlaceGlb">지도에 배치 (위치 선택)</button>
+          <button id="btnRemoveGlb">모델 제거</button>
+        </div>
+
+        <div style="font-size:12px; color:#666; margin-top:6px;">
+          ※ GLB 파일 업로드 후 지도에서 위치 클릭 → 모델 배치 및 편집 가능
+        </div>
+
+        <hr style="margin:12px 0;">
+
+        <h4 style="margin:0 0 6px;">객체 선택 숨김</h4>
+
+        <div class="analysis-buttons">
+          <button id="btnResetHidden">숨김 객체 전체 복구</button>
+        </div>
+
+        <div style="font-size:12px; color:#666; margin-top:6px;">
+          ※ 지도에서 건물 클릭 → 개별 숨김 / 다시 클릭 → 복구
+        </div>
+
+      </div>
+
+      <div class="analysis-box">
+
+        <h3>지형조건 분석</h3>
+        </br>
+
+        <!-- 상단 버튼 (가로 배치) -->
+        <div class="analysis-tab">
+          <button id="btnSlopeTab" onclick="openSlope()">경사도 분석</button>
+          <button id="btnProfileTab" onclick="openProfile()">지형단면 분석</button>
+        </div>
+
+        <!-- ================= 경사도 ================= -->
+        <div id="slopeUI" class="analysis-panel" style="display:none;">
+
+          <label style="width:150px;">분석영역넓이:</label>
+          <select id="area">
+            <option value="10000">10,000 ㎡</option>
+            <option value="50000">50,000 ㎡</option>
+            <option value="100000">100,000 ㎡</option>
+          </select>
+
+          <div class="analysis-buttons">
+            <button id="btnSlopByPoint">경사도 포인트 지정 후 바로 분석 수행</button>
+            <button id="btnSlopByPolygon">경사도 분석 영역 그린 후 바로 분석 수행</button>
+            <button id="btnSlopeInit">경사도 분석 초기화</button>
+            <button onclick="resetAnalysis()">← 분석 선택으로</button>
+          </div>
+
+          <div id="slopeResult" style="display:none;">
+            <h3>분석 결과</h3>
+          </div>
+
+        </div>
+
+        <!-- ================= 지형단면 ================= -->
+        <div id="profileUI" class="analysis-panel" style="display:none;">
+
+          <button id="btn_freeSection">자유선택</button>
+          <button id="btn_createCrossSectionPlot">필지선택</button>
+
+          <label id="crossIntervalDistanceNm" class="hide">횡단 간격 설정 (미터)</label>
+          <input type="number" id="crossIntervalDistance" value="10" class="hide">
+
+          <button id="btnSampleTerrainByLine" disabled>종단면 그리기</button>
+
+          <button id="actIntervalSet1" class="hide">지점선택</button>
+          <button id="actIntervalSet2" class="hide">등간격설정</button>
+
+          <label id="crossDistanceNm" class="hide">횡단 길이</label>
+          <input type="number" id="crossDistance" value="50" class="hide">
+
+          <label id="crossIntervalNm" class="hide">횡단 간격</label>
+          <input type="number" id="crossInterval" value="50" class="hide">
+
+          <button id="btnSampleTerrainByCrossLine" class="hide">횡단 지점 선택</button>
+          <button id="btnCrossPointInterval" class="hide">횡단지점(등간격)</button>
+
+          <button id="btnAnalysis">분석 실행</button>
+          <button id="btnInit">초기화</button>
+
+          <div id="tableResult"></div>
+
+          <button onclick="resetAnalysis()">← 분석 선택으로</button>
+
+        </div>
+
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="map-wrap">
+        <div id="vmap3d"></div>
+      </div>
+
+      <div class="result-wrap" id="resultCards">
+        
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let uploadedGlbUrl = null;
+
+    var map;	
+    var options = {
+        mapId : "vmap3d",
+        initPosition : new vw.CameraPosition(
+            new vw.CoordZ(126.92775802528264, 37.52501881993892, 12416),  
+            new vw.Direction(0, -90, 0)
+        ),
+        logo: true,
+        navigation: true
+    };
+
+    map = new vw.Map();   
+    map.setOption(options);
+    map.start(); // 지도 생성
+
+    vw.ws3dInitCallBack = function () {
+
+      const viewer = ws3d.viewer;
+
+      // 연속지적도 WMS
+      var layer = new vw.Layers();
+      var source = new vw.source.TileWMS();
+
+      source.setLayers("lp_pa_cbnd_bubun,lp_pa_cbnd_bonbun");
+      source.setStyles("lp_pa_cbnd_bubun_line,lp_pa_cbnd_bonbun_line");
+      source.setUrl(`https://api.vworld.kr/req/wms?Key=${API_KEY}&`);
+
+      var tile = new vw.layer.Tile(source);
+      layer.add(tile);
+
+    };
+
+    const API_KEY = "CBDA8338-FEF2-34AE-9B04-D31B3597153F";
+
+    let searchPolygon = null;
+    let landCharData = null;
+    let landUseData = null;
+    let buildingData = null;
+
+    /* =========================
+      검색
+    ========================= */
+    function handleSearch() {
+
+      const type = $("#searchType").val();
+      const input = $("#searchInput").val();
+
+      if (!input) return alert("값 입력");
+
+      // PNU 직접 입력
+      if (type === "pnu") {
+        pnu = input;
+        drawParcel(pnu);
+        getAllData(pnu);
+        return;
+      }
+
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/req/search",
+        data: {
+          service: "search",
+          request: "search",
+          version: "2.0",
+          size: 1,
+          page: 1,
+          type: "address",
+          category: type,
+          format: "json",
+          key: API_KEY,
+          query: input
+        },
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function (data) {
+
+          const item = data.response?.result?.items[0];
+
+          if (!item) return alert("검색 결과 없음");
+
+          const x = item.point.x;
+          const y = item.point.y;
+          const pnu = item.id;
+
+          move(x, y, 300);
+          drawParcel(pnu);
+          getAllData(pnu);
+        }
+      });
+    }
+
+
+    /* =========================
+      지도 이동
+    ========================= */
+    function move(x, y, z) {
+      const pos = new vw.CoordZ(x, y, z);
+      const cam = new vw.CameraPosition(pos, new vw.Direction(0, -90, 0));
+      map.moveTo(cam);
+    }
+
+    /* =========================
+      필지 표시
+    ========================= */
+    function drawParcel(pnu) {
+
+      if (searchPolygon) {
+        map.removeObjectById("parcel");
+      }
+
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/req/data",
+        data: {
+          key: API_KEY,
+          service: "data",
+          version: "2.0",
+          request: "getfeature",
+          format: "json",
+          size: 1,
+          page: 1,
+          geometry: true,
+          crs: "EPSG:4326",
+          data: "LP_PA_CBND_BUBUN",
+          attrfilter: "pnu:=:" + pnu
+        },
+        dataType: 'jsonp', //cors 우회를 위해 jsonp 이용
+				async: false,
+        success: function (data) {
+
+          const coords = data.response.result.featureCollection.features[0].geometry.coordinates[0][0];
+
+          const pts = coords.map(c => new vw.Coord(c[0], c[1]));
+
+          const poly = new vw.geom.Polygon(new vw.Collection(pts));
+          poly.setFillColor(new vw.Color(255, 0, 0, 80));
+          poly.setWidth(2);
+          poly.setId("parcel");
+          poly.create();
+
+          searchPolygon = poly;
+
+        }
+      });
+    }
+
+    async function getAllData(pnu) {
+
+      // 1. 토지특성
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/ned/data/getLandCharacteristics",
+        data: {
+          pnu: pnu,
+          key: API_KEY,
+          domain: location.origin
+        },
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function (res) {
+          landCharData = res;
+        }
+      });
+
+      // 2. 토지이용계획
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/ned/data/getLandUseAttr",
+        data: {
+          pnu: pnu,
+          key: API_KEY,
+          domain: location.origin,
+          numOfRows: 100
+        },
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function (res) {
+          landUseData = res;
+        }
+      });
+
+      // 3. 건물용도
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/ned/data/getBuildingUse",
+        data: {
+          pnu: pnu,
+          key: API_KEY,
+          domain: location.origin
+        },
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function (res) {
+          buildingData = res;
+        }
+      });
+
+      // 4. 카드 렌더링
+      renderCards(landCharData, landUseData, buildingData);
+    }
+
+    function renderCards(landChar, landUse, building) {
+
+      const container = document.getElementById("resultCards");
+
+      const lcRaw = landChar?.landCharacteristics?.field;
+      const luRaw = landUse?.landUseAtt?.field;
+      const buRaw = building?.buildingUses?.field;
+
+      const lc = Array.isArray(lcRaw) ? lcRaw[0] : lcRaw || {};
+      const lu = Array.isArray(luRaw) ? luRaw[0] : luRaw || {};
+      const bu = Array.isArray(buRaw) ? buRaw[0] : buRaw || {};
+      
+      container.innerHTML = `
+        <div class="card-wrap">
+
+          <div class="card">
+            <div class="title">토지특성</div>
+            <div>지목: ${lc.lndcgrCodeNm || "-"}</div>
+            <div>면적: ${lc.lndpclAr || "-"}㎡</div>
+            <div>용도지역명: ${lc.prposArea1Nm || "-"}</div>
+            <div>지형형상: ${lc.tpgrphFrmCodeNm || "-"}</div>
+            <div>도로접면: ${lc.roadSideCodeNm || "-"}</div>
+            <div>공시지가(원/㎡): ${lc.pblntfPclnd || "-"}원</div>
+            <div>데이터기준일자: ${lc.lastUpdtDt || "-"}</div>
+          </div>
+
+          <div class="card">
+            <div class="title">토지이용계획</div>
+            <div>대장구분명: ${lu.regstrSeCodeNm || "-"}</div>
+            <div>저촉여부: ${lu.cnflcAtNm || "-"}%</div>
+            <div>용도지역지구명: ${lu.prposAreaDstrcCodeNm || "-"}%</div>
+            <div>데이터기준일자: ${lu.lastUpdtDt || "-"}</div>
+          </div>
+
+          <div class="card">
+            <div class="title">용도별건물</div>
+            <div>특수지구분명: ${bu.regstrSeCodeNm || "-"}</div>
+            <div>집합건물구분: ${bu.agbldgSeCodeNm || "-"}</div>
+            <div>대장종류: ${bu.buldKndCodeNm || "-"}</div>
+            <div>건물주부구분명: ${bu.buldMainAtachSeCodeNm || "-"}</div>
+            <div>건물대지면적(㎡): ${bu.buldPlotAr || "-"}㎡</div>
+            <div>건물건축면적(㎡): ${bu.buldBildngAr || "-"}㎡</div>
+            <div>건물연면적(㎡): ${bu.buldTotar || "-"}㎡</div>
+            <div>용적율(%): ${bu.measrmtRt || "-"}%</div>
+            <div>건폐율(%): ${bu.btlRt || "-"}%</div>
+            <div>건축물구조명: ${bu.strctCodeNm || "-"}</div>
+            <div>주요용도명: ${bu.mainPrposCodeNm || "-"}</div>
+            <div>세부용도명: ${bu.detailPrposCodeNm || "-"}</div>
+            <div>건물용도분류명: ${bu.buldPrposClCodeNm || "-"}</div>
+            <div>건물높이(m): ${bu.buldHg || "-"}m</div>
+            <div>지상층수: ${bu.groundFloorCo || "-"}</div>
+            <div>지하층수: ${bu.undgrndFloorCo || "-"}</div>
+            <div>허가일자: ${bu.prmisnDe || "-"}</div>
+            <div>사용승인일자: ${bu.useConfmDe || "-"}</div>
+            <div>데이터기준일자: ${bu.lastUpdtDt || "-"}</div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* =========================
+      초기 상태
+    ========================= */
+    function resetAnalysis() {
+      document.getElementById("slopeUI").style.display = "none";
+      document.getElementById("profileUI").style.display = "none";
+
+      document.getElementById("btnSlopeTab").style.display = "block";
+      document.getElementById("btnProfileTab").style.display = "block";
+
+      document.getElementById("slopeResult").style.display = "none";
+    }
+
+
+    /* =========================
+      경사도 클릭
+    ========================= */
+    function openSlope() {
+
+      document.getElementById("slopeUI").style.display = "block";
+      document.getElementById("profileUI").style.display = "none";
+
+      document.getElementById("btnProfileTab").style.display = "none";
+    }
+
+
+    /* =========================
+      지형단면 클릭
+    ========================= */
+    function openProfile() {
+
+      document.getElementById("profileUI").style.display = "block";
+      document.getElementById("slopeUI").style.display = "none";
+
+      document.getElementById("btnSlopeTab").style.display = "none";
+    }
+
+    document.getElementById("btnSlopByPoint").onclick = function () {
+      document.getElementById("slopeResult").style.display = "block";
+    };
+
+
+    /* =========================================================
+      [추가] 3D 분석 통합 (기존 코드 수정 없음)
+    ========================================================= */
+
+    let slopeAnalysis;
+    let profileTerrain;
+    let crossSection;
+    let selectMode;
+
+    /* =========================
+      ws3d 초기화 이후 분석 객체 생성
+    ========================= */
+    const _oldInit = vw.ws3dInitCallBack;
+
+    vw.ws3dInitCallBack = function () {
+
+      if (_oldInit) _oldInit(); // 기존 코드 유지
+
+      const viewer = ws3d.viewer;
+
+      slopeAnalysis = window.slopeAnalysis;
+      profileTerrain = window.profileTerrain;
+
+      ws3de.modeler.init();
+
+    };
+
+
+    /* =========================
+      경사도 - 영역 분석
+    ========================= */
+    document.getElementById('btnSlopByPolygon').addEventListener("click", function () {
+
+      if (!slopeAnalysis) return alert("분석 초기화 안됨");
+
+      slopeAnalysis.startDrawingPolygon(function () {
+
+        slopeAnalysis.analysisSlopeByAreaStart(
+          function (clickeddata) {
+
+            document.getElementById("slopeResult").style.display = "block";
+
+          },
+          function (result) {
+            console.log("경사도 전체 결과", result);
+          }
+        );
+
+      });
+
+    });
+
+
+    /* =========================
+      경사도 - 포인트 분석
+    ========================= */
+    document.getElementById('btnSlopByPoint').addEventListener("click", function () {
+
+      if (!slopeAnalysis) return alert("분석 초기화 안됨");
+
+      slopeAnalysis.spotmarkerS =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/slope/spotmarkerS.png";
+
+      slopeAnalysis.getPoint(function () {
+
+        let area = document.getElementById('area').value;
+
+        slopeAnalysis.analysisSlopeByPointStart(
+          area,
+          function (clickeddata) {
+
+            document.getElementById("slopeResult").style.display = "block";
+
+          },
+          function (result) {
+            console.log("경사도 전체 결과", result);
+          }
+        );
+
+      });
+
+    });
+
+    /* =========================
+      경사도 초기화
+    ========================= */
+    document.getElementById("btnSlopeInit").addEventListener("click", function () {
+
+      // 1. 지도 객체 제거 (그려진 폴리곤/마커 제거)
+      try {
+        if (map) {
+          map.clear(); // 🔥 핵심 (그려진 객체 제거)
+        }
+      } catch (e) {
+        console.log("map clear 실패", e);
+      }
+
+      // 2. slopeAnalysis 내부 상태 초기화 (안전 초기화)
+      try {
+        slopeAnalysis = window.slopeAnalysis;
+      } catch (e) {}
+
+      // 3. 결과 UI 초기화
+      document.getElementById("slopeResult").style.display = "none";
+      document.getElementById("selected").innerText = "N/A";
+      document.getElementById("selectAngle").innerText = "N/A";
+      document.getElementById("selectGradient").innerText = "N/A";
+
+      // 4. 결과 테이블 제거
+      const table = document.getElementById("slopeResultTable");
+      if (table) table.remove();
+
+    });
+
+    /* =========================
+      slopeResultTable 위치 강제 이동
+    ========================= */
+    const observer = new MutationObserver(() => {
+
+      const table = document.getElementById("slopeResultTable");
+      const container = document.getElementById("slopeResult");
+
+      if (table && container && !container.contains(table)) {
+        container.appendChild(table);
+      }
+
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+
+    /* =========================
+      지형단면 - 종단/횡단 시작
+    ========================= */
+    document.getElementById('btnSampleTerrainByLine').addEventListener("click", function () {
+
+      if (!profileTerrain) return;
+
+      if (selectMode === 'freeSelectMode') {
+
+        profileTerrain.initProfileAnalysis();
+
+        profileTerrain.startMarker =
+          "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/ico_location_red.svg";
+        profileTerrain.endMarker =
+          "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/ico_location_blue.svg";
+
+        profileTerrain.startDrawingPolyline();
+
+      } else {
+
+        if (!crossSection) return alert("필지 없음");
+
+        const crossIntervalDistance =
+          Number(document.getElementById('crossIntervalDistance').value);
+
+        const crossSectionOptions = {
+          crossIntervalDistance: crossIntervalDistance
+        };
+
+        const crossSectionObjectOptions = {
+          longLineWidth: 4,
+          longLineColor: '#FF3257'
+        };
+
+        crossSection.startDrawingCrossSectionPosition(
+          crossSectionOptions,
+          crossSectionObjectOptions
+        );
+
+      }
+
+    });
+
+
+    /* =========================
+      횡단 지점 선택
+    ========================= */
+    document.getElementById("btnSampleTerrainByCrossLine").addEventListener("click", function () {
+
+      let crossDistance =
+        Number(document.getElementById('crossDistance').value);
+
+      profileTerrain.spotMarker =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/spotmarker.png";
+
+      profileTerrain.startDrawingCrossPoint(crossDistance);
+
+    });
+
+
+    /* =========================
+      분석 실행
+    ========================= */
+    document.getElementById("btnAnalysis").addEventListener("click", function () {
+
+      if (!profileTerrain) return;
+
+      if (selectMode === 'freeSelectMode') {
+
+        let crossDistanceValue =
+          Number(document.getElementById('crossDistance').value);
+
+        profileTerrain.table = document.getElementById("tableResult");
+
+        profileTerrain.analysisStart(crossDistanceValue);
+
+      } else {
+
+        if (!crossSection) return;
+
+        crossSection.analyzeCrossSection({}, function (result) {
+          console.log("단면 분석 결과", result);
+        });
+
+      }
+
+    });
+
+
+    /* =========================
+      지형단면 분석 초기화
+    ========================= */
+    document.getElementById("btnInit").addEventListener("click", function () {
+
+      if (profileTerrain) {
+        profileTerrain.initProfileAnalysis();
+      }
+
+      document.getElementById("tableResult").innerHTML = "";
+
+    });
+
+
+    /* =========================
+      모드 선택
+    ========================= */
+    document.getElementById("btn_freeSection").addEventListener("click", function () {
+      selectMode = 'freeSelectMode';
+    });
+
+    document.getElementById("btn_createCrossSectionPlot").addEventListener("click", function () {
+
+      selectMode = 'jibunSelectMode';
+
+      if (!crossSection) {
+        crossSection = new CrossSection('cross1', 'analysis');
+      }
+
+    });
+    
+   
+    document.getElementById("btnUploadGlb").addEventListener("click", function () {
+
+      const fileInput = document.getElementById("glbUpload");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("GLB 파일 선택 먼저");
+        return;
+      }
+
+      if (!file.name.endsWith(".glb")) {
+        alert("GLB 파일만 가능");
+        return;
+      }
+
+      uploadedGlbUrl = URL.createObjectURL(file);
+
+      alert("업로드 완료! 위치를 지정하세요.");
+    });
+
+    document.getElementById("btnPlaceGlb").addEventListener("click", function () {
+
+      if (!uploadedGlbUrl) {
+        alert("먼저 GLB 업로드");
+        return;
+      }
+
+      // 마커 스타일
+      buildingControl.spotmarkerS =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/buildingcontrol/spotmarkerS.png";
+
+      buildingControl.glbFileUrl = uploadedGlbUrl;
+
+      // 위치 선택
+      buildingControl.modelCreateSpotPoint(function () {
+
+        buildingControl._glbEditable = true;
+
+        // 모델 로드
+        buildingControl.modelGlbAdd3DMap(function () {
+          console.log("GLB 로드 완료 + 편집 가능");
+        });
+
+      });
+
+    });
+
+    document.getElementById("btnRemoveGlb").addEventListener("click", function () {
+
+      try {
+        if (ws3de && ws3de.modeler) {
+          ws3de.modeler.removeAll();
+        }
+
+        // 메모리 해제
+        if (uploadedGlbUrl) {
+          URL.revokeObjectURL(uploadedGlbUrl);
+          uploadedGlbUrl = null;
+        }
+
+        alert("모델 제거 완료");
+
+      } catch (e) {
+        console.log("GLB 제거 실패", e);
+      }
+
+    });
+
+    let hiddenFeatures = new Set();
+
+    const viewer = ws3d.viewer;
+
+    viewer.screenSpaceEventHandler.setInputAction(function (movement) {
+
+      const pickedFeature = viewer.scene.pick(movement.position);
+
+      if (!Cesium.defined(pickedFeature)) return;
+
+      handleFeatureToggle(pickedFeature);
+
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    function handleFeatureToggle(pickedFeature) {
+
+      if (!(pickedFeature instanceof Cesium.Cesium3DTileFeature)) return;
+
+      const featureId = getFeatureId(pickedFeature);
+
+      if (hiddenFeatures.has(featureId)) {
+
+        pickedFeature.show = true;
+        hiddenFeatures.delete(featureId);
+
+      } else {
+
+        pickedFeature.show = false;
+        hiddenFeatures.add(featureId);
+
+      }
+
+    }
+
+    function getFeatureId(feature) {
+
+      try {
+        if (feature.featureId !== undefined) return feature.featureId;
+
+        if (feature.getProperty) {
+          return feature.getProperty("id") ||
+                feature.getProperty("OBJECTID") ||
+                JSON.stringify(feature.getPropertyNames());
+        }
+
+      } catch (e) {}
+
+      return feature._batchId || Math.random();
+    }
+
+    document.getElementById("btnResetHidden").onclick = function () {
+
+      const viewer = ws3d.viewer;
+
+      viewer.scene.primitives._primitives.forEach(p => {
+
+        if (p instanceof Cesium.Cesium3DTileset) {
+
+          const content = p._root?.content;
+
+          if (!content || !content._features) return;
+
+          const features = content._features;
+
+          for (let i = 0; i < features.length; i++) {
+            features[i].show = true;
+          }
+
+        }
+
+      });
+
+      hiddenFeatures.clear();
+
+    };
+  </script>
+</body>
+</html>
