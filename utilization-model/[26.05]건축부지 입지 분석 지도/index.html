@@ -1844,8 +1844,6 @@
           unique.push(item);
         }
       });
-
-      console.log("토지특성 후보 목록", unique);
       return unique;
     }
 
@@ -1868,8 +1866,6 @@
       const currentRes = await requestLandCharacteristics(pnu, currentYear);
       const currentFields = extractLandCharacteristicsFields(currentRes);
 
-      console.log("토지특성 현재연도 응답", currentYear, currentRes);
-
       if (currentFields.length > 0) {
         return {
           response: currentRes,
@@ -1881,8 +1877,6 @@
 
       const previousRes = await requestLandCharacteristics(pnu, previousYear);
       const previousFields = extractLandCharacteristicsFields(previousRes);
-
-      console.log("토지특성 이전연도 응답", previousYear, previousRes);
 
       return {
         response: previousRes,
@@ -1931,10 +1925,6 @@
       landCharData = results[0].status === "fulfilled" ? results[0].value : { selected: {}, stdrYear: "-", fallbackUsed: false };
       landUseData = results[1].status === "fulfilled" ? results[1].value : {};
       buildingData = results[2].status === "fulfilled" ? results[2].value : {};
-
-      console.log("토지특성 최종", landCharData);
-      console.log("토지이용계획 최종", landUseData);
-      console.log("용도별건물 최종", buildingData);
 
       renderCards(landCharData, landUseData, buildingData);
     }
@@ -2001,21 +1991,6 @@
           selected: bu
         }
       };
-
-      console.log("renderCards 원본 입력값", {
-        landChar: landChar,
-        landUse: landUse,
-        building: building
-      });
-      console.log("renderCards 화면 표출 가공값", renderDebugValues);
-      console.table(renderDebugValues.landCharacteristics.displayValues);
-      console.table(renderDebugValues.landUsePlan.displayValues);
-      console.log("토지이용계획 배열 가공 상세", {
-        luRaw: luRaw,
-        luList: luList,
-        cnflcAtNmJoined: luCnflcAtNmText,
-        prposAreaDstrcCodeNmJoined: luPrposAreaDstrcCodeNmText
-      });
       
       container.innerHTML = `
         <div class="card-wrap">
@@ -2883,7 +2858,6 @@
 
           },
           function (result) {
-            console.log("경사도 전체 결과", result);
           }
         );
 
@@ -3188,7 +3162,6 @@
         // 모델 로드
         buildingControl.modelGlbAdd3DMap(function (createdObject) {
           rememberNewGlbObjects(beforeSnapshot, createdObject);
-          console.log("GLB 로드 완료 + 편집 가능");
         });
 
       });
@@ -3366,15 +3339,6 @@
       const sidebar = document.querySelector(".sidebar");
       const searchBox = document.querySelector(".search-box");
       const btn = document.getElementById("btnSiteSuitability");
-
-      if (!sidebar || !searchBox || !btn) {
-        console.log("입지 적합성 버튼 초기 노출 보정 실패", {
-          sidebar: !!sidebar,
-          searchBox: !!searchBox,
-          btn: !!btn
-        });
-        return;
-      }
 
       let wrapper = btn.closest(".site-suitability-top");
       if (!wrapper) {
