@@ -1,0 +1,3400 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>건축부지 입지분석 프로토타입</title>
+
+  <script src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE"></script>
+  <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/slope/slope_analysis_api.js"></script>
+  <script type="text/javascript" src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/profileTerrain_analysis_api.js"></script>
+  <script src="https://map.vworld.kr/js/dtkmap/tool3d/libapis/buildingcontrol/buildingControl_api.js"></script>
+  <script src="https://map.vworld.kr/js/ws3dmap/WS3DRelease3/WS3DExtension/modeler.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e5eaf0;
+      --border-strong: #d8e0ea;
+      --text: #1f2937;
+      --text-sub: #64748b;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --success: #059669;
+      --success-hover: #047857;
+      --warning: #f97316;
+      --warning-hover: #ea580c;
+      --danger: #dc2626;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: "Pretendard", "Inter", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      letter-spacing: -0.02em;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: 100vh;
+      background: var(--bg);
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04);
+      z-index: 2;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: 1fr 340px;
+      min-width: 0;
+    }
+
+    .map-wrap {
+      position: relative;
+      background: #d8dee6;
+    }
+
+    #vmap3d {
+      width: 100%;
+      height: 100%;
+    }
+
+    .result-wrap {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-top: 1px solid var(--border);
+      padding: 20px 22px 24px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.28;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    h3, h4 {
+      color: #0f172a;
+      letter-spacing: -0.025em;
+    }
+
+    .search-box,
+    .analysis-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-top: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-box select,
+    .search-box input,
+    .analysis-panel select,
+    .analysis-panel input {
+      width: 100%;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .search-box input {
+      padding: 11px 12px;
+      margin-bottom: 10px;
+    }
+
+    .analysis-panel select,
+    .analysis-panel input {
+      padding: 9px 10px;
+      margin-top: 6px;
+    }
+
+    .search-box input:focus,
+    .search-box select:focus,
+    .analysis-panel select:focus,
+    .analysis-panel input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .search-box button,
+    .analysis-tab button {
+      width: 100%;
+      padding: 11px 12px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+    }
+
+    .search-box button:hover:not(:disabled),
+    .analysis-tab button:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .card-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(240px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #60a5fa);
+    }
+
+    .card .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eef2f7;
+      color: #0f172a;
+      font-size: 16px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .card .title::after {
+      content: "정보";
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 124px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      min-height: 30px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--surface-soft);
+    }
+
+    .info-row:nth-child(even) {
+      background: #ffffff;
+    }
+
+    .info-label {
+      color: #334155;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .info-value {
+      min-width: 0;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 500;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .info-value.is-muted {
+      color: var(--text-muted);
+    }
+
+    .info-value.is-important {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .fallback-note {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #c2410c;
+      font-size: 11px;
+      font-weight: 700;
+      vertical-align: 1px;
+    }
+
+    .empty-card-text {
+      color: var(--text-sub);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--surface-soft);
+    }
+
+    .analysis-box {
+      padding: 14px;
+    }
+
+    .analysis-box[style*="dashed"] {
+      border: 1px solid rgba(37, 99, 235, 0.28) !important;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .analysis-panel {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eef2f7;
+    }
+
+    .analysis-panel label {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: 700;
+    }
+
+    .analysis-tab {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .analysis-panel button,
+    .analysis-buttons button,
+    #profileUI button {
+      width: 100%;
+      margin-top: 7px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-weight: 700;
+    }
+
+    .analysis-panel button,
+    .analysis-buttons button {
+      background: var(--success);
+    }
+
+    .analysis-panel button:hover:not(:disabled),
+    .analysis-buttons button:hover:not(:disabled) {
+      background: var(--success-hover);
+    }
+
+    #profileUI button {
+      background: var(--warning);
+    }
+
+    #profileUI button:hover:not(:disabled) {
+      background: var(--warning-hover);
+    }
+
+    .hide {
+      display: none;
+    }
+
+
+
+    /* 분석 버튼 공통: 가로 정렬 */
+    .analysis-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .analysis-buttons button {
+      flex: 1 1 0;
+      min-width: 0;
+      margin-top: 0;
+    }
+
+    /* GLB 업로드 플로우: 사이드바 폭에서도 좁아 보이지 않도록 2열 단계 카드로 표시 */
+    .glb-flow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 14px;
+      margin-top: 12px;
+      counter-reset: glb-step;
+    }
+
+    .glb-step {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+      min-height: 104px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .glb-step::after {
+      content: "→";
+      position: absolute;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+    }
+
+    .glb-step:nth-of-type(1)::after {
+      top: 50%;
+      right: -19px;
+      transform: translateY(-50%);
+    }
+
+    .glb-step:nth-of-type(2)::after {
+      display: none;
+    }
+
+    .glb-step:nth-of-type(3)::after {
+      top: 50%;
+      right: -19px;
+      transform: translateY(-50%);
+    }
+
+    .glb-step:nth-of-type(4)::after {
+      display: none;
+    }
+
+    .glb-step-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 24px;
+    }
+
+    .glb-step-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .glb-step-title {
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.25;
+      white-space: normal;
+      word-break: keep-all;
+    }
+
+    .glb-step input[type="file"] {
+      width: 100%;
+      min-width: 0;
+      padding: 9px;
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface-soft);
+      color: var(--text-sub);
+      font-size: 12px;
+    }
+
+    .glb-step button {
+      width: 100%;
+      margin-top: 0;
+      padding: 10px 9px;
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    #btnUploadGlb,
+    #btnPlaceGlb {
+      background: var(--primary);
+    }
+
+    #btnUploadGlb:hover:not(:disabled),
+    #btnPlaceGlb:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    #btnRemoveGlb {
+      background: var(--danger);
+    }
+
+    #btnRemoveGlb:hover:not(:disabled) {
+      background: #b91c1c;
+    }
+
+    .glb-flow-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-soft);
+      color: #1e3a8a;
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    /* 분석 실행 플로우: 버튼을 기능 순서대로 인지할 수 있도록 단계 카드화 */
+    .process-flow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+      counter-reset: process-step;
+    }
+
+    .process-step {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-width: 0;
+      min-height: 96px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .process-step::before {
+      counter-increment: process-step;
+      content: counter(process-step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .process-step::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 900;
+      transform: translateY(-50%);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+    }
+
+    .process-step:nth-child(2)::after,
+    .process-step:last-child::after {
+      display: none;
+    }
+
+    .process-step-title {
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.25;
+      word-break: keep-all;
+    }
+
+    .process-step-desc {
+      margin-top: -3px;
+      color: var(--text-sub);
+      font-size: 11px;
+      line-height: 1.35;
+      word-break: keep-all;
+    }
+
+    .process-step label {
+      margin-top: 0;
+    }
+
+    .process-step select,
+    .process-step input {
+      margin-top: 0;
+    }
+
+    .process-step button {
+      width: 100%;
+      margin-top: auto;
+      min-height: 40px;
+    }
+
+    .process-step.is-reset::before {
+      content: "R";
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .process-step.is-reset button {
+      background: #64748b;
+    }
+
+    .process-step.is-reset button:hover:not(:disabled) {
+      background: #475569;
+    }
+
+    @media (max-width: 1180px) {
+      .glb-flow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+
+    @media (max-width: 440px) {
+      .glb-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .glb-step {
+        min-height: auto;
+      }
+
+      .glb-step::after {
+        content: "↓";
+        top: auto !important;
+        right: auto !important;
+        left: 50%;
+        bottom: -19px;
+        transform: translateX(-50%) !important;
+      }
+
+      .glb-step:nth-of-type(4)::after {
+        display: none;
+      }
+
+      .process-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .process-step {
+        min-height: auto;
+      }
+
+      .process-step::after {
+        content: "↓";
+        top: auto;
+        right: auto;
+        left: 50%;
+        bottom: -18px;
+        transform: translateX(-50%);
+      }
+
+      .process-step:nth-child(2)::after {
+        display: inline-flex;
+      }
+
+      .process-step:last-child::after {
+        display: none;
+      }
+    }
+
+
+
+    /* 지도 내부 분석 결과 팝업 */
+    .analysis-popup {
+      position: absolute;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      width: min(520px, calc(100% - 44px));
+      max-height: min(520px, calc(100% - 44px));
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(8px);
+    }
+
+    .analysis-popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .analysis-popup-title {
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .analysis-popup-close {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #334155;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .analysis-popup-close:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+
+    .analysis-popup-body {
+      min-height: 92px;
+      padding: 14px;
+      overflow: auto;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .analysis-popup-empty {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--surface-soft);
+      color: var(--text-sub);
+      font-weight: 650;
+    }
+
+    #slopePopupResult h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #0f172a;
+    }
+
+    #profilePopupResult table,
+    #tableResult table,
+    #tableResult canvas,
+    #slopeResultTable table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #tableResult canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+
+    /* 지형단면 결과는 VWorld API가 첫 번째 차트 이후 null(1), null(2) 결과를
+       연속으로 붙이는 경우가 있어 DOM을 건드리지 않고 시각적으로만 첫 결과를 유지한다. */
+    #tableResult.profile-first-result-only {
+      overflow: hidden;
+    }
+
+    #tableResult.profile-first-result-only canvas:not(:first-of-type) {
+      display: none !important;
+    }
+
+    #profilePopupResult th,
+    #profilePopupResult td,
+    #tableResult th,
+    #tableResult td {
+      padding: 7px 8px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      text-align: center;
+    }
+
+
+
+    /* 입지 적합성 종합 결과 */
+    .suitability-trigger {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: #ffffff;
+      font-weight: 850;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .site-suitability-top {
+      display: block !important;
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      margin-top: 14px;
+      margin-bottom: 14px;
+      padding: 10px 0 12px;
+      background: var(--surface);
+    }
+
+    #btnSiteSuitability {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 46px !important;
+      margin-top: 0 !important;
+      padding: 12px 14px !important;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+      color: #ffffff !important;
+      font-weight: 850;
+      z-index: 9999;
+    }
+
+    .suitability-trigger-note {
+      margin-top: 7px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-soft);
+      color: #1e3a8a;
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .report-apply-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .report-apply-actions button {
+      flex: 1 1 0;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      background: #0f766e;
+    }
+
+    .report-apply-actions button:hover:not(:disabled) {
+      background: #115e59;
+    }
+
+    .report-apply-actions button.secondary {
+      background: #475569;
+    }
+
+    .report-applied-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .suitability-summary {
+      display: grid;
+      gap: 12px;
+    }
+
+    .suitability-score-card {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .suitability-score-ring {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 88px;
+      height: 88px;
+      border-radius: 999px;
+      border: 8px solid #bfdbfe;
+      background: #ffffff;
+      color: #1d4ed8;
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .suitability-grade {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .suitability-headline {
+      margin-top: 8px;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .suitability-metrics {
+      display: grid;
+      gap: 8px;
+    }
+
+    .suitability-metric {
+      display: grid;
+      grid-template-columns: 116px 1fr 42px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .suitability-metric-name {
+      color: #334155;
+      font-weight: 800;
+    }
+
+    .suitability-meter {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e2e8f0;
+    }
+
+    .suitability-meter-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: #2563eb;
+    }
+
+    .suitability-metric-score {
+      color: #0f172a;
+      font-weight: 850;
+      text-align: right;
+    }
+
+    .suitability-risk-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .suitability-risk-list li {
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-soft);
+      color: #334155;
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .suitability-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .suitability-actions button {
+      flex: 1 1 0;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      background: var(--primary);
+    }
+
+    .suitability-actions button.secondary {
+      background: #475569;
+    }
+
+    .site-report-panel {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      width: min(440px, calc(100% - 36px));
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      backdrop-filter: blur(8px);
+    }
+
+    .site-report-panel.is-open {
+      display: flex;
+    }
+
+    .site-report-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .site-report-title {
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .site-report-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #334155;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .site-report-body {
+      flex: 1 1 auto;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .site-report-section {
+      margin-bottom: 14px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .site-report-section h4 {
+      margin: 0 0 9px;
+      font-size: 14px;
+    }
+
+    .site-report-section p,
+    .site-report-section li {
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .site-report-section ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .site-report-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 7px 10px;
+      font-size: 12px;
+    }
+
+    .site-report-grid dt {
+      color: #475569;
+      font-weight: 850;
+    }
+
+    .site-report-grid dd {
+      margin: 0;
+      color: #111827;
+      font-weight: 650;
+    }
+
+    .site-report-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .site-report-footer button {
+      flex: 1 1 0;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      font-weight: 850;
+      background: var(--primary);
+    }
+
+    .site-report-footer button.secondary {
+      background: #64748b;
+    }
+
+
+    #slopeResult {
+      margin-top: 14px;
+      padding: 12px;
+      background: var(--surface-soft);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    #slopeResult h3 {
+      font-size: 14px;
+      margin: 0 0 8px;
+    }
+
+    #slopeResult p {
+      font-size: 13px;
+      margin: 3px 0;
+    }
+
+    #profileUI {
+      margin-top: 10px;
+    }
+
+    #slopeResultTable {
+      margin-top: 10px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+    }
+
+    #slopeResultTable li {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    #slopeResultTable .th {
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    @media (max-width: 1180px) {
+      .app {
+        grid-template-columns: 340px 1fr;
+      }
+
+      .card-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .main {
+        grid-template-rows: 1fr 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>건축부지 입지분석 프로토타입</h1>
+
+      <div class="search-box">
+        <input id="searchInput" placeholder="지번주소 입력">
+        <button onclick="handleSearch()">검색</button>
+      </div>
+
+      <div class="site-suitability-top">
+        <button type="button" id="btnSiteSuitability" class="suitability-trigger" onclick="runSiteSuitabilityAnalysis()">
+          입지 적합성 종합분석 실행
+        </button>
+        <div class="suitability-trigger-note">
+          ※ 주소 검색 후 바로 실행할 수 있으며, 경사도/지형단면 분석을 완료한 뒤 결과를 리포트에 반영하면 지형 점수가 더 정확해집니다.
+        </div>
+      </div>
+
+      <div class="analysis-box" style="margin-bottom:12px; border:2px dashed #1664ff;">
+
+        <h3>사용자 건물 가시화</h3>
+
+        <div class="glb-flow" aria-label="GLB 모델 배치 순서">
+          <div class="glb-step">
+            <div class="glb-step-head">
+              <span class="glb-step-no">1</span>
+              <span class="glb-step-title">GLB 파일 선택</span>
+            </div>
+            <input type="file" id="glbUpload" accept=".glb" />
+          </div>
+
+          <div class="glb-step">
+            <div class="glb-step-head">
+              <span class="glb-step-no">2</span>
+              <span class="glb-step-title">파일 업로드</span>
+            </div>
+            <button id="btnUploadGlb">GLB 업로드</button>
+          </div>
+
+          <div class="glb-step">
+            <div class="glb-step-head">
+              <span class="glb-step-no">3</span>
+              <span class="glb-step-title">지도 위치 선택</span>
+            </div>
+            <button id="btnPlaceGlb">지도에 배치</button>
+          </div>
+
+          <div class="glb-step">
+            <div class="glb-step-head">
+              <span class="glb-step-no">4</span>
+              <span class="glb-step-title">필요 시 초기화</span>
+            </div>
+            <button id="btnRemoveGlb">모델 제거</button>
+          </div>
+        </div>
+
+        <div class="glb-flow-note">
+          <span>※</span>
+          <span>번호 순서대로 파일 선택, 업로드, 지도 배치까지 진행하세요. 배치 후 지도에서 위치를 클릭하면 모델 배치 및 편집이 가능합니다.</span>
+        </div>
+
+        <hr style="margin:12px 0;">
+
+        <h4 style="margin:0 0 6px;">객체 선택 숨김</h4>
+
+        <div class="analysis-buttons">
+          <button id="btnSelectHidden">선택 건물 객체 숨김</button>
+          <button id="btnResetHidden">숨김 객체 전체 복구</button>
+        </div>
+
+        <div style="font-size:12px; color:#666; margin-top:6px;">
+          ※ 선택 건물 객체 숨김 버튼 클릭 후 지도에서 건물을 클릭하면 개별 숨김 처리됩니다.
+        </div>
+
+      </div>
+
+      <div class="analysis-box">
+
+        <h3>지형조건 분석</h3>
+        </br>
+
+        <!-- 상단 버튼 (가로 배치) -->
+        <div class="analysis-tab">
+          <button id="btnSlopeTab" onclick="openSlope()">경사도 분석</button>
+          <button id="btnProfileTab" onclick="openProfile()">지형단면 분석</button>
+        </div>
+
+        <!-- ================= 경사도 ================= -->
+        <div id="slopeUI" class="analysis-panel" style="display:none;">
+
+          <div class="process-flow slope-process-flow" aria-label="경사도 분석 진행 순서">
+            <div class="process-step">
+              <div class="process-step-title">분석영역 설정</div>
+              <div class="process-step-desc">분석할 반경/면적을 먼저 선택합니다.</div>
+              <label style="width:150px;">분석영역넓이</label>
+              <select id="area">
+                <option value="10000">10,000 ㎡</option>
+                <option value="50000">50,000 ㎡</option>
+                <option value="100000">100,000 ㎡</option>
+              </select>
+            </div>
+
+            <div class="process-step">
+              <div class="process-step-title">포인트 지정 및 분석</div>
+              <div class="process-step-desc">지도에서 포인트를 지정하면 바로 분석합니다.</div>
+              <button id="btnSlopByPoint">경사도 포인트 지정 후 바로 분석 수행</button>
+            </div>
+
+            <div class="process-step is-reset">
+              <div class="process-step-title">분석 초기화</div>
+              <div class="process-step-desc">분석 결과와 지도 표시를 지웁니다.</div>
+              <button id="btnSlopeInit">경사도 분석 초기화</button>
+            </div>
+
+            <div class="process-step is-reset">
+              <div class="process-step-title">분석 메뉴로 돌아가기</div>
+              <div class="process-step-desc">다른 분석 유형을 선택합니다.</div>
+              <button onclick="resetAnalysis()">← 분석 선택으로</button>
+            </div>
+          </div>
+
+          <div id="slopeResult" style="display:none;">
+            <h3>분석 결과</h3>
+          </div>
+
+        </div>
+
+        <!-- ================= 지형단면 ================= -->
+        <div id="profileUI" class="analysis-panel" style="display:none;">
+
+          <button type="button" id="btn_freeSection" onclick="activateFreeSectionMode()">자유선택</button>
+
+          <div class="process-flow profile-process-flow" aria-label="지형단면 분석 진행 순서">
+            <div class="process-step">
+              <div class="process-step-title">종단면 선 그리기</div>
+              <div class="process-step-desc">지도 위에 분석 기준선을 먼저 그립니다.</div>
+              <button id="btnSampleTerrainByLine" disabled>종단면 그리기</button>
+            </div>
+
+            <div class="process-step">
+              <div class="process-step-title">횡단 조건 설정</div>
+              <div class="process-step-desc">횡단 길이를 확인한 뒤 지점을 선택합니다.</div>
+              <label id="crossDistanceNm" class="hide">횡단 길이</label>
+              <input type="number" id="crossDistance" value="50" class="hide">
+              <button id="btnSampleTerrainByCrossLine" class="hide">횡단 지점 선택</button>
+            </div>
+
+            <div class="process-step">
+              <div class="process-step-title">분석 실행</div>
+              <div class="process-step-desc">설정한 조건으로 지형단면 결과를 생성합니다.</div>
+              <button id="btnAnalysis">분석 실행</button>
+            </div>
+
+            <div class="process-step is-reset">
+              <div class="process-step-title">초기화 및 메뉴 이동</div>
+              <div class="process-step-desc">결과를 지우거나 분석 선택 화면으로 돌아갑니다.</div>
+              <button id="btnInit">초기화</button>
+              <button onclick="resetAnalysis()">← 분석 선택으로</button>
+            </div>
+          </div>
+
+          <label id="crossIntervalNm" class="hide">횡단 간격</label>
+          <input type="number" id="crossInterval" value="50" class="hide">
+
+          <div id="tableResult"></div>
+
+        </div>
+
+
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="map-wrap">
+        <div id="vmap3d"></div>
+
+        <div id="analysisPopup" class="analysis-popup" style="display:none;">
+          <div class="analysis-popup-header">
+            <div id="analysisPopupTitle" class="analysis-popup-title">분석 결과</div>
+            <button type="button" class="analysis-popup-close" onclick="closeAnalysisPopup()" aria-label="분석 결과 닫기">×</button>
+          </div>
+          <div id="analysisPopupBody" class="analysis-popup-body"></div>
+        </div>
+
+        <aside id="siteSuitabilityPanel" class="site-report-panel" aria-label="입지 적합성 상세 리포트">
+          <div class="site-report-header">
+            <div class="site-report-title">입지 적합성 상세 리포트</div>
+            <button type="button" class="site-report-close" onclick="closeSiteSuitabilityPanel()" aria-label="상세 리포트 닫기">×</button>
+          </div>
+          <div id="siteSuitabilityReportBody" class="site-report-body">
+            <div class="site-report-section">
+              <p>입지 적합성 종합분석 실행 후 상세 리포트가 표시됩니다.</p>
+            </div>
+          </div>
+          <div class="site-report-footer">
+            <button type="button" class="secondary" onclick="closeSiteSuitabilityPanel()">닫기</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="result-wrap" id="resultCards">
+        <div class="card-wrap">
+          <div class="card">
+            <div class="title">토지특성</div>
+            <div class="empty-card-text">검색 후 정보가 표시됩니다.</div>
+          </div>
+
+          <div class="card">
+            <div class="title">토지이용계획</div>
+            <div class="empty-card-text">검색 후 정보가 표시됩니다.</div>
+          </div>
+
+          <div class="card">
+            <div class="title">용도별건물</div>
+            <div class="empty-card-text">검색 후 정보가 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let uploadedGlbUrl = null;
+    let placedGlbTargets = [];
+
+    function getScenePrimitiveCollection() {
+      return ws3d?.viewer?.scene?.primitives || null;
+    }
+
+    function getSceneGroundPrimitiveCollection() {
+      return ws3d?.viewer?.scene?.groundPrimitives || null;
+    }
+
+    function getViewerEntities() {
+      return ws3d?.viewer?.entities || null;
+    }
+
+    function snapshotGlbSceneObjects() {
+      const primitives = getScenePrimitiveCollection();
+      const groundPrimitives = getSceneGroundPrimitiveCollection();
+      const entities = getViewerEntities();
+      const dataSources = ws3d?.viewer?.dataSources;
+
+      return {
+        primitives: primitives?._primitives ? new Set(primitives._primitives) : new Set(),
+        groundPrimitives: groundPrimitives?._primitives ? new Set(groundPrimitives._primitives) : new Set(),
+        entities: entities?.values ? new Set(entities.values) : new Set(),
+        dataSources: dataSources?._dataSources ? new Set(dataSources._dataSources) : new Set()
+      };
+    }
+
+    function rememberNewGlbObjects(beforeSnapshot, createdObject) {
+      if (createdObject) {
+        placedGlbTargets.push(createdObject);
+      }
+
+      const primitives = getScenePrimitiveCollection();
+      const entities = getViewerEntities();
+
+      if (primitives?._primitives) {
+        primitives._primitives.forEach(function (primitive) {
+          if (!beforeSnapshot.primitives.has(primitive)) {
+            placedGlbTargets.push(primitive);
+          }
+        });
+      }
+
+      const groundPrimitives = getSceneGroundPrimitiveCollection();
+      if (groundPrimitives?._primitives) {
+        groundPrimitives._primitives.forEach(function (primitive) {
+          if (!beforeSnapshot.groundPrimitives?.has(primitive)) {
+            placedGlbTargets.push(primitive);
+          }
+        });
+      }
+
+      if (entities?.values) {
+        entities.values.forEach(function (entity) {
+          if (!beforeSnapshot.entities.has(entity)) {
+            placedGlbTargets.push(entity);
+          }
+        });
+      }
+
+      placedGlbTargets = [...new Set(placedGlbTargets)];
+    }
+
+    function removePlacedGlbObjects() {
+      const primitives = getScenePrimitiveCollection();
+      const groundPrimitives = getSceneGroundPrimitiveCollection();
+      const entities = getViewerEntities();
+
+      placedGlbTargets.forEach(function (target) {
+        try {
+          if (primitives?.contains?.(target)) {
+            primitives.remove(target);
+            return;
+          }
+
+          if (groundPrimitives?.contains?.(target)) {
+            groundPrimitives.remove(target);
+            return;
+          }
+
+          if (entities?.contains?.(target)) {
+            entities.remove(target);
+            return;
+          }
+
+          if (target?.destroy && !target.isDestroyed?.()) {
+            target.destroy();
+          }
+        } catch (e) {
+          console.log("GLB 개별 객체 제거 실패", e);
+        }
+      });
+
+      placedGlbTargets = [];
+
+      // VWorld modeler 버전별 제거 함수가 다를 수 있어 존재하는 함수만 호출
+      const modeler = ws3de?.modeler;
+      ["removeAll", "remove", "clear", "deleteAll", "destroy"].some(function (methodName) {
+        try {
+          if (typeof modeler?.[methodName] === "function") {
+            modeler[methodName]();
+            return true;
+          }
+        } catch (e) {
+          console.log("modeler 제거 함수 실행 실패", methodName, e);
+        }
+        return false;
+      });
+
+      ws3d?.viewer?.render?.();
+    }
+
+    var map;	
+    var options = {
+        mapId : "vmap3d",
+        initPosition : new vw.CameraPosition(
+            new vw.CoordZ(126.92775802528264, 37.52501881993892, 12416),  
+            new vw.Direction(0, -90, 0)
+        ),
+        logo: true,
+        navigation: true
+    };
+
+    map = new vw.Map();   
+    map.setOption(options);
+    map.start(); // 지도 생성
+
+    vw.ws3dInitCallBack = function () {
+
+      const viewer = ws3d.viewer;
+
+      // 연속지적도 WMS
+      var layer = new vw.Layers();
+      var source = new vw.source.TileWMS();
+
+      source.setLayers("lp_pa_cbnd_bubun,lp_pa_cbnd_bonbun");
+      source.setStyles("lp_pa_cbnd_bubun_line,lp_pa_cbnd_bonbun_line");
+      source.setUrl(`https://api.vworld.kr/req/wms?Key=${API_KEY}&`);
+
+      var tile = new vw.layer.Tile(source);
+      layer.add(tile);
+
+      const facilityBuild = map.getElementById('facility_build');
+      if (facilityBuild && typeof facilityBuild.hide === "function") {
+        facilityBuild.hide();
+      }
+
+      const facilityBuildAll = map.getElementById('facility_build_all');
+      if (facilityBuildAll && typeof facilityBuildAll.show === "function") {
+        facilityBuildAll.show();
+      }
+
+    };
+
+    const API_KEY = "CBDA8338-FEF2-34AE-9B04-D31B3597153F";
+
+    let searchPolygon = null;
+    let landCharData = null;
+    let landUseData = null;
+    let buildingData = null;
+
+    /* =========================
+      검색
+    ========================= */
+    function handleSearch() {
+
+      const input = $("#searchInput").val();
+
+      if (!input) return alert("지번주소를 입력하세요");
+
+      const type = "parcel";
+
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/req/search",
+        data: {
+          service: "search",
+          request: "search",
+          version: "2.0",
+          size: 1,
+          page: 1,
+          type: "address",
+          category: type,
+          format: "json",
+          key: API_KEY,
+          query: input
+        },
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function (data) {
+
+          const item = data.response?.result?.items[0];
+
+          if (!item) return alert("검색 결과 없음");
+
+          const x = item.point.x;
+          const y = item.point.y;
+          const pnu = item.id;
+
+          move(x, y, 300);
+          drawParcel(pnu);
+          getAllData(pnu);
+        }
+      });
+    }
+
+
+    /* =========================
+      지도 이동
+    ========================= */
+    function move(x, y, z) {
+      const pos = new vw.CoordZ(x, y, z);
+      const cam = new vw.CameraPosition(pos, new vw.Direction(0, -90, 0));
+      map.moveTo(cam);
+    }
+
+    /* =========================
+      필지 표시
+    ========================= */
+    function drawParcel(pnu) {
+
+      if (searchPolygon) {
+        map.removeObjectById("parcel");
+      }
+
+      $.ajax({
+        type: "get",
+        url: "https://api.vworld.kr/req/data",
+        data: {
+          key: API_KEY,
+          service: "data",
+          version: "2.0",
+          request: "getfeature",
+          format: "json",
+          size: 1,
+          page: 1,
+          geometry: true,
+          crs: "EPSG:4326",
+          data: "LP_PA_CBND_BUBUN",
+          attrfilter: "pnu:=:" + pnu
+        },
+        dataType: 'jsonp', //cors 우회를 위해 jsonp 이용
+				async: false,
+        success: function (data) {
+
+          const coords = data.response.result.featureCollection.features[0].geometry.coordinates[0][0];
+
+          const pts = coords.map(c => new vw.Coord(c[0], c[1]));
+
+          const poly = new vw.geom.Polygon(new vw.Collection(pts));
+          poly.setFillColor(new vw.Color(255, 0, 0, 80));
+          poly.setWidth(2);
+          poly.setId("parcel");
+          poly.create();
+
+          searchPolygon = poly;
+
+        }
+      });
+    }
+
+    function normalizeFieldToArray(field) {
+      if (!field) return [];
+      return Array.isArray(field) ? field.filter(Boolean) : [field];
+    }
+
+    function hasMeaningfulObjectValue(obj) {
+      if (!obj || typeof obj !== "object") return false;
+      return Object.values(obj).some(function (value) {
+        return value !== undefined && value !== null && String(value).trim() !== "";
+      });
+    }
+
+    function normalizeDateValue(value) {
+      return String(value || "").replace(/[^0-9]/g, "");
+    }
+
+    function findObjectsByKeys(source, keys) {
+      const result = [];
+      const visited = new Set();
+
+      function walk(value) {
+        if (!value || typeof value !== "object") return;
+        if (visited.has(value)) return;
+        visited.add(value);
+
+        if (Array.isArray(value)) {
+          value.forEach(walk);
+          return;
+        }
+
+        const hasTargetKey = keys.some(function (key) {
+          return Object.prototype.hasOwnProperty.call(value, key);
+        });
+
+        if (hasTargetKey && hasMeaningfulObjectValue(value)) {
+          result.push(value);
+        }
+
+        Object.keys(value).forEach(function (key) {
+          walk(value[key]);
+        });
+      }
+
+      walk(source);
+      return result;
+    }
+
+    function getLatestByLastUpdate(items) {
+      const list = normalizeFieldToArray(items).filter(hasMeaningfulObjectValue);
+      if (list.length === 0) return {};
+
+      return list.slice().sort(function (a, b) {
+        const bDate = normalizeDateValue(b.lastUpdtDt || b.updateDt || b.updtDt || b.stdrDe || b.stdrYear);
+        const aDate = normalizeDateValue(a.lastUpdtDt || a.updateDt || a.updtDt || a.stdrDe || a.stdrYear);
+
+        if (bDate !== aDate) return bDate.localeCompare(aDate);
+
+        // 날짜가 같거나 없는 중복 데이터면 실제 값이 더 많이 채워진 객체를 우선한다.
+        const bFilled = Object.values(b).filter(function (value) {
+          return value !== undefined && value !== null && String(value).trim() !== "";
+        }).length;
+        const aFilled = Object.values(a).filter(function (value) {
+          return value !== undefined && value !== null && String(value).trim() !== "";
+        }).length;
+
+        return bFilled - aFilled;
+      })[0] || {};
+    }
+
+    function getAllValuesByKeyDeep(source, key) {
+      const values = [];
+      const visited = new Set();
+
+      function walk(value) {
+        if (!value || typeof value !== "object") return;
+        if (visited.has(value)) return;
+        visited.add(value);
+
+        if (Array.isArray(value)) {
+          value.forEach(walk);
+          return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          const targetValue = value[key];
+          if (Array.isArray(targetValue)) {
+            targetValue.forEach(function (item) {
+              if (item !== undefined && item !== null && String(item).trim() !== "") {
+                values.push(String(item).trim());
+              }
+            });
+          } else if (targetValue !== undefined && targetValue !== null && String(targetValue).trim() !== "") {
+            values.push(String(targetValue).trim());
+          }
+        }
+
+        Object.keys(value).forEach(function (childKey) {
+          walk(value[childKey]);
+        });
+      }
+
+      walk(source);
+      return values;
+    }
+
+    function joinValuesFromResponse(source, key) {
+      const values = getAllValuesByKeyDeep(source, key);
+      // 토지이용계획은 같은 저촉여부/용도지역지구명이 여러 번 나와도
+      // 실제 API 결과 건수 흐름을 유지하기 위해 중복 제거하지 않는다.
+      return values.join(", ") || "-";
+    }
+
+    function joinUniqueValues(items, key) {
+      const values = normalizeFieldToArray(items)
+        .map(function (item) { return item && item[key]; })
+        .filter(function (value) {
+          return value !== undefined && value !== null && String(value).trim() !== "";
+        })
+        .map(function (value) { return String(value).trim(); });
+
+      return Array.from(new Set(values)).join(", ") || "-";
+    }
+
+    function safeJsonp(options) {
+      return new Promise(function (resolve) {
+        $.ajax({
+          type: options.type || "get",
+          url: options.url,
+          data: options.data || {},
+          dataType: "jsonp",
+          jsonp: "callback",
+          timeout: options.timeout || 10000,
+          success: function (res) {
+            resolve(res || {});
+          },
+          error: function (xhr, status, error) {
+            console.log("VWorld API 호출 실패", options.url, status, error);
+            resolve({});
+          }
+        });
+      });
+    }
+
+    function extractLandCharacteristicsFields(res) {
+      const directFields = normalizeFieldToArray(res && res.landCharacteristics && res.landCharacteristics.field)
+        .filter(hasMeaningfulObjectValue);
+
+      const deepFields = findObjectsByKeys(res, [
+        "lndcgrCodeNm",
+        "lndpclAr",
+        "prposArea1Nm",
+        "tpgrphFrmCodeNm",
+        "roadSideCodeNm",
+        "pblntfPclnd",
+        "lastUpdtDt"
+      ]);
+
+      const merged = directFields.concat(deepFields);
+      const unique = [];
+      const seen = new Set();
+
+      merged.forEach(function (item) {
+        const key = JSON.stringify(item);
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(item);
+        }
+      });
+
+      console.log("토지특성 후보 목록", unique);
+      return unique;
+    }
+
+    async function requestLandCharacteristics(pnu, stdrYear) {
+      return await safeJsonp({
+        url: "https://api.vworld.kr/ned/data/getLandCharacteristics",
+        data: {
+          pnu: pnu,
+          stdrYear: stdrYear,
+          key: API_KEY,
+          domain: location.origin
+        }
+      });
+    }
+
+    async function getLatestLandCharacteristics(pnu) {
+      const currentYear = new Date().getFullYear();
+      const previousYear = currentYear - 1;
+
+      const currentRes = await requestLandCharacteristics(pnu, currentYear);
+      const currentFields = extractLandCharacteristicsFields(currentRes);
+
+      console.log("토지특성 현재연도 응답", currentYear, currentRes);
+
+      if (currentFields.length > 0) {
+        return {
+          response: currentRes,
+          selected: getLatestByLastUpdate(currentFields),
+          stdrYear: currentYear,
+          fallbackUsed: false
+        };
+      }
+
+      const previousRes = await requestLandCharacteristics(pnu, previousYear);
+      const previousFields = extractLandCharacteristicsFields(previousRes);
+
+      console.log("토지특성 이전연도 응답", previousYear, previousRes);
+
+      return {
+        response: previousRes,
+        selected: getLatestByLastUpdate(previousFields),
+        stdrYear: previousYear,
+        fallbackUsed: true
+      };
+    }
+
+    async function getAllData(pnu) {
+      landCharData = { selected: {}, stdrYear: "-", fallbackUsed: false };
+      landUseData = {};
+      buildingData = {};
+      renderCards(landCharData, landUseData, buildingData);
+
+      const landCharPromise = getLatestLandCharacteristics(pnu).catch(function (e) {
+        console.log("토지특성 조회 실패", e);
+        return { selected: {}, stdrYear: "-", fallbackUsed: false };
+      });
+
+      const landUsePromise = safeJsonp({
+        url: "https://api.vworld.kr/ned/data/getLandUseAttr",
+        data: {
+          pnu: pnu,
+          key: API_KEY,
+          domain: location.origin,
+          numOfRows: 100
+        }
+      });
+
+      const buildingPromise = safeJsonp({
+        url: "https://api.vworld.kr/ned/data/getBuildingUse",
+        data: {
+          pnu: pnu,
+          key: API_KEY,
+          domain: location.origin
+        }
+      });
+
+      const results = await Promise.allSettled([
+        landCharPromise,
+        landUsePromise,
+        buildingPromise
+      ]);
+
+      landCharData = results[0].status === "fulfilled" ? results[0].value : { selected: {}, stdrYear: "-", fallbackUsed: false };
+      landUseData = results[1].status === "fulfilled" ? results[1].value : {};
+      buildingData = results[2].status === "fulfilled" ? results[2].value : {};
+
+      console.log("토지특성 최종", landCharData);
+      console.log("토지이용계획 최종", landUseData);
+      console.log("용도별건물 최종", buildingData);
+
+      renderCards(landCharData, landUseData, buildingData);
+    }
+
+    function renderCards(landChar, landUse, building) {
+
+      const container = document.getElementById("resultCards");
+
+      const lc = landChar?.selected || {};
+      const lcYear = landChar?.stdrYear || "-";
+      const lcFallbackText = landChar?.fallbackUsed ? " / 현재연도 값 없음 → 이전연도 조회" : "";
+
+      const luRaw = landUse?.landUseAtt?.field;
+      const luList = findObjectsByKeys(landUse, [
+        "cnflcAtNm",
+        "prposAreaDstrcCodeNm",
+        "regstrSeCodeNm",
+        "lastUpdtDt"
+      ]);
+      const lu = getLatestByLastUpdate(luList);
+
+      // 토지이용계획은 배열 구조를 신뢰하지 않고, 응답 전체에서 필요한 키 값을 전부 수집해 단일 문자열처럼 표출한다.
+      const luCnflcAtNmText = joinValuesFromResponse(landUse, "cnflcAtNm");
+      const luPrposAreaDstrcCodeNmText = joinValuesFromResponse(landUse, "prposAreaDstrcCodeNm");
+
+      const buRaw = building?.buildingUses?.field;
+      const bu = Array.isArray(buRaw) ? buRaw[0] : buRaw || {};
+
+      const renderDebugValues = {
+        landCharacteristics: {
+          raw: landChar,
+          selected: lc,
+          stdrYear: lcYear,
+          fallbackText: lcFallbackText,
+          displayValues: {
+            lndcgrCodeNm: lc.lndcgrCodeNm || "-",
+            lndpclAr: lc.lndpclAr || "-",
+            prposArea1Nm: lc.prposArea1Nm || "-",
+            tpgrphFrmCodeNm: lc.tpgrphFrmCodeNm || "-",
+            roadSideCodeNm: lc.roadSideCodeNm || "-",
+            pblntfPclnd: lc.pblntfPclnd || "-",
+            lastUpdtDt: lc.lastUpdtDt || "-"
+          }
+        },
+        landUsePlan: {
+          raw: landUse,
+          fieldRaw: luRaw,
+          normalizedList: luList,
+          selectedForCommonFields: lu,
+          joinedValues: {
+            cnflcAtNm: luCnflcAtNmText,
+            prposAreaDstrcCodeNm: luPrposAreaDstrcCodeNmText
+          },
+          displayValues: {
+            regstrSeCodeNm: lu.regstrSeCodeNm || "-",
+            cnflcAtNm: luCnflcAtNmText,
+            prposAreaDstrcCodeNm: luPrposAreaDstrcCodeNmText,
+            lastUpdtDt: lu.lastUpdtDt || "-"
+          }
+        },
+        buildingUse: {
+          raw: building,
+          fieldRaw: buRaw,
+          selected: bu
+        }
+      };
+
+      console.log("renderCards 원본 입력값", {
+        landChar: landChar,
+        landUse: landUse,
+        building: building
+      });
+      console.log("renderCards 화면 표출 가공값", renderDebugValues);
+      console.table(renderDebugValues.landCharacteristics.displayValues);
+      console.table(renderDebugValues.landUsePlan.displayValues);
+      console.log("토지이용계획 배열 가공 상세", {
+        luRaw: luRaw,
+        luList: luList,
+        cnflcAtNmJoined: luCnflcAtNmText,
+        prposAreaDstrcCodeNmJoined: luPrposAreaDstrcCodeNmText
+      });
+      
+      container.innerHTML = `
+        <div class="card-wrap">
+
+          <div class="card">
+            <div class="title">토지특성</div>
+            <div class="info-list">
+              <div class="info-row"><div class="info-label">기준연도</div><div class="info-value is-important">${lcYear}${landChar?.fallbackUsed ? `<span class="fallback-note">현재연도 값 없음 · 이전연도 조회</span>` : ""}</div></div>
+              <div class="info-row"><div class="info-label">지목</div><div class="info-value">${lc.lndcgrCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">면적</div><div class="info-value">${lc.lndpclAr || "-"}㎡</div></div>
+              <div class="info-row"><div class="info-label">용도지역명</div><div class="info-value">${lc.prposArea1Nm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">지형형상</div><div class="info-value">${lc.tpgrphFrmCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">도로접면</div><div class="info-value">${lc.roadSideCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">공시지가</div><div class="info-value">${lc.pblntfPclnd || "-"}원/㎡</div></div>
+              <div class="info-row"><div class="info-label">데이터기준일자</div><div class="info-value">${lc.lastUpdtDt || "-"}</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="title">토지이용계획</div>
+            <div class="info-list">
+              <div class="info-row"><div class="info-label">대장구분명</div><div class="info-value">${lu.regstrSeCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">저촉여부</div><div class="info-value is-important">${luCnflcAtNmText}</div></div>
+              <div class="info-row"><div class="info-label">용도지역지구명</div><div class="info-value">${luPrposAreaDstrcCodeNmText}</div></div>
+              <div class="info-row"><div class="info-label">데이터기준일자</div><div class="info-value">${lu.lastUpdtDt || "-"}</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="title">용도별건물</div>
+            <div class="info-list">
+              <div class="info-row"><div class="info-label">특수지구분명</div><div class="info-value">${bu.regstrSeCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">집합건물구분</div><div class="info-value">${bu.agbldgSeCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">대장종류</div><div class="info-value">${bu.buldKndCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">건물주부구분명</div><div class="info-value">${bu.buldMainAtachSeCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">건물대지면적</div><div class="info-value">${bu.buldPlotAr || "-"}㎡</div></div>
+              <div class="info-row"><div class="info-label">건물건축면적</div><div class="info-value">${bu.buldBildngAr || "-"}㎡</div></div>
+              <div class="info-row"><div class="info-label">건물연면적</div><div class="info-value">${bu.buldTotar || "-"}㎡</div></div>
+              <div class="info-row"><div class="info-label">용적율</div><div class="info-value is-important">${bu.measrmtRt || "-"}%</div></div>
+              <div class="info-row"><div class="info-label">건폐율</div><div class="info-value is-important">${bu.btlRt || "-"}%</div></div>
+              <div class="info-row"><div class="info-label">건축물구조명</div><div class="info-value">${bu.strctCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">주요용도명</div><div class="info-value">${bu.mainPrposCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">세부용도명</div><div class="info-value">${bu.detailPrposCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">건물용도분류명</div><div class="info-value">${bu.buldPrposClCodeNm || "-"}</div></div>
+              <div class="info-row"><div class="info-label">건물높이</div><div class="info-value">${bu.buldHg || "-"}m</div></div>
+              <div class="info-row"><div class="info-label">지상층수</div><div class="info-value">${bu.groundFloorCo || "-"}</div></div>
+              <div class="info-row"><div class="info-label">지하층수</div><div class="info-value">${bu.undgrndFloorCo || "-"}</div></div>
+              <div class="info-row"><div class="info-label">허가일자</div><div class="info-value">${bu.prmisnDe || "-"}</div></div>
+              <div class="info-row"><div class="info-label">사용승인일자</div><div class="info-value">${bu.useConfmDe || "-"}</div></div>
+              <div class="info-row"><div class="info-label">데이터기준일자</div><div class="info-value">${bu.lastUpdtDt || "-"}</div></div>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* =========================
+      초기 상태
+    ========================= */
+    function resetAnalysis() {
+      document.getElementById("slopeUI").style.display = "none";
+      document.getElementById("profileUI").style.display = "none";
+
+      document.getElementById("btnSlopeTab").style.display = "block";
+      document.getElementById("btnProfileTab").style.display = "block";
+
+      document.getElementById("slopeResult").style.display = "none";
+      closeAnalysisPopup();
+    }
+
+
+    /* =========================
+      경사도 클릭
+    ========================= */
+    function openSlope() {
+
+      document.getElementById("slopeUI").style.display = "block";
+      document.getElementById("profileUI").style.display = "none";
+
+      document.getElementById("btnProfileTab").style.display = "none";
+    }
+
+
+    /* =========================
+      지형단면 클릭
+    ========================= */
+    function openProfile() {
+
+      document.getElementById("profileUI").style.display = "block";
+      document.getElementById("slopeUI").style.display = "none";
+
+      document.getElementById("btnSlopeTab").style.display = "none";
+
+      // 필지선택 기능을 제거했으므로 지형단면은 자유선택 모드를 기본값으로 활성화
+      activateFreeSectionMode();
+    }
+
+    document.getElementById("btnSlopByPoint").onclick = function () {
+      prepareSlopePopup();
+    };
+
+
+
+    /* =========================
+      지도 내부 분석 결과 팝업
+    ========================= */
+    function getAnalysisPopup() {
+      return document.getElementById("analysisPopup");
+    }
+
+    function getAnalysisPopupBody() {
+      return document.getElementById("analysisPopupBody");
+    }
+
+    function openAnalysisPopup(title) {
+      const popup = getAnalysisPopup();
+      const titleEl = document.getElementById("analysisPopupTitle");
+      if (titleEl) titleEl.innerText = title || "분석 결과";
+      if (popup) popup.style.display = "flex";
+    }
+
+    function closeAnalysisPopup() {
+      const popup = getAnalysisPopup();
+      if (popup) popup.style.display = "none";
+    }
+
+    function ensureProfileTableResult() {
+      let tableResult = document.getElementById("tableResult");
+      if (tableResult) return tableResult;
+
+      // profileTerrain 또는 팝업 초기화 과정에서 #tableResult가 제거되는 경우가 있어
+      // 다음 분석 실행 전에 원래 id를 가진 결과 영역을 반드시 복구한다.
+      tableResult = document.createElement("div");
+      tableResult.id = "tableResult";
+
+      const profileUI = document.getElementById("profileUI");
+      const profilePopupResult = document.getElementById("profilePopupResult");
+
+      if (profilePopupResult) {
+        profilePopupResult.appendChild(tableResult);
+      } else if (profileUI) {
+        profileUI.appendChild(tableResult);
+      } else {
+        document.body.appendChild(tableResult);
+      }
+
+      return tableResult;
+    }
+
+    function clearAnalysisPopup() {
+      const body = getAnalysisPopupBody();
+      const profileUI = document.getElementById("profileUI");
+      const tableResult = ensureProfileTableResult();
+
+      // 팝업을 비울 때 #tableResult를 삭제하면 profileTerrain 내부 참조가 null이 된다.
+      // 삭제하지 말고 원래 지형단면 패널 하단으로 되돌린다.
+      if (profileUI && tableResult && body && body.contains(tableResult)) {
+        profileUI.appendChild(tableResult);
+      }
+
+      if (body) body.innerHTML = "";
+    }
+
+    function prepareSlopePopup() {
+      const body = getAnalysisPopupBody();
+      if (!body) return null;
+
+      body.innerHTML = `
+        <div id="slopePopupResult">
+          <h3>경사도 분석 결과</h3>
+          <div class="analysis-popup-empty">지도에서 분석 지점을 선택하면 결과가 표시됩니다.</div>
+
+          <div class="report-apply-actions">
+            <button type="button" onclick="applySlopeResultToReport()">경사도 결과 리포트 반영</button>
+          </div>
+
+          <div id="slopeReportAppliedBadge" class="report-applied-badge" style="display:none;">
+            리포트에 반영됨
+          </div>
+        </div>
+      `;
+      openAnalysisPopup("경사도 분석 결과");
+      return document.getElementById("slopePopupResult");
+    }
+
+    function prepareProfilePopup() {
+      const body = getAnalysisPopupBody();
+      const tableResult = ensureProfileTableResult();
+      if (!body || !tableResult) return tableResult || null;
+
+      // VWorld profileTerrain API는 결과 컨테이너의 id와 내부 canvas를 직접 참조한다.
+      // 따라서 새 div를 넘기지 않고, 원래 API가 기대하는 #tableResult 자체를 팝업 안으로 이동한다.
+      tableResult.innerHTML = "";
+      body.innerHTML = `
+        <div id="profilePopupResult">
+          <div class="analysis-popup-empty">분석 실행 후 지형단면 결과가 표시됩니다.</div>
+        </div>
+
+        <div class="report-apply-actions">
+          <button type="button" onclick="applyProfileResultToReport()">지형단면 결과 리포트 반영</button>
+        </div>
+
+        <div id="profileReportAppliedBadge" class="report-applied-badge" style="display:none;">
+          리포트에 반영됨
+        </div>
+      `;
+
+      const popupResult = document.getElementById("profilePopupResult");
+      if (popupResult && !popupResult.contains(tableResult)) {
+        popupResult.innerHTML = "";
+        popupResult.appendChild(tableResult);
+      }
+
+      openAnalysisPopup("지형단면 분석 결과");
+      return tableResult;
+    }
+
+
+    /* =========================
+      지형단면 첫 번째 결과만 표시 - v7 안전 방식
+      - Chart.js는 절대 가로채지 않는다.
+      - VWorld/profileTerrain이 원래 방식대로 첫 번째 차트를 만들도록 둔다.
+      - 차트가 실제로 생긴 뒤에만 #tableResult 높이를 첫 번째 차트 하단으로 잘라
+        null(1), null(2) 등 후속 결과를 화면에서만 숨긴다.
+      - MutationObserver를 사용하지 않아 지도 렌더링 루프와 충돌하지 않는다.
+    ========================= */
+    let profileClipTimerIds = [];
+
+    function resetProfileResultClip() {
+      profileClipTimerIds.forEach(function (timerId) {
+        clearTimeout(timerId);
+      });
+      profileClipTimerIds = [];
+
+      const tableResult = ensureProfileTableResult();
+      if (tableResult) {
+        tableResult.classList.remove("profile-first-result-only");
+        tableResult.style.maxHeight = "";
+        tableResult.style.overflow = "";
+      }
+    }
+
+    function clipProfileResultToFirstChart() {
+      const tableResult = ensureProfileTableResult();
+      if (!tableResult) return false;
+
+      const firstCanvas = tableResult.querySelector("canvas");
+
+      // 첫 번째 차트가 아직 만들어지기 전에는 절대 높이를 자르지 않는다.
+      // 이게 v6에서 차트가 안 보일 수 있었던 핵심 원인이다.
+      if (!firstCanvas || firstCanvas.offsetHeight <= 0) {
+        return false;
+      }
+
+      tableResult.classList.add("profile-first-result-only");
+      tableResult.style.overflow = "hidden";
+
+      const tableRect = tableResult.getBoundingClientRect();
+      const canvasRect = firstCanvas.getBoundingClientRect();
+      const bottom = Math.ceil(canvasRect.bottom - tableRect.top + 12);
+
+      if (bottom > 120) {
+        tableResult.style.maxHeight = bottom + "px";
+        return true;
+      }
+
+      return false;
+    }
+
+    function scheduleProfileResultClip() {
+      resetProfileResultClip();
+
+      // profileTerrain/Chart.js 렌더링이 비동기라서 여러 번 시도하되,
+      // canvas가 실제로 보일 때까진 아무 것도 자르지 않는다.
+      [800, 1500, 2500, 4000, 6500, 9000].forEach(function (delay) {
+        const timerId = setTimeout(clipProfileResultToFirstChart, delay);
+        profileClipTimerIds.push(timerId);
+      });
+    }
+
+    function startProfileSingleResultMode() {
+      scheduleProfileResultClip();
+    }
+
+    function stopProfileSingleResultMode() {
+      resetProfileResultClip();
+    }
+
+
+    /* =========================
+      입지 적합성 종합분석
+      - 좌측은 실행/입력, 지도 팝업은 종합 요약, 우측 패널은 상세 리포트 역할로 분리한다.
+    ========================= */
+    let latestSuitabilityResult = null;
+    let appliedSlopeReportData = null;
+    let appliedProfileReportData = null;
+
+    function toDisplayValue(value, fallback) {
+      const text = value === undefined || value === null ? "" : String(value).trim();
+      return text || fallback || "-";
+    }
+
+    function parseNumericValue(value) {
+      const numeric = Number(String(value || "").replace(/[^0-9.\-]/g, ""));
+      return Number.isFinite(numeric) ? numeric : null;
+    }
+
+    function getCurrentLandCharSelected() {
+      return landCharData?.selected || {};
+    }
+
+    function getCurrentLandUseSummary() {
+      const luList = findObjectsByKeys(landUseData, [
+        "cnflcAtNm",
+        "prposAreaDstrcCodeNm",
+        "regstrSeCodeNm",
+        "lastUpdtDt"
+      ]);
+      const selected = getLatestByLastUpdate(luList);
+      return {
+        selected: selected || {},
+        cnflcAtNm: joinValuesFromResponse(landUseData, "cnflcAtNm"),
+        prposAreaDstrcCodeNm: joinValuesFromResponse(landUseData, "prposAreaDstrcCodeNm")
+      };
+    }
+
+    function getCurrentBuildingUseSelected() {
+      const raw = buildingData?.buildingUses?.field;
+      return Array.isArray(raw) ? raw[0] || {} : raw || {};
+    }
+
+    function applySlopeResultToReport() {
+      const table = document.getElementById("slopeResultTable");
+      const popup = document.getElementById("slopePopupResult");
+
+      const sourceText = [
+        table ? table.innerText : "",
+        popup ? popup.innerText : ""
+      ].join(" ").replace(/\s+/g, " ").trim();
+
+      const isOnlyPlaceholder = !table && /지도에서 분석 지점을 선택하면 결과가 표시됩니다/.test(sourceText);
+      if (!sourceText || isOnlyPlaceholder) {
+        alert("반영할 경사도 분석 결과가 없습니다. 먼저 경사도 분석을 실행하세요.");
+        return;
+      }
+
+      const angleText =
+        document.getElementById("selectAngle")?.innerText ||
+        sourceText.match(/각도[^0-9\-]*([0-9.\-]+)/)?.[1] ||
+        "";
+
+      const gradientText =
+        document.getElementById("selectGradient")?.innerText ||
+        sourceText.match(/경사[^0-9\-]*([0-9.\-]+)/)?.[1] ||
+        "";
+
+      const angle = parseNumericValue(angleText);
+      const gradient = parseNumericValue(gradientText);
+
+      appliedSlopeReportData = {
+        isAnalyzed: true,
+        isApplied: true,
+        appliedAt: new Date().toLocaleString(),
+        angle: angle,
+        gradient: gradient,
+        text: sourceText || "경사도 분석 결과가 리포트에 반영되었습니다."
+      };
+
+      latestSuitabilityResult = null;
+
+      const badge = document.getElementById("slopeReportAppliedBadge");
+      if (badge) {
+        badge.style.display = "inline-flex";
+        badge.innerText = "경사도 결과 리포트 반영 완료";
+      }
+
+      alert("경사도 분석 결과를 상세 리포트에 반영했습니다.");
+    }
+
+    function applyProfileResultToReport() {
+      const tableResult = document.getElementById("tableResult");
+
+      const hasCanvas = !!tableResult?.querySelector?.("canvas");
+      const text = tableResult ? tableResult.innerText.replace(/\s+/g, " ").trim() : "";
+
+      if (!hasCanvas && !text) {
+        alert("반영할 지형단면 분석 결과가 없습니다. 먼저 지형단면 분석을 실행하세요.");
+        return;
+      }
+
+      appliedProfileReportData = {
+        isAnalyzed: true,
+        isApplied: true,
+        appliedAt: new Date().toLocaleString(),
+        hasChart: hasCanvas,
+        text: text || "지형단면 차트 결과가 리포트에 반영되었습니다."
+      };
+
+      latestSuitabilityResult = null;
+
+      const badge = document.getElementById("profileReportAppliedBadge");
+      if (badge) {
+        badge.style.display = "inline-flex";
+        badge.innerText = "지형단면 결과 리포트 반영 완료";
+      }
+
+      alert("지형단면 분석 결과를 상세 리포트에 반영했습니다.");
+    }
+
+    function getSlopeAnalysisSummary() {
+      if (appliedSlopeReportData) {
+        return appliedSlopeReportData;
+      }
+
+      return {
+        isAnalyzed: false,
+        isApplied: false,
+        appliedAt: "-",
+        angle: null,
+        gradient: null,
+        text: "경사도 분석 결과가 아직 리포트에 반영되지 않았습니다."
+      };
+    }
+
+    function getProfileAnalysisSummary() {
+      if (appliedProfileReportData) {
+        return appliedProfileReportData;
+      }
+
+      return {
+        isAnalyzed: false,
+        isApplied: false,
+        appliedAt: "-",
+        hasChart: false,
+        text: "지형단면 분석 결과가 아직 리포트에 반영되지 않았습니다."
+      };
+    }
+
+    function classifySuitability(score) {
+      if (score >= 85) return { grade: "매우 적합", tone: "우수", headline: "건축부지로서 전반적인 입지 조건이 우수합니다." };
+      if (score >= 70) return { grade: "적합", tone: "양호", headline: "대부분의 입지 조건이 양호하며 기본 건축 검토가 가능합니다." };
+      if (score >= 55) return { grade: "조건부 적합", tone: "주의", headline: "건축 검토는 가능하지만 일부 조건에 대한 추가 확인이 필요합니다." };
+      if (score >= 40) return { grade: "검토 필요", tone: "주의", headline: "입지 리스크가 있어 토목·인허가 검토를 선행하는 것이 좋습니다." };
+      return { grade: "부적합 가능성 높음", tone: "위험", headline: "현재 수집된 조건만으로는 건축 적합성이 낮게 판단됩니다." };
+    }
+
+    function buildSuitabilityResult() {
+      const lc = getCurrentLandCharSelected();
+      const lu = getCurrentLandUseSummary();
+      const bu = getCurrentBuildingUseSelected();
+      const slope = getSlopeAnalysisSummary();
+      const profile = getProfileAnalysisSummary();
+
+      const area = parseNumericValue(lc.lndpclAr);
+      const roadText = toDisplayValue(lc.roadSideCodeNm, "");
+      const landUseText = toDisplayValue(lu.prposAreaDstrcCodeNm, "");
+      const conflictText = toDisplayValue(lu.cnflcAtNm, "");
+      const terrainText = toDisplayValue(lc.tpgrphFrmCodeNm, "");
+      const far = parseNumericValue(bu.measrmtRt);
+      const bcr = parseNumericValue(bu.btlRt);
+
+      let basicScore = 0;
+      if (toDisplayValue(lc.lndcgrCodeNm, "") !== "-") basicScore += 4;
+      if (area !== null) basicScore += area >= 150 ? 6 : 3;
+      if (toDisplayValue(lc.prposArea1Nm, "") !== "-") basicScore += 4;
+      if (terrainText && terrainText !== "-") basicScore += 3;
+      if (parseNumericValue(lc.pblntfPclnd) !== null) basicScore += 3;
+      basicScore = Math.min(20, basicScore);
+
+      let landUseScore = 8;
+      if (landUseText && landUseText !== "-") landUseScore += 8;
+      if (conflictText && conflictText !== "-") landUseScore += conflictText.includes("저촉") ? 3 : 6;
+      if (/주거|상업|공업|계획관리|생산관리|자연녹지/.test(landUseText)) landUseScore += 4;
+      if (/개발제한|보전|문화재|상수원|공원|하천|농림|자연환경/.test(landUseText)) landUseScore -= 6;
+      landUseScore = Math.max(0, Math.min(25, landUseScore));
+
+      let accessScore = 4;
+      if (/광대|중로|대로|소로|세로/.test(roadText)) accessScore += 8;
+      if (/광대|중로|대로/.test(roadText)) accessScore += 3;
+      if (/맹지|접면없음|없음/.test(roadText)) accessScore = 2;
+      accessScore = Math.max(0, Math.min(15, accessScore));
+
+      let terrainScore = 8;
+      if (slope.isAnalyzed) terrainScore += 8;
+      if (profile.isAnalyzed) terrainScore += 6;
+      if (slope.gradient !== null) {
+        if (slope.gradient <= 10) terrainScore += 3;
+        else if (slope.gradient <= 20) terrainScore += 1;
+        else terrainScore -= 4;
+      }
+      if (/평지|완경사/.test(terrainText)) terrainScore += 2;
+      if (/급경사|고지|부정형/.test(terrainText)) terrainScore -= 3;
+      terrainScore = Math.max(0, Math.min(25, terrainScore));
+
+      let scaleScore = 4;
+      if (bcr !== null) scaleScore += 4;
+      if (far !== null) scaleScore += 4;
+      if (parseNumericValue(bu.buldPlotAr) !== null || parseNumericValue(bu.buldBildngAr) !== null) scaleScore += 2;
+      if (toDisplayValue(bu.mainPrposCodeNm, "") !== "-") scaleScore += 1;
+      scaleScore = Math.max(0, Math.min(15, scaleScore));
+
+      const categories = [
+        { name: "토지 기본 조건", score: basicScore, max: 20 },
+        { name: "용도지역/규제", score: landUseScore, max: 25 },
+        { name: "접근성/도로접면", score: accessScore, max: 15 },
+        { name: "지형 안정성", score: terrainScore, max: 25 },
+        { name: "건축 규모 검토", score: scaleScore, max: 15 }
+      ];
+
+      const totalScore = Math.round(categories.reduce(function (sum, item) {
+        return sum + item.score;
+      }, 0));
+      const classification = classifySuitability(totalScore);
+      const risks = [];
+      const recommendations = [];
+
+      if (!slope.isApplied) risks.push("경사도 분석 결과가 아직 리포트에 반영되지 않았습니다. 경사도 분석 후 '경사도 결과 리포트 반영' 버튼을 눌러주세요.");
+      if (!profile.isApplied) risks.push("지형단면 분석 결과가 아직 리포트에 반영되지 않았습니다. 지형단면 분석 후 '지형단면 결과 리포트 반영' 버튼을 눌러주세요.");
+      if (/개발제한|보전|문화재|상수원|공원|하천|농림|자연환경/.test(landUseText)) risks.push("용도지역/지구에 인허가 제약 가능성이 있는 키워드가 포함되어 있습니다.");
+      if (/맹지|접면없음|없음/.test(roadText) || roadText === "-") risks.push("도로접면 정보가 부족하거나 불리할 수 있어 진입도로 검토가 필요합니다.");
+      if (slope.gradient !== null && slope.gradient > 20) risks.push("경사도가 높아 절성토, 옹벽, 배수계획 등 토목 검토가 필요합니다.");
+      if (risks.length === 0) risks.push("현재 수집된 데이터 기준으로 즉시 확인되는 중대 리스크는 크지 않습니다.");
+
+      recommendations.push("상세 설계 전 토목 측량, 지반조사, 관할 인허가 조건을 추가 확인하세요.");
+      if (!slope.isApplied || !profile.isApplied) recommendations.push("경사도와 지형단면 분석 결과를 각각 리포트에 반영한 뒤 종합분석을 다시 실행하면 결과 신뢰도가 높아집니다.");
+      if (bcr === null || far === null) recommendations.push("건폐율/용적률 제한은 토지이용계획 및 조례 기준으로 별도 검증이 필요합니다.");
+
+      return {
+        totalScore: totalScore,
+        classification: classification,
+        categories: categories,
+        risks: risks,
+        recommendations: recommendations,
+        source: { lc: lc, lu: lu, bu: bu, slope: slope, profile: profile }
+      };
+    }
+
+    function renderSuitabilityMetrics(categories) {
+      return categories.map(function (item) {
+        const percent = Math.round((item.score / item.max) * 100);
+        return `
+          <div class="suitability-metric">
+            <div class="suitability-metric-name">${item.name}</div>
+            <div class="suitability-meter"><div class="suitability-meter-fill" style="width:${percent}%"></div></div>
+            <div class="suitability-metric-score">${Math.round(item.score)}/${item.max}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function runSiteSuitabilityAnalysis() {
+      latestSuitabilityResult = buildSuitabilityResult();
+      renderSiteSuitabilityPopup(latestSuitabilityResult);
+      renderSiteSuitabilityReport(latestSuitabilityResult);
+    }
+
+    function renderSiteSuitabilityPopup(result) {
+      const body = getAnalysisPopupBody();
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="suitability-summary">
+          <div class="suitability-score-card">
+            <div class="suitability-score-ring">${result.totalScore}</div>
+            <div>
+              <div class="suitability-grade">${result.classification.grade}</div>
+              <div class="suitability-headline">${result.classification.headline}</div>
+            </div>
+          </div>
+
+          <div class="suitability-metrics">
+            ${renderSuitabilityMetrics(result.categories)}
+          </div>
+
+          <ul class="suitability-risk-list">
+            ${result.risks.slice(0, 3).map(function (risk) { return `<li>${risk}</li>`; }).join("")}
+          </ul>
+
+          <div class="suitability-actions">
+            <button type="button" onclick="openSiteSuitabilityPanel()">상세 리포트 보기</button>
+          </div>
+        </div>
+      `;
+
+      closeSiteSuitabilityPanel();
+      openAnalysisPopup("입지 적합성 종합 결과");
+    }
+
+    function renderSiteSuitabilityReport(result) {
+      const target = document.getElementById("siteSuitabilityReportBody");
+      if (!target) return;
+
+      const lc = result.source.lc;
+      const lu = result.source.lu;
+      const bu = result.source.bu;
+      const slope = result.source.slope;
+      const profile = result.source.profile;
+
+      target.innerHTML = `
+        <div class="site-report-section">
+          <h4>1. 종합 평가</h4>
+          <dl class="site-report-grid">
+            <dt>종합 점수</dt><dd>${result.totalScore} / 100</dd>
+            <dt>적합도</dt><dd>${result.classification.grade}</dd>
+            <dt>판단 요약</dt><dd>${result.classification.headline}</dd>
+          </dl>
+        </div>
+
+        <div class="site-report-section">
+          <h4>2. 항목별 점수</h4>
+          <div class="suitability-metrics">${renderSuitabilityMetrics(result.categories)}</div>
+        </div>
+
+        <div class="site-report-section">
+          <h4>3. 토지 기본 정보</h4>
+          <dl class="site-report-grid">
+            <dt>지목</dt><dd>${toDisplayValue(lc.lndcgrCodeNm)}</dd>
+            <dt>면적</dt><dd>${toDisplayValue(lc.lndpclAr)}㎡</dd>
+            <dt>용도지역</dt><dd>${toDisplayValue(lc.prposArea1Nm)}</dd>
+            <dt>도로접면</dt><dd>${toDisplayValue(lc.roadSideCodeNm)}</dd>
+            <dt>지형형상</dt><dd>${toDisplayValue(lc.tpgrphFrmCodeNm)}</dd>
+            <dt>공시지가</dt><dd>${toDisplayValue(lc.pblntfPclnd)}원/㎡</dd>
+          </dl>
+        </div>
+
+        <div class="site-report-section">
+          <h4>4. 토지이용계획/규제 검토</h4>
+          <dl class="site-report-grid">
+            <dt>저촉여부</dt><dd>${toDisplayValue(lu.cnflcAtNm)}</dd>
+            <dt>용도지역지구</dt><dd>${toDisplayValue(lu.prposAreaDstrcCodeNm)}</dd>
+            <dt>대장구분</dt><dd>${toDisplayValue(lu.selected.regstrSeCodeNm)}</dd>
+          </dl>
+        </div>
+
+        <div class="site-report-section">
+          <h4>5. 지형 조건</h4>
+          <dl class="site-report-grid">
+            <dt>경사도 반영 여부</dt><dd>${slope.isApplied ? "리포트 반영 완료" : "미반영"}</dd>
+            <dt>경사도 반영 시각</dt><dd>${toDisplayValue(slope.appliedAt)}</dd>
+            <dt>경사도 값</dt><dd>${slope.gradient !== null ? slope.gradient + "%" : "결과값 없음"}</dd>
+            <dt>경사각</dt><dd>${slope.angle !== null ? slope.angle + "°" : "결과값 없음"}</dd>
+            <dt>지형단면 반영 여부</dt><dd>${profile.isApplied ? "리포트 반영 완료" : "미반영"}</dd>
+            <dt>지형단면 반영 시각</dt><dd>${toDisplayValue(profile.appliedAt)}</dd>
+            <dt>차트 생성</dt><dd>${profile.hasChart ? "생성됨" : "없음"}</dd>
+          </dl>
+        </div>
+
+        <div class="site-report-section">
+          <h4>6. 건축 규모 검토</h4>
+          <dl class="site-report-grid">
+            <dt>건폐율</dt><dd>${toDisplayValue(bu.btlRt)}%</dd>
+            <dt>용적률</dt><dd>${toDisplayValue(bu.measrmtRt)}%</dd>
+            <dt>건축면적</dt><dd>${toDisplayValue(bu.buldBildngAr)}㎡</dd>
+            <dt>연면적</dt><dd>${toDisplayValue(bu.buldTotar)}㎡</dd>
+            <dt>주요용도</dt><dd>${toDisplayValue(bu.mainPrposCodeNm)}</dd>
+          </dl>
+        </div>
+
+        <div class="site-report-section">
+          <h4>7. 리스크 및 권고사항</h4>
+          <ul>
+            ${result.risks.map(function (risk) { return `<li>${risk}</li>`; }).join("")}
+            ${result.recommendations.map(function (rec) { return `<li>${rec}</li>`; }).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
+    function openSiteSuitabilityPanel() {
+      if (!latestSuitabilityResult) {
+        latestSuitabilityResult = buildSuitabilityResult();
+        renderSiteSuitabilityReport(latestSuitabilityResult);
+      }
+      const panel = document.getElementById("siteSuitabilityPanel");
+      if (panel) panel.classList.add("is-open");
+    }
+
+    function closeSiteSuitabilityPanel() {
+      const panel = document.getElementById("siteSuitabilityPanel");
+      if (panel) panel.classList.remove("is-open");
+    }
+
+    /* =========================================================
+      [추가] 3D 분석 통합 (기존 코드 수정 없음)
+    ========================================================= */
+
+    let slopeAnalysis;
+    let profileTerrain;
+    let selectMode;
+
+    let slopeSceneSnapshot = null;
+
+    function removeSceneObjectsCreatedAfter(snapshot) {
+      if (!snapshot) return;
+
+      const primitives = getScenePrimitiveCollection();
+      const groundPrimitives = getSceneGroundPrimitiveCollection();
+      const entities = getViewerEntities();
+      const dataSources = ws3d?.viewer?.dataSources;
+      const glbTargetSet = new Set(placedGlbTargets);
+
+      try {
+        if (primitives?._primitives) {
+          primitives._primitives.slice().forEach(function (primitive) {
+            if (!snapshot.primitives.has(primitive) && !glbTargetSet.has(primitive)) {
+              try {
+                primitives.remove(primitive);
+              } catch (e) {
+                try {
+                  if (primitive?.destroy && !primitive.isDestroyed?.()) primitive.destroy();
+                } catch (destroyError) {}
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.log("경사도 primitive 제거 실패", e);
+      }
+
+      try {
+        if (groundPrimitives?._primitives) {
+          groundPrimitives._primitives.slice().forEach(function (primitive) {
+            if (!snapshot.groundPrimitives?.has(primitive) && !glbTargetSet.has(primitive)) {
+              try {
+                groundPrimitives.remove(primitive);
+              } catch (e) {
+                try {
+                  if (primitive?.destroy && !primitive.isDestroyed?.()) primitive.destroy();
+                } catch (destroyError) {}
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.log("경사도 groundPrimitive 제거 실패", e);
+      }
+
+      try {
+        if (dataSources?._dataSources) {
+          dataSources._dataSources.slice().forEach(function (dataSource) {
+            if (!snapshot.dataSources?.has(dataSource) && !glbTargetSet.has(dataSource)) {
+              try {
+                dataSources.remove(dataSource, true);
+              } catch (e) {}
+            }
+          });
+        }
+      } catch (e) {
+        console.log("경사도 dataSource 제거 실패", e);
+      }
+
+      try {
+        if (entities?.values) {
+          entities.values.slice().forEach(function (entity) {
+            if (!snapshot.entities.has(entity) && !glbTargetSet.has(entity)) {
+              try {
+                entities.remove(entity);
+              } catch (e) {}
+            }
+          });
+        }
+      } catch (e) {
+        console.log("경사도 entity 제거 실패", e);
+      }
+    }
+
+    function callSlopeResetMethodsSafely() {
+      const target = slopeAnalysis || window.slopeAnalysis;
+      if (!target) return;
+
+      // 일부 VWorld 버전은 init/clear/remove 중 하나만으로는 바닥면 화살표 primitive가 남는다.
+      // 성공 여부와 관계없이 존재하는 정리 메서드를 모두 호출한다.
+      [
+        "analysisSlopeByPointEnd",
+        "clearSlopeAnalysis",
+        "removeSlopeAnalysis",
+        "initSlopeAnalysis",
+        "clear",
+        "removeAll",
+        "remove",
+        "reset",
+        "init"
+      ].forEach(function (methodName) {
+        try {
+          if (typeof target[methodName] === "function") {
+            target[methodName]();
+          }
+        } catch (e) {
+          console.log("slopeAnalysis 초기화 함수 실행 실패", methodName, e);
+        }
+      });
+    }
+
+    function resetSlopeAnalysisObjects() {
+      // VWorld 경사도 분석은 마커 외에 3D 화살표/분석 primitive를 별도로 남기는 경우가 있어
+      // 분석 시작 직전 스냅샷 이후 생성된 Cesium 객체까지 같이 정리한다.
+      callSlopeResetMethodsSafely();
+
+      try {
+        if (map) map.clear();
+      } catch (e) {
+        console.log("map clear 실패", e);
+      }
+
+      removeSceneObjectsCreatedAfter(slopeSceneSnapshot);
+      slopeSceneSnapshot = null;
+
+      try {
+        slopeAnalysis = window.slopeAnalysis;
+      } catch (e) {}
+
+      try {
+        ws3d?.viewer?.scene?.requestRender?.();
+        ws3d?.viewer?.render?.();
+      } catch (e) {}
+    }
+
+    // 필지선택(CrossSection) 기능은 제거했지만,
+    // 브라우저 캐시/외부 API 콜백에서 crossSection 참조가 남아도 ReferenceError가 나지 않도록 명시적으로 비활성 상태를 선언한다.
+    var crossSection = null;
+
+    /* =========================
+      ws3d 초기화 이후 분석 객체 생성
+    ========================= */
+    const _oldInit = vw.ws3dInitCallBack;
+
+    vw.ws3dInitCallBack = function () {
+
+      if (_oldInit) _oldInit(); // 기존 코드 유지
+
+      const viewer = ws3d.viewer;
+
+      slopeAnalysis = window.slopeAnalysis;
+      profileTerrain = window.profileTerrain;
+
+      ws3de.modeler.init();
+      installBuildingHideClickHandler();
+
+    };
+
+
+    /* =========================
+      경사도 - 포인트 분석
+    ========================= */
+    document.getElementById('btnSlopByPoint').addEventListener("click", function () {
+
+      if (!slopeAnalysis) return alert("분석 초기화 안됨");
+
+      prepareSlopePopup();
+      slopeSceneSnapshot = snapshotGlbSceneObjects();
+
+      slopeAnalysis.spotmarkerS =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/slope/spotmarkerS.png";
+
+      slopeAnalysis.getPoint(function () {
+
+        let area = document.getElementById('area').value;
+
+        slopeAnalysis.analysisSlopeByPointStart(
+          area,
+          function (clickeddata) {
+
+            openAnalysisPopup("경사도 분석 결과");
+
+          },
+          function (result) {
+            console.log("경사도 전체 결과", result);
+          }
+        );
+
+      });
+
+    });
+
+    /* =========================
+      경사도 초기화
+    ========================= */
+    document.getElementById("btnSlopeInit").addEventListener("click", function () {
+
+      // 1. 경사도 분석 객체 제거
+      resetSlopeAnalysisObjects();
+
+      // 2. 결과 UI 초기화
+      clearAnalysisPopup();
+      closeAnalysisPopup();
+
+      const slopeResult = document.getElementById("slopeResult");
+      if (slopeResult) {
+        slopeResult.style.display = "none";
+      }
+
+      // VWorld 경사도 API가 결과 DOM을 동적으로 생성하는 경우가 있어,
+      // 존재하는 요소만 안전하게 초기화한다.
+      ["selected", "selectAngle", "selectGradient"].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = "N/A";
+      });
+
+      // 3. 결과 테이블 제거
+      const table = document.getElementById("slopeResultTable");
+      if (table) table.remove();
+
+      appliedSlopeReportData = null;
+      latestSuitabilityResult = null;
+
+      const badge = document.getElementById("slopeReportAppliedBadge");
+      if (badge) badge.style.display = "none";
+
+    });
+
+    /* =========================
+      slopeResultTable 위치 강제 이동
+    ========================= */
+    const observer = new MutationObserver(() => {
+
+      const table = document.getElementById("slopeResultTable");
+      const container = document.getElementById("slopePopupResult") || document.getElementById("analysisPopupBody");
+
+      if (table && container && !container.contains(table)) {
+        const empty = container.querySelector?.(".analysis-popup-empty");
+        if (empty) empty.remove();
+        container.appendChild(table);
+        openAnalysisPopup("경사도 분석 결과");
+      }
+
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+
+    /* =========================
+      지형단면 - 종단 시작
+    ========================= */
+    document.getElementById('btnSampleTerrainByLine').addEventListener("click", function () {
+
+      if (!profileTerrain) return alert("지형단면 분석 초기화 안됨");
+      if (selectMode !== 'freeSelectMode') return alert("자유선택을 먼저 선택하세요");
+
+      try {
+        if (typeof profileTerrain.initProfileAnalysis === "function") {
+          profileTerrain.initProfileAnalysis();
+        }
+      } catch (e) {
+        console.log("지형단면 초기화 중 오류", e);
+      }
+
+      profileTerrain.startMarker =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/ico_location_red.svg";
+      profileTerrain.endMarker =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/ico_location_blue.svg";
+
+      profileTerrain.startDrawingPolyline();
+
+      // 종단면 그리기 후에도 보조 옵션 버튼은 숨김 유지
+      hideProfileUnusedOptionButtons();
+
+    });
+
+
+    /* =========================
+      횡단 지점 선택
+    ========================= */
+    document.getElementById("btnSampleTerrainByCrossLine").addEventListener("click", function () {
+
+      if (!profileTerrain) return alert("지형단면 분석 초기화 안됨");
+
+      let crossDistance =
+        Number(document.getElementById('crossDistance').value);
+
+      profileTerrain.spotMarker =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/profileTerrain/spotmarker.png";
+
+      profileTerrain.startDrawingCrossPoint(crossDistance);
+
+    });
+
+
+    /* =========================
+      분석 실행
+    ========================= */
+    document.getElementById("btnAnalysis").addEventListener("click", function () {
+
+      if (!profileTerrain) return alert("지형단면 분석 초기화 안됨");
+      if (selectMode !== 'freeSelectMode') return alert("자유선택을 먼저 선택하세요");
+
+      let crossDistanceValue =
+        Number(document.getElementById('crossDistance').value);
+
+      const tableResult = prepareProfilePopup();
+      if (!tableResult) return alert("지형단면 결과 영역을 찾을 수 없습니다.");
+
+      profileTerrain.table = tableResult;
+      startProfileSingleResultMode();
+
+      // 일부 VWorld/Chart.js 버전은 팝업 DOM이 화면에 붙은 다음 canvas context를 잡아야 안정적이다.
+      requestAnimationFrame(function () {
+        profileTerrain.analysisStart(crossDistanceValue);
+        // analysisStart 이후 비동기 DOM 렌더링이 끝나는 시점에 높이만 한 번 더 보정한다.
+        setTimeout(clipProfileResultToFirstChart, 5200);
+      });
+
+    });
+
+
+    /* =========================
+      지형단면 분석 초기화
+    ========================= */
+    document.getElementById("btnInit").addEventListener("click", function () {
+
+      if (profileTerrain) {
+        profileTerrain.initProfileAnalysis();
+      }
+
+      stopProfileSingleResultMode();
+
+      const tableResult = ensureProfileTableResult();
+      if (tableResult) tableResult.innerHTML = "";
+      clearAnalysisPopup();
+      ensureProfileTableResult();
+      closeAnalysisPopup();
+      resetProfileModeUI();
+      selectMode = undefined;
+
+      appliedProfileReportData = null;
+      latestSuitabilityResult = null;
+
+      const badge = document.getElementById("profileReportAppliedBadge");
+      if (badge) badge.style.display = "none";
+
+    });
+
+
+    function setProfileElementVisible(id, visible) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle("hide", !visible);
+    }
+
+    function hideProfileUnusedOptionButtons() {
+      // 자유선택 단일 플로우에서는 VWorld API가 내부적으로 표시할 수 있는
+      // 지점선택/등간격설정 버튼을 사용자에게 노출하지 않는다.
+      ["actIntervalSet1", "actIntervalSet2"].forEach(function (id) {
+        setProfileElementVisible(id, false);
+      });
+    }
+
+    function setProfileButtonEnabled(id, enabled) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.disabled = !enabled;
+    }
+
+    function resetProfileModeUI() {
+      [
+        "crossDistanceNm",
+        "crossDistance",
+        "crossIntervalNm",
+        "crossInterval",
+        "btnSampleTerrainByCrossLine"
+      ].forEach(function (id) {
+        setProfileElementVisible(id, false);
+      });
+
+      setProfileButtonEnabled("btnSampleTerrainByLine", false);
+
+      const freeBtn = document.getElementById("btn_freeSection");
+      if (freeBtn) {
+        freeBtn.dataset.active = "false";
+        freeBtn.innerText = "자유선택";
+        freeBtn.classList.remove("hide");
+      }
+
+      hideProfileUnusedOptionButtons();
+    }
+
+    function clearProfileResult() {
+      stopProfileSingleResultMode();
+
+      const tableResult = ensureProfileTableResult();
+      if (tableResult) tableResult.innerHTML = "";
+
+      const profilePopupResult = document.getElementById("profilePopupResult");
+      if (profilePopupResult) profilePopupResult.innerHTML = "";
+    }
+
+    function initProfileTerrainSafely() {
+      if (profileTerrain && typeof profileTerrain.initProfileAnalysis === "function") {
+        profileTerrain.initProfileAnalysis();
+      }
+    }
+
+    function activateFreeSectionMode() {
+      selectMode = "freeSelectMode";
+
+      resetProfileModeUI();
+      clearProfileResult();
+
+      // 자유선택 버튼에서는 VWorld profileTerrain 내부 상태를 강제 초기화하지 않는다.
+      // 일부 버전에서 initProfileAnalysis()가 아직 선택 객체가 없는 상태의 null.id를 참조할 수 있다.
+      // 실제 초기화는 "종단면 그리기" 또는 "초기화" 버튼에서만 수행한다.
+
+      // 자유선택은 종단면 선을 먼저 그린 뒤 분석 실행에서 횡단 길이를 사용한다.
+      setProfileButtonEnabled("btnSampleTerrainByLine", true);
+      setProfileElementVisible("crossDistanceNm", true);
+      setProfileElementVisible("crossDistance", true);
+      setProfileElementVisible("btnSampleTerrainByCrossLine", true);
+
+      // 지형단면은 자유선택 단일 모드이므로 활성화 상태 버튼은 화면에서 숨긴다.
+      const freeBtn = document.getElementById("btn_freeSection");
+      if (freeBtn) {
+        freeBtn.dataset.active = "true";
+        freeBtn.innerText = "자유선택 활성화됨";
+        freeBtn.classList.add("hide");
+      }
+
+      hideProfileUnusedOptionButtons();
+    }
+
+    /* =========================
+      모드 선택
+      - btn_freeSection은 HTML onclick에서 activateFreeSectionMode()를 직접 호출한다.
+      - addEventListener를 중복 등록하지 않아 자유선택 클릭 시 초기화 함수가 2번 실행되지 않도록 한다.
+    ========================= */
+    
+   
+    document.getElementById("btnUploadGlb").addEventListener("click", function () {
+
+      const fileInput = document.getElementById("glbUpload");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("GLB 파일 선택 먼저");
+        return;
+      }
+
+      if (!file.name.endsWith(".glb")) {
+        alert("GLB 파일만 가능");
+        return;
+      }
+
+      uploadedGlbUrl = URL.createObjectURL(file);
+
+      alert("업로드 완료! 위치를 지정하세요.");
+    });
+
+    document.getElementById("btnPlaceGlb").addEventListener("click", function () {
+
+      if (!uploadedGlbUrl) {
+        alert("먼저 GLB 업로드");
+        return;
+      }
+
+      // 마커 스타일
+      buildingControl.spotmarkerS =
+        "https://map.vworld.kr/js/dtkmap/tool3d/libapis/buildingcontrol/spotmarkerS.png";
+
+      buildingControl.glbFileUrl = uploadedGlbUrl;
+
+      // 위치 선택
+      buildingControl.modelCreateSpotPoint(function () {
+
+        buildingControl._glbEditable = true;
+
+        const beforeSnapshot = snapshotGlbSceneObjects();
+
+        // 모델 로드
+        buildingControl.modelGlbAdd3DMap(function (createdObject) {
+          rememberNewGlbObjects(beforeSnapshot, createdObject);
+          console.log("GLB 로드 완료 + 편집 가능");
+        });
+
+      });
+
+    });
+
+    document.getElementById("btnRemoveGlb").addEventListener("click", function () {
+
+      try {
+        removePlacedGlbObjects();
+
+        // 메모리 해제
+        if (uploadedGlbUrl) {
+          URL.revokeObjectURL(uploadedGlbUrl);
+          uploadedGlbUrl = null;
+        }
+
+        document.getElementById("glbUpload").value = "";
+
+        alert("모델 제거 완료");
+
+      } catch (e) {
+        console.log("GLB 제거 실패", e);
+        alert("GLB 제거 실패: " + e.message);
+      }
+
+    });
+
+    let hiddenFeatures = new Set();
+    let isBuildingHideMode = false;
+
+    document.getElementById("btnSelectHidden").addEventListener("click", function () {
+
+      isBuildingHideMode = !isBuildingHideMode;
+
+      this.innerText = isBuildingHideMode
+        ? "선택 건물 객체 숨김 중지"
+        : "선택 건물 객체 숨김";
+
+      this.style.background = isBuildingHideMode ? "#d93025" : "#00a86b";
+
+      if (isBuildingHideMode) {
+        alert("숨길 건물을 지도에서 클릭하세요.");
+      }
+
+    });
+
+    function installBuildingHideClickHandler() {
+
+      const viewer = ws3d?.viewer;
+
+      if (!viewer || !viewer.screenSpaceEventHandler || installBuildingHideClickHandler._installed) return;
+
+      installBuildingHideClickHandler._installed = true;
+
+      viewer.screenSpaceEventHandler.setInputAction(function (movement) {
+
+        // 초기 화면에서는 지도 객체 클릭만으로 숨김 처리하지 않음
+        if (!isBuildingHideMode) return;
+
+        const pickedFeature = viewer.scene.pick(movement.position);
+
+        if (!Cesium.defined(pickedFeature)) return;
+
+        hideSelectedBuildingFeature(pickedFeature);
+
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    }
+
+    installBuildingHideClickHandler();
+
+    function hideSelectedBuildingFeature(pickedFeature) {
+
+      if (!(pickedFeature instanceof Cesium.Cesium3DTileFeature)) return;
+
+      const featureId = getFeatureId(pickedFeature);
+
+      pickedFeature.show = false;
+      hiddenFeatures.add({ id: featureId, feature: pickedFeature });
+
+    }
+
+    function getFeatureId(feature) {
+
+      try {
+        if (feature.featureId !== undefined) return feature.featureId;
+
+        if (feature.getProperty) {
+          return feature.getProperty("id") ||
+                feature.getProperty("OBJECTID") ||
+                JSON.stringify(feature.getPropertyNames());
+        }
+
+      } catch (e) {}
+
+      return feature._batchId || Math.random();
+    }
+
+    // 건물 삭제 초기화
+    function initDelete3dTileBuilding() {
+
+      const bildingTileIdList = [
+        "facility_build_lod1",
+        "facility_build_lod2",
+        "facility_build_lod3",
+        "facility_build",
+        "facility_build_all"
+      ];
+
+      let lyCnt = 0;
+
+      for (let i = 0; i < bildingTileIdList.length; i++) {
+
+        const bildingTile = ws3d.viewer.map.getElementById(bildingTileIdList[i]);
+
+        if (bildingTile !== undefined) {
+
+          if (bildingTile.visible === false) {
+
+            lyCnt++;
+
+          } else if (bildingTile.visible) {
+
+            const tileset = bildingTile._tileset;
+
+            if (tileset && tileset.clippingPlanes !== undefined) {
+              tileset.clippingPlanes.enabled = false;
+              tileset.clippingPlanes.removeAll();
+              tileset.clippingPlanes = undefined;
+            }
+
+          }
+
+        }
+
+        if (lyCnt > 2 && typeof checkThemeLayer === "function") {
+          checkThemeLayer("chk_3차원 입체모형(LoD4)", true, "setLayerClick");
+        }
+
+      }
+
+      vw.isRunning = false;
+      ws3d.viewer.render();
+
+    }
+
+    document.getElementById("btnResetHidden").onclick = function () {
+
+      try {
+        initDelete3dTileBuilding();
+      } catch (e) {
+        console.log("건물 삭제 초기화 실패", e);
+      }
+
+      // feature.show 방식으로 숨김 처리된 객체도 함께 복구
+      hiddenFeatures.forEach(item => {
+        try {
+          if (item.feature) item.feature.show = true;
+        } catch (e) {}
+      });
+
+      hiddenFeatures.clear();
+
+      isBuildingHideMode = false;
+      const btnSelectHidden = document.getElementById("btnSelectHidden");
+      btnSelectHidden.innerText = "선택 건물 객체 숨김";
+      btnSelectHidden.style.background = "#00a86b";
+
+    };
+
+
+    // 입지 적합성 버튼 초기 노출 보정: 캐시/중복 배치로 인해 아래쪽에 남는 경우 검색창 아래로 강제 이동한다.
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebar = document.querySelector(".sidebar");
+      const searchBox = document.querySelector(".search-box");
+      const btn = document.getElementById("btnSiteSuitability");
+
+      if (!sidebar || !searchBox || !btn) {
+        console.log("입지 적합성 버튼 초기 노출 보정 실패", {
+          sidebar: !!sidebar,
+          searchBox: !!searchBox,
+          btn: !!btn
+        });
+        return;
+      }
+
+      let wrapper = btn.closest(".site-suitability-top");
+      if (!wrapper) {
+        wrapper = document.createElement("div");
+        wrapper.className = "site-suitability-top";
+        btn.parentNode.insertBefore(wrapper, btn);
+        wrapper.appendChild(btn);
+      }
+
+      const note = wrapper.querySelector(".suitability-trigger-note") || document.querySelector(".suitability-trigger-note");
+      if (note && note.parentElement !== wrapper) {
+        wrapper.appendChild(note);
+      }
+
+      searchBox.insertAdjacentElement("afterend", wrapper);
+
+      btn.style.display = "block";
+      btn.style.visibility = "visible";
+      btn.style.opacity = "1";
+    });
+  </script>
+</body>
+</html>
