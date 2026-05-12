@@ -1133,6 +1133,291 @@
     }
 
 
+    /* 초기 사용 방법 안내 모달 */
+    .guide-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.48);
+      backdrop-filter: blur(4px);
+    }
+
+    .guide-modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .guide-modal {
+      width: min(560px, 100%);
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.32);
+    }
+
+    .guide-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .guide-modal-title {
+      margin: 0;
+      color: #0f172a;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .guide-modal-close {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #334155;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .guide-modal-close:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+
+    .guide-modal-body {
+      padding: 18px 20px;
+      overflow: auto;
+    }
+
+    .guide-step-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .guide-step-list li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-soft);
+    }
+
+    .guide-step-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .guide-step-title {
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .guide-step-desc {
+      margin-top: 3px;
+      color: var(--text-sub);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .guide-warning {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 12px 13px;
+      border: 1px solid #fed7aa;
+      border-radius: var(--radius-md);
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 800;
+      word-break: keep-all;
+    }
+
+    .guide-warning strong {
+      color: #7c2d12;
+      font-weight: 950;
+    }
+
+    .guide-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px 18px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .guide-modal-footer label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .guide-modal-footer input {
+      width: auto;
+    }
+
+    .guide-modal-footer button {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 850;
+    }
+
+    /* 입지분석 점수 산정 도움말 */
+    .suitability-title-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .score-help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .score-help-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 21px;
+      height: 21px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+      cursor: help;
+    }
+
+    /* 도움말 본문은 body 하위 고정 포털로 띄워서 결과 팝업 overflow에 잘리지 않게 한다. */
+    #scoreHelpPortal {
+      position: fixed;
+      top: 72px;
+      left: 16px;
+      z-index: 200000;
+      display: none;
+      width: min(520px, calc(100vw - 32px));
+      max-height: min(560px, calc(100vh - 32px));
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      color: #334155;
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.24);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 600;
+      pointer-events: auto;
+    }
+
+    #scoreHelpPortal.is-pinned {
+      box-shadow: 0 22px 52px rgba(15, 23, 42, 0.32);
+    }
+
+    #scoreHelpPortal.is-open {
+      display: block;
+    }
+
+    #scoreHelpPortal strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    #scoreHelpPortal ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+
+    #scoreHelpPortal li {
+      margin: 3px 0;
+    }
+
+    #scoreHelpPortal .score-help-lead {
+      margin: 0 0 10px;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    #scoreHelpPortal .score-help-section {
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid #eef2f7;
+    }
+
+    #scoreHelpPortal .score-help-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    #scoreHelpPortal .score-help-max {
+      flex: 0 0 auto;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    #scoreHelpPortal .score-help-note {
+      margin-top: 10px;
+      padding: 8px 9px;
+      border-radius: var(--radius-sm);
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+
+
     #slopeResult {
       margin-top: 14px;
       padding: 12px;
@@ -1191,6 +1476,61 @@
   </style>
 </head>
 <body>
+  <div id="guideModal" class="guide-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
+    <div class="guide-modal">
+      <div class="guide-modal-header">
+        <h2 id="guideModalTitle" class="guide-modal-title">건축부지 입지분석 사용 방법</h2>
+        <button type="button" class="guide-modal-close" onclick="closeGuideModal()" aria-label="사용 방법 닫기">×</button>
+      </div>
+
+      <div class="guide-modal-body">
+        <ul class="guide-step-list">
+          <li>
+            <span class="guide-step-no">1</span>
+            <div>
+              <div class="guide-step-title">지번주소 검색</div>
+              <div class="guide-step-desc">좌측 검색창에 지번주소를 입력하면 필지 위치로 이동하고 토지특성, 토지이용계획, 건축물 정보가 표시됩니다.</div>
+            </div>
+          </li>
+          <li>
+            <span class="guide-step-no">2</span>
+            <div>
+              <div class="guide-step-title">입지 적합성 종합분석 실행</div>
+              <div class="guide-step-desc">주소 검색 후 바로 종합 점수를 확인할 수 있습니다. 경사도와 지형단면 분석 결과를 반영하면 지형 점수의 신뢰도가 높아집니다.</div>
+            </div>
+          </li>
+          <li>
+            <span class="guide-step-no">3</span>
+            <div>
+              <div class="guide-step-title">경사도·지형단면 분석</div>
+              <div class="guide-step-desc">지도에서 분석 지점을 선택하거나 단면선을 그린 뒤 결과를 생성하세요. 이후 경사도와 지형단면 결과는 반드시 각각 리포트에 반영한 다음 초기화해야 합니다.</div>
+            </div>
+          </li>
+          <li>
+            <span class="guide-step-no">4</span>
+            <div>
+              <div class="guide-step-title">GLB 건물 모델 배치</div>
+              <div class="guide-step-desc">GLB 파일 선택 → 업로드 → 지도 배치 순서로 진행하면 사용자 건물 모델을 지도 위에 가시화할 수 있습니다.</div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="guide-warning">
+          <span>※</span>
+          <span><strong>중요:</strong> 경사도 분석과 지형단면 분석은 결과를 생성한 뒤 반드시 각각 “리포트 반영” 버튼으로 저장한 다음 초기화하지 않아야 리포트에 반영됩니다. 초기화하면 해당 분석 결과가 입지 적합성 종합점수와 상세 리포트에 반영되지 않습니다.</span>
+        </div>
+      </div>
+
+      <div class="guide-modal-footer">
+        <label>
+          <input type="checkbox" id="guideDontShowToday">
+          오늘 하루 보지 않기
+        </label>
+        <button type="button" onclick="closeGuideModal()">시작하기</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <aside class="sidebar">
       <h1>건축부지 입지분석 프로토타입</h1>
@@ -2454,43 +2794,81 @@
       const bcr = parseNumericValue(bu.btlRt);
 
       let basicScore = 0;
-      if (toDisplayValue(lc.lndcgrCodeNm, "") !== "-") basicScore += 4;
-      if (area !== null) basicScore += area >= 150 ? 6 : 3;
-      if (toDisplayValue(lc.prposArea1Nm, "") !== "-") basicScore += 4;
-      if (terrainText && terrainText !== "-") basicScore += 3;
-      if (parseNumericValue(lc.pblntfPclnd) !== null) basicScore += 3;
-      basicScore = Math.min(20, basicScore);
+      const landCategoryText = toDisplayValue(lc.lndcgrCodeNm, "");
+      const primaryUseText = toDisplayValue(lc.prposArea1Nm, "");
 
-      let landUseScore = 8;
-      if (landUseText && landUseText !== "-") landUseScore += 8;
-      if (conflictText && conflictText !== "-") landUseScore += conflictText.includes("저촉") ? 3 : 6;
+      // 토지 기본 조건은 단순히 값이 있다는 이유로 가점하지 않고, 규모·지목·형상처럼 실제 적합성에 영향을 주는 조건만 반영한다.
+      if (area !== null) {
+        if (area >= 1000) basicScore += 8;
+        else if (area >= 500) basicScore += 7;
+        else if (area >= 150) basicScore += 5;
+        else basicScore += 2;
+      }
+      if (/대|공장용지|창고용지|학교용지|주차장|잡종지/.test(landCategoryText)) basicScore += 5;
+      else if (/전|답|과수원|목장용지|임야/.test(landCategoryText)) basicScore += 2;
+      else if (/도로|하천|구거|제방|묘지|공원|유지/.test(landCategoryText)) basicScore -= 4;
+
+      if (/주거|상업|공업|관리|녹지/.test(primaryUseText)) basicScore += 4;
+      if (/평지/.test(terrainText)) basicScore += 3;
+      else if (/완경사/.test(terrainText)) basicScore += 2;
+      else if (/급경사|고지|부정형/.test(terrainText)) basicScore -= 3;
+      basicScore = Math.max(0, Math.min(20, basicScore));
+
+      let landUseScore = 0;
+      if (/일반주거|준주거|상업|공업|계획관리|생산관리|자연녹지/.test(landUseText)) landUseScore += 12;
+      else if (/보전관리|농림|자연환경|개발제한|문화재|상수원|공원|하천/.test(landUseText)) landUseScore += 3;
+      else if (landUseText && landUseText !== "-") landUseScore += 6;
+
+      if (conflictText && conflictText !== "-") {
+        if (conflictText.includes("저촉")) landUseScore -= 5;
+        else landUseScore += 5;
+      }
+      if (/개발제한/.test(landUseText)) landUseScore -= 8;
+      if (/보전|문화재|상수원|자연환경/.test(landUseText)) landUseScore -= 6;
+      if (/공원|하천|농림/.test(landUseText)) landUseScore -= 4;
       if (/주거|상업|공업|계획관리|생산관리|자연녹지/.test(landUseText)) landUseScore += 4;
-      if (/개발제한|보전|문화재|상수원|공원|하천|농림|자연환경/.test(landUseText)) landUseScore -= 6;
       landUseScore = Math.max(0, Math.min(25, landUseScore));
 
-      let accessScore = 4;
-      if (/광대|중로|대로|소로|세로/.test(roadText)) accessScore += 8;
-      if (/광대|중로|대로/.test(roadText)) accessScore += 3;
-      if (/맹지|접면없음|없음/.test(roadText)) accessScore = 2;
+      let accessScore = 0;
+      if (/광대|대로/.test(roadText)) accessScore = 15;
+      else if (/중로/.test(roadText)) accessScore = 13;
+      else if (/소로/.test(roadText)) accessScore = 10;
+      else if (/세로/.test(roadText)) accessScore = 8;
+      else if (/맹지|접면없음|없음/.test(roadText)) accessScore = 0;
       accessScore = Math.max(0, Math.min(15, accessScore));
 
-      let terrainScore = 8;
-      if (slope.isAnalyzed) terrainScore += 8;
-      if (profile.isAnalyzed) terrainScore += 6;
+      let terrainScore = 0;
       if (slope.gradient !== null) {
-        if (slope.gradient <= 10) terrainScore += 3;
-        else if (slope.gradient <= 20) terrainScore += 1;
-        else terrainScore -= 4;
+        if (slope.gradient <= 10) terrainScore += 12;
+        else if (slope.gradient <= 20) terrainScore += 8;
+        else if (slope.gradient <= 30) terrainScore += 4;
+        else terrainScore += 0;
+      } else if (/평지/.test(terrainText)) {
+        terrainScore += 8;
+      } else if (/완경사/.test(terrainText)) {
+        terrainScore += 6;
+      } else if (/급경사|고지/.test(terrainText)) {
+        terrainScore += 1;
       }
-      if (/평지|완경사/.test(terrainText)) terrainScore += 2;
-      if (/급경사|고지|부정형/.test(terrainText)) terrainScore -= 3;
+
+      if (profile.isApplied) terrainScore += 6;
+      if (/평지/.test(terrainText)) terrainScore += 4;
+      else if (/완경사/.test(terrainText)) terrainScore += 3;
+      if (/급경사|고지|부정형/.test(terrainText)) terrainScore -= 5;
       terrainScore = Math.max(0, Math.min(25, terrainScore));
 
-      let scaleScore = 4;
-      if (bcr !== null) scaleScore += 4;
-      if (far !== null) scaleScore += 4;
-      if (parseNumericValue(bu.buldPlotAr) !== null || parseNumericValue(bu.buldBildngAr) !== null) scaleScore += 2;
-      if (toDisplayValue(bu.mainPrposCodeNm, "") !== "-") scaleScore += 1;
+      let scaleScore = 0;
+      if (bcr !== null) {
+        if (bcr <= 60) scaleScore += 5;
+        else if (bcr <= 80) scaleScore += 3;
+        else scaleScore += 1;
+      }
+      if (far !== null) {
+        if (far >= 100 && far <= 600) scaleScore += 5;
+        else if (far > 0) scaleScore += 3;
+      }
+      if (parseNumericValue(bu.buldPlotAr) !== null || parseNumericValue(bu.buldBildngAr) !== null) scaleScore += 3;
+      if (/주거|근린|업무|상업|공장|창고/.test(toDisplayValue(bu.mainPrposCodeNm, ""))) scaleScore += 2;
       scaleScore = Math.max(0, Math.min(15, scaleScore));
 
       const categories = [
@@ -2578,6 +2956,7 @@
 
       closeSiteSuitabilityPanel();
       openAnalysisPopup("입지 적합성 종합 결과");
+      setSuitabilityPopupTitleWithHelp();
     }
 
     function renderSiteSuitabilityReport(result) {
@@ -3334,30 +3713,316 @@
     };
 
 
+
+    function openGuideModal() {
+      const modal = document.getElementById("guideModal");
+      if (modal) modal.classList.add("is-open");
+    }
+
+    function closeGuideModal() {
+      const modal = document.getElementById("guideModal");
+      const dontShowToday = document.getElementById("guideDontShowToday");
+
+      if (dontShowToday?.checked) {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        localStorage.setItem("siteAnalysisGuideHiddenDate", todayKey);
+      }
+
+      if (modal) modal.classList.remove("is-open");
+    }
+
+    function shouldShowGuideModal() {
+      const todayKey = new Date().toISOString().slice(0, 10);
+      return localStorage.getItem("siteAnalysisGuideHiddenDate") !== todayKey;
+    }
+
+    function getScoreHelpPortal() {
+      let portal = document.getElementById("scoreHelpPortal");
+      if (portal) return portal;
+
+      portal = document.createElement("div");
+      portal.id = "scoreHelpPortal";
+      portal.setAttribute("role", "tooltip");
+      portal.innerHTML = getScoreHelpContentHtml();
+      document.body.appendChild(portal);
+      return portal;
+    }
+
+    function getScoreHelpContentHtml() {
+      return `
+        <strong>입지 적합성 점수 산정 로직</strong>
+        <p class="score-help-lead">
+          종합 점수는 5개 항목의 점수를 합산해 100점 만점으로 계산합니다. 단순히 데이터 값이 있다는 이유로 점수를 주지 않고, 건축 적합성에 유리하거나 불리한 조건만 반영합니다.
+        </p>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">토지 기본 조건 <span class="score-help-max">최대 20점</span></div>
+          <ul>
+            <li>면적 1,000㎡ 이상 +8점, 500㎡ 이상 +7점, 150㎡ 이상 +5점, 150㎡ 미만 +2점</li>
+            <li>지목이 대·공장용지·창고용지·학교용지·주차장·잡종지이면 +5점</li>
+            <li>지목이 전·답·과수원·목장용지·임야이면 +2점</li>
+            <li>지목이 도로·하천·구거·제방·묘지·공원·유지이면 -4점</li>
+            <li>용도지역명에 주거·상업·공업·관리·녹지가 포함되면 +4점</li>
+            <li>지형형상이 평지이면 +3점, 완경사이면 +2점, 급경사·고지·부정형이면 -3점</li>
+          </ul>
+        </div>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">용도지역/규제 <span class="score-help-max">최대 25점</span></div>
+          <ul>
+            <li>용도지역지구명에 일반주거·준주거·상업·공업·계획관리·생산관리·자연녹지가 포함되면 +12점</li>
+            <li>보전관리·농림·자연환경·개발제한·문화재·상수원·공원·하천 계열이면 우선 +3점만 부여</li>
+            <li>그 외 용도지역지구명이 있으면 +6점</li>
+            <li>저촉여부에 “저촉”이 포함되면 -5점, 저촉이 아닌 값이면 +5점</li>
+            <li>개발제한 포함 시 -8점</li>
+            <li>보전·문화재·상수원·자연환경 포함 시 -6점</li>
+            <li>공원·하천·농림 포함 시 -4점</li>
+            <li>주거·상업·공업·계획관리·생산관리·자연녹지 포함 시 추가 +4점</li>
+          </ul>
+        </div>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">접근성/도로접면 <span class="score-help-max">최대 15점</span></div>
+          <ul>
+            <li>광대·대로 접면이면 15점</li>
+            <li>중로 접면이면 13점</li>
+            <li>소로 접면이면 10점</li>
+            <li>세로 접면이면 8점</li>
+            <li>맹지·접면없음·없음이면 0점</li>
+            <li>도로접면 정보가 없으면 점수를 부여하지 않음</li>
+          </ul>
+        </div>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">지형 안정성 <span class="score-help-max">최대 25점</span></div>
+          <ul>
+            <li>경사도 결과가 있으면 경사도 기준으로 10% 이하 +12점, 20% 이하 +8점, 30% 이하 +4점, 30% 초과 0점</li>
+            <li>경사도 결과가 없을 때는 지형형상 보조 기준으로 평지 +8점, 완경사 +6점, 급경사·고지 +1점</li>
+            <li>지형단면 결과를 리포트에 반영하면 +6점</li>
+            <li>지형형상이 평지이면 추가 +4점, 완경사이면 추가 +3점</li>
+            <li>지형형상이 급경사·고지·부정형이면 -5점</li>
+          </ul>
+        </div>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">건축 규모 검토 <span class="score-help-max">최대 15점</span></div>
+          <ul>
+            <li>건폐율 60% 이하 +5점, 80% 이하 +3점, 80% 초과 +1점</li>
+            <li>용적률 100~600% 범위이면 +5점, 그 외 0% 초과 값이면 +3점</li>
+            <li>건물대지면적 또는 건축면적 값이 있으면 +3점</li>
+            <li>주요용도명에 주거·근린·업무·상업·공장·창고가 포함되면 +2점</li>
+            <li>건폐율·용적률 정보가 없으면 해당 항목은 점수를 부여하지 않음</li>
+          </ul>
+        </div>
+
+        <div class="score-help-section">
+          <div class="score-help-section-title">등급 기준</div>
+          <ul>
+            <li>85점 이상: 매우 적합</li>
+            <li>70~84점: 적합</li>
+            <li>55~69점: 조건부 적합</li>
+            <li>40~54점: 검토 필요</li>
+            <li>40점 미만: 부적합 가능성 높음</li>
+          </ul>
+        </div>
+
+        <div class="score-help-note">
+          ※ 각 항목 점수는 최소 0점, 최대 배점으로 보정됩니다. 데이터 부재는 가점하지 않으며, 불리한 조건이 명확할 때만 감점합니다. 도움말 안으로 마우스를 이동하면 스크롤해서 전체 기준을 볼 수 있습니다.
+        </div>
+      `;
+    }
+
+    let scoreHelpHideTimer = null;
+    let scoreHelpPinned = false;
+
+    function positionScoreHelpTooltip(helpEl) {
+      const portal = getScoreHelpPortal();
+      const icon = helpEl?.querySelector?.(".score-help-icon") || helpEl;
+      if (!portal || !icon) return;
+
+      const iconRect = icon.getBoundingClientRect();
+      const tooltipWidth = Math.min(620, window.innerWidth - 32);
+
+      // 실제 콘텐츠 높이를 사용하기 위해 잠시 화면 밖에서 표시한 뒤 측정한다.
+      portal.style.width = tooltipWidth + "px";
+      portal.style.left = "-9999px";
+      portal.style.top = "-9999px";
+      portal.classList.add("is-open");
+
+      const tooltipHeight = Math.min(portal.offsetHeight || 320, window.innerHeight - 32);
+
+      let left = iconRect.right - tooltipWidth;
+      left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16));
+
+      let top = iconRect.bottom + 10;
+      if (top + tooltipHeight > window.innerHeight - 16) {
+        top = Math.max(16, iconRect.top - tooltipHeight - 10);
+      }
+
+      portal.style.left = left + "px";
+      portal.style.top = top + "px";
+    }
+
+    function cancelScoreHelpHide() {
+      if (scoreHelpHideTimer) {
+        clearTimeout(scoreHelpHideTimer);
+        scoreHelpHideTimer = null;
+      }
+    }
+
+    function showScoreHelpTooltip(helpEl) {
+      const portal = getScoreHelpPortal();
+      if (!portal) return;
+      cancelScoreHelpHide();
+      positionScoreHelpTooltip(helpEl);
+      portal.classList.add("is-open");
+    }
+
+    function hideScoreHelpTooltip(force) {
+      const portal = document.getElementById("scoreHelpPortal");
+      if (!portal) return;
+
+      if (!force && scoreHelpPinned) return;
+      scoreHelpPinned = false;
+      portal.classList.remove("is-pinned");
+      portal.classList.remove("is-open");
+    }
+
+    function scheduleScoreHelpHide() {
+      cancelScoreHelpHide();
+      scoreHelpHideTimer = setTimeout(function () {
+        const portal = document.getElementById("scoreHelpPortal");
+        const helpHovered = !!document.querySelector(".score-help:hover, .score-help:focus-within");
+        const portalHovered = !!portal?.matches?.(":hover");
+        const portalFocused = portal && portal.contains(document.activeElement);
+
+        if (!scoreHelpPinned && !helpHovered && !portalHovered && !portalFocused) {
+          hideScoreHelpTooltip(true);
+        }
+      }, 220);
+    }
+
+    function bindScoreHelpPortalEvents() {
+      const portal = getScoreHelpPortal();
+      if (!portal || portal.dataset.portalBound === "true") return;
+      portal.dataset.portalBound = "true";
+      portal.setAttribute("tabindex", "-1");
+
+      portal.addEventListener("mouseenter", cancelScoreHelpHide);
+      portal.addEventListener("mouseleave", scheduleScoreHelpHide);
+      portal.addEventListener("focusin", cancelScoreHelpHide);
+      portal.addEventListener("focusout", scheduleScoreHelpHide);
+      portal.addEventListener("click", function (event) {
+        event.stopPropagation();
+      });
+    }
+
+    function bindScoreHelpPositioning() {
+      bindScoreHelpPortalEvents();
+
+      document.querySelectorAll(".score-help").forEach(function (helpEl) {
+        if (helpEl.dataset.positionBound === "true") return;
+        helpEl.dataset.positionBound = "true";
+
+        helpEl.addEventListener("mouseenter", function () {
+          scoreHelpPinned = false;
+          getScoreHelpPortal().classList.remove("is-pinned");
+          showScoreHelpTooltip(helpEl);
+        });
+
+        helpEl.addEventListener("mouseleave", scheduleScoreHelpHide);
+
+        helpEl.addEventListener("focusin", function () {
+          showScoreHelpTooltip(helpEl);
+        });
+
+        helpEl.addEventListener("focusout", scheduleScoreHelpHide);
+
+        helpEl.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          const portal = getScoreHelpPortal();
+          const willPin = !scoreHelpPinned || !portal.classList.contains("is-open");
+          scoreHelpPinned = willPin;
+          showScoreHelpTooltip(helpEl);
+          portal.classList.toggle("is-pinned", scoreHelpPinned);
+          if (scoreHelpPinned) portal.focus({ preventScroll: true });
+        });
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      const portal = document.getElementById("scoreHelpPortal");
+      if (!portal?.classList.contains("is-open")) return;
+      if (event.target.closest?.(".score-help") || portal.contains(event.target)) return;
+      hideScoreHelpTooltip(true);
+    });
+
+    window.addEventListener("resize", function () {
+      const activeHelp = document.querySelector(".score-help:hover, .score-help:focus-within");
+      if (activeHelp) {
+        positionScoreHelpTooltip(activeHelp);
+      } else if (!scoreHelpPinned) {
+        hideScoreHelpTooltip(true);
+      }
+    });
+
+    window.addEventListener("scroll", function () {
+      const activeHelp = document.querySelector(".score-help:hover, .score-help:focus-within");
+      if (activeHelp) positionScoreHelpTooltip(activeHelp);
+    }, true);
+
+    function getScoreHelpHtml() {
+      return `
+        <span class="score-help" tabindex="0" aria-label="점수 산정 기준 도움말. 클릭하면 고정됩니다" aria-describedby="scoreHelpPortal">
+          <span class="score-help-icon">?</span>
+        </span>
+      `;
+    }
+
+    function setSuitabilityPopupTitleWithHelp() {
+      const titleEl = document.getElementById("analysisPopupTitle");
+      if (!titleEl) return;
+
+      titleEl.innerHTML = `
+        <span class="suitability-title-row">
+          <span>입지 적합성 종합 결과</span>
+          ${getScoreHelpHtml()}
+        </span>
+      `;
+
+      bindScoreHelpPositioning();
+    }
+
     // 입지 적합성 버튼 초기 노출 보정: 캐시/중복 배치로 인해 아래쪽에 남는 경우 검색창 아래로 강제 이동한다.
     document.addEventListener("DOMContentLoaded", function () {
-      const sidebar = document.querySelector(".sidebar");
       const searchBox = document.querySelector(".search-box");
       const btn = document.getElementById("btnSiteSuitability");
 
-      let wrapper = btn.closest(".site-suitability-top");
-      if (!wrapper) {
-        wrapper = document.createElement("div");
-        wrapper.className = "site-suitability-top";
-        btn.parentNode.insertBefore(wrapper, btn);
-        wrapper.appendChild(btn);
+      if (searchBox && btn) {
+        let wrapper = btn.closest(".site-suitability-top");
+        if (!wrapper) {
+          wrapper = document.createElement("div");
+          wrapper.className = "site-suitability-top";
+          btn.parentNode.insertBefore(wrapper, btn);
+          wrapper.appendChild(btn);
+        }
+
+        const note = wrapper.querySelector(".suitability-trigger-note") || document.querySelector(".suitability-trigger-note");
+        if (note && note.parentElement !== wrapper) {
+          wrapper.appendChild(note);
+        }
+
+        searchBox.insertAdjacentElement("afterend", wrapper);
+
+        btn.style.display = "block";
+        btn.style.visibility = "visible";
+        btn.style.opacity = "1";
       }
 
-      const note = wrapper.querySelector(".suitability-trigger-note") || document.querySelector(".suitability-trigger-note");
-      if (note && note.parentElement !== wrapper) {
-        wrapper.appendChild(note);
+      if (shouldShowGuideModal()) {
+        openGuideModal();
       }
-
-      searchBox.insertAdjacentElement("afterend", wrapper);
-
-      btn.style.display = "block";
-      btn.style.visibility = "visible";
-      btn.style.opacity = "1";
     });
   </script>
 </body>
