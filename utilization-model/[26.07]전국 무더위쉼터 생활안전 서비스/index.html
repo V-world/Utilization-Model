@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>전국 무더위쉼터 생활안전 지도</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <!-- MarkerCluster CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"
+  />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      margin: 0 auto;
+      background-color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    header {
+      background: linear-gradient(135deg, #e67e22, #d35400);
+      color: white;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    .header-content {
+      display: flex;
+      align-items: center;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 16px;
+      gap: 8px;
+    }
+    .logo {
+      font-size: 24px;
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+    }
+    .header-buttons {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .header-buttons button {
+      background-color: #ffffff;
+      color: #d35400;
+      border: 1px solid #ffffff;
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .header-buttons button:hover {
+      background-color: #c0392b;
+      color: #ffffff;
+    }
+    .header-buttons button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      background-color: #eeeeee;
+      color: #888888;
+      border-color: #eeeeee;
+    }
+    .emergency-button-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .emergency-button-wrap.show-loading-tooltip:hover::after,
+    .emergency-button-wrap.show-loading-tooltip:focus-within::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 160px;
+      max-width: 220px;
+      padding: 6px 9px;
+      border-radius: 7px;
+      background: #2c3e50;
+      color: #ffffff;
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: center;
+      white-space: normal;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.28);
+      z-index: 3000;
+      pointer-events: none;
+    }
+    .emergency-button-wrap.show-loading-tooltip:hover::before,
+    .emergency-button-wrap.show-loading-tooltip:focus-within::before {
+      content: "";
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 5px 5px 5px;
+      border-style: solid;
+      border-color: transparent transparent #2c3e50 transparent;
+      z-index: 3001;
+      pointer-events: none;
+    }
+    .header-source {
+      font-size: 10px;
+      color: rgba(255,255,255,0.85);
+      padding-left: 10px;
+      white-space: nowrap;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+    }
+    #map {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 오른쪽 리스트 패널 */
+    #shelter-list {
+      width: 310px;
+      border-left: 1px solid #e0e0e0;
+      background-color: #fafafa;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    #shelter-list-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 4px 0 8px 0;
+      color: #333;
+    }
+    .scroll-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e0e0e0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    .scroll-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+    .scroll-item h3 {
+      margin: 0 0 2px 0;
+      font-size: 13px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .scroll-item .code {
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 6px;
+    }
+    .tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #555;
+      gap: 6px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .badge-night { background-color: #8e44ad; }
+    .badge-weekend { background-color: #2980b9; }
+    .badge-basic { background-color: #95a5a6; }
+    .capacity-label {
+      font-weight: 600;
+      color: #d35400;
+      white-space: nowrap;
+    }
+    .mini-info {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 0.78em;
+    }
+
+    /* 팝업 스타일 */
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: #2c3e50;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.5;
+      border-radius: 10px;
+    }
+    .custom-popup .leaflet-popup-tip {
+      background: #2c3e50;
+    }
+    .shelter-popup h3 {
+      margin: 0 0 8px 0;
+      color: #ecf0f1;
+      font-size: 16px;
+      border-bottom: 1px solid #34495e;
+      padding-bottom: 4px;
+    }
+    .shelter-popup p {
+      margin: 4px 0;
+    }
+    .popup-section {
+      margin-top: 6px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #34495e;
+    }
+    .popup-label {
+      color: #bdc3c7;
+      font-size: 12px;
+    }
+    .popup-value {
+      font-weight: 600;
+      font-size: 13px;
+      color: #fff;
+    }
+    .popup-desc {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #ecf0f1;
+    }
+    .popup-button-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .popup-button-row a,
+    .popup-button-row button {
+      border: 0;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #fff;
+      background: #e67e22;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .popup-button-row button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      background: #7f8c8d;
+    }
+
+    .tooltip-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      font-size: 13px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tooltip-content {
+      position: absolute;
+      top: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      right: auto;
+      width: 360px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      font-size: 13px;
+      line-height: 1.4;
+      z-index: 1500;
+      display: none;
+    }
+    .tooltip-content ul {
+      padding-left: 18px;
+      margin: 4px 0;
+    }
+    .tooltip-content hr {
+      border: 0;
+      border-top: 1px solid #34495e;
+      margin: 6px 0;
+    }
+    .header-tooltip {
+      position: relative;
+      margin-left: 4px;
+    }
+    .header-tooltip:hover .tooltip-content {
+      display: block;
+    }
+
+    /* 전체 화면 덮는 로딩 오버레이 */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    #loading-box {
+      width: 340px;
+      background: #ffffff;
+      padding: 20px 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    }
+    #loading-title {
+      font-size: 18px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    #loading-progressbar {
+      width: 100%;
+      height: 14px;
+      background: #eee;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    #loading-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f39c12, #d35400);
+      transition: width 0.25s ease;
+    }
+    #loading-count {
+      font-size: 14px;
+      color: #333;
+    }
+
+
+
+    .weather-panel {
+      position: fixed;
+      top: 74px;
+      left: 14px;
+      width: 285px;
+      background: rgba(44, 62, 80, 0.94);
+      color: #ecf0f1;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+      padding: 10px 12px;
+      z-index: 1200;
+      font-size: 12px;
+      line-height: 1.45;
+      pointer-events: auto;
+    }
+    .weather-panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+    .weather-panel-main {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 3px 0 5px 0;
+    }
+    .weather-panel-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 4px;
+      margin-top: 4px;
+    }
+    .weather-panel-muted {
+      color: #bdc3c7;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .weather-panel button {
+      border: 0;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 11px;
+      color: #2c3e50;
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      main { flex-direction: column; }
+      #shelter-list {
+        width: 100%;
+        height: 230px;
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+      }
+      .header-source { display: none; }
+      .weather-panel { top: 66px; left: 8px; width: calc(100% - 34px); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-content">
+      <div class="logo">☀️</div>
+      <h1>전국 무더위쉼터 생활안전 지도</h1>
+
+      <div class="header-buttons">
+        <div class="header-tooltip">
+          <span class="tooltip-icon">i</span>
+          <div class="tooltip-content">
+            <strong>폭염 유의사항</strong>
+            <ul>
+              <li>야외활동을 줄이고 물을 자주 섭취하세요.</li>
+              <li>어지러움, 두통, 메스꺼움이 있으면 즉시 시원한 장소로 이동하세요.</li>
+              <li>고령자, 영유아, 만성질환자는 장시간 외출을 피하세요.</li>
+              <li>응급상황은 지도 정보보다 119 신고를 우선하세요.</li>
+            </ul>
+            <hr />
+            <strong>표출 데이터</strong>
+            <ul>
+              <li>재난안전데이터공유플랫폼 무더위쉼터 API</li>
+              <li>국립중앙의료원 응급의료기관 기본정보 API</li>
+              <li>기상청 단기예보 조회서비스 API</li>
+            </ul>
+          </div>
+        </div>
+
+        <button id="btn-korea">전국</button>
+        <button id="btn-seoul">수도권</button>
+        <button id="btn-gangwon">강원</button>
+        <button id="btn-yeongnam">영남</button>
+        <button id="btn-honam">호남</button>
+        <button id="btn-jeju">제주</button>
+        <button id="btn-my-location">내 위치</button>
+        <span class="emergency-button-wrap" data-tooltip="데이터를 불러오는 중입니다">
+          <button id="btn-emergency-in-view">화면 내 응급실</button>
+        </span>
+        <button id="btn-emergency-off">응급실 OFF</button>
+      </div>
+
+      <div class="header-source">데이터 출처 : 재난안전데이터공유플랫폼</div>
+    </div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+    <div id="weather-panel" class="weather-panel">
+      <div class="weather-panel-title">
+        <span>현재 지도 중심 날씨</span>
+        <button type="button" id="btn-weather-refresh">갱신</button>
+      </div>
+      <div id="weather-panel-body" class="weather-panel-muted">지도 중심 위치의 기상청 단기예보를 불러오는 중입니다.</div>
+    </div>
+    <div id="shelter-list">
+      <div id="shelter-list-title">현재 화면 내 무더위쉼터</div>
+    </div>
+  </main>
+
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay">
+  <div id="loading-box">
+    <div id="loading-title">무더위쉼터 데이터 불러오는 중...</div>
+    <div id="loading-progressbar">
+      <div id="loading-progress"></div>
+    </div>
+    <div id="loading-count">0 / 0</div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+<!-- MarkerCluster JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+
+<script>
+  const VWORLD_KEY = "CEB52025-E065-364C-9DBA-44880E3B02B8";
+
+  // 재난안전데이터공유플랫폼 무더위쉼터 API
+  const SAFETYDATA_KEY = "KLFCC5O2669591Q7";
+  const SAFETYDATA_API = "https://www.safetydata.go.kr/V2/api/DSSP-IF-10942";
+
+  // 브라우저 CORS가 막히면 true로 바꿔서 테스트할 수 있습니다.
+  // 단, 운영환경에서는 백엔드 프록시를 별도로 두는 방식을 권장합니다.
+  const USE_VWORLD_PROXY_FOR_SAFETYDATA = true;
+  const VWORLD_PROXY = "https://map.vworld.kr/proxy.do?url=";
+
+  // 국립중앙의료원 응급의료기관 기본정보 조회 API
+  // 사용자가 제공한 인증키는 URL 인코딩된 값이므로 URLSearchParams 사용 시 한 번 디코딩 후 다시 인코딩합니다.
+  const EMERGENCY_SERVICE_KEY = "yJkg311Qg9Eq0X9Si08FqSPeDQJCqP4uS9nW%2B4ADeoHWXkF1j8TrQ%2BrBNRikicwGB7wGc4AUQtWishlRlSuhMw%3D%3D";
+  const EMERGENCY_API = "https://apis.data.go.kr/B552657/ErmctInfoInqireService/getEgytBassInfoInqire";
+  const USE_VWORLD_PROXY_FOR_EMERGENCY = true;
+  // 응급실 API 응답의 wgs84Lon, wgs84Lat 좌표를 직접 사용합니다.
+  const EMERGENCY_NUM_ROWS = 100;
+  const EMERGENCY_MAX_PAGE_COUNT = 30;
+  const EMERGENCY_RADIUS_METERS = 3000;
+
+  // 기상청 단기예보 조회서비스
+  const WEATHER_API = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
+  const USE_VWORLD_PROXY_FOR_WEATHER = true;
+  const WEATHER_NUM_ROWS = 1000;
+
+  const DEFAULT_NUM_ROWS = 1000;
+  const MAX_PAGE_COUNT = 20;
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function toNumber(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const n = Number(String(value).trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function formatYn(value) {
+    const v = String(value ?? "").trim().toUpperCase();
+    if (v === "Y") return "가능";
+    if (v === "N") return "불가";
+    return "-";
+  }
+
+  function formatTime(value) {
+    const v = String(value ?? "").trim();
+    if (!v) return "-";
+
+    // 0900, 900, 09:00, 090000 등 최대한 대응
+    const digits = v.replace(/[^0-9]/g, "");
+    if (digits.length >= 4) {
+      return digits.slice(0, 2) + ":" + digits.slice(2, 4);
+    }
+    return v;
+  }
+
+  function getShelterAddress(item) {
+    return item.RN_DTL_ADRES || item.DTL_ADRES || "-";
+  }
+
+  function getOpenBadges(item) {
+    const badges = [];
+    if (String(item.CHCK_MATTER_NIGHT_OPN_AT ?? "").toUpperCase() === "Y") {
+      badges.push(`<span class="badge badge-night">야간개방</span>`);
+    }
+    if (String(item.CHCK_MATTER_WKEND_HDAY_OPN_AT ?? "").toUpperCase() === "Y") {
+      badges.push(`<span class="badge badge-weekend">주말개방</span>`);
+    }
+    if (!badges.length) badges.push(`<span class="badge badge-basic">일반쉼터</span>`);
+    return badges.join(" ");
+  }
+
+  function getDecodedEmergencyServiceKey() {
+    try {
+      return decodeURIComponent(EMERGENCY_SERVICE_KEY);
+    } catch (e) {
+      return EMERGENCY_SERVICE_KEY;
+    }
+  }
+
+
+  function getDecodedWeatherServiceKey() {
+    // 기상청 API도 공공데이터포털 일반 인증키를 사용합니다.
+    return getDecodedEmergencyServiceKey();
+  }
+
+  function pad2(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function formatDateYmd(date) {
+    return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(date.getDate())}`;
+  }
+
+  function formatDisplayYmd(value) {
+    const v = String(value || "");
+    if (v.length !== 8) return v || "-";
+    return `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`;
+  }
+
+  function formatDisplayHm(value) {
+    const v = String(value || "").padStart(4, "0");
+    if (v.length < 4) return value || "-";
+    return `${v.slice(0, 2)}:${v.slice(2, 4)}`;
+  }
+
+  function getVilageFcstBaseDateTime(now = new Date()) {
+    // 단기예보 기준시각: 02, 05, 08, 11, 14, 17, 20, 23시.
+    // 발표 직후 API 반영 지연을 고려해 현재시각에서 90분을 뺀 뒤 가장 가까운 기준시각을 선택합니다.
+    const target = new Date(now.getTime() - 90 * 60 * 1000);
+    const baseHours = [2, 5, 8, 11, 14, 17, 20, 23];
+    const hour = target.getHours();
+    let baseHour = null;
+
+    for (const h of baseHours) {
+      if (h <= hour) baseHour = h;
+    }
+
+    if (baseHour === null) {
+      target.setDate(target.getDate() - 1);
+      baseHour = 23;
+    }
+
+    return {
+      base_date: formatDateYmd(target),
+      base_time: `${pad2(baseHour)}00`
+    };
+  }
+
+  function dfs_xy_conv(lat, lon) {
+    // 기상청 격자 변환 공식: WGS84 위경도 -> DFS 격자 X/Y
+    const RE = 6371.00877;
+    const GRID = 5.0;
+    const SLAT1 = 30.0;
+    const SLAT2 = 60.0;
+    const OLON = 126.0;
+    const OLAT = 38.0;
+    const XO = 43;
+    const YO = 136;
+    const DEGRAD = Math.PI / 180.0;
+
+    const re = RE / GRID;
+    const slat1 = SLAT1 * DEGRAD;
+    const slat2 = SLAT2 * DEGRAD;
+    const olon = OLON * DEGRAD;
+    const olat = OLAT * DEGRAD;
+
+    let sn = Math.tan(Math.PI * 0.25 + slat2 * 0.5) / Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+    sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
+
+    let sf = Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+    sf = Math.pow(sf, sn) * Math.cos(slat1) / sn;
+
+    let ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
+    ro = re * sf / Math.pow(ro, sn);
+
+    let ra = Math.tan(Math.PI * 0.25 + lat * DEGRAD * 0.5);
+    ra = re * sf / Math.pow(ra, sn);
+
+    let theta = lon * DEGRAD - olon;
+    if (theta > Math.PI) theta -= 2.0 * Math.PI;
+    if (theta < -Math.PI) theta += 2.0 * Math.PI;
+    theta *= sn;
+
+    return {
+      x: Math.floor(ra * Math.sin(theta) + XO + 0.5),
+      y: Math.floor(ro - ra * Math.cos(theta) + YO + 0.5)
+    };
+  }
+
+  function buildWeatherApiUrl(lat, lng) {
+    const grid = dfs_xy_conv(lat, lng);
+    const base = getVilageFcstBaseDateTime();
+
+    const params = new URLSearchParams({
+      serviceKey: getDecodedWeatherServiceKey(),
+      pageNo: "1",
+      numOfRows: String(WEATHER_NUM_ROWS),
+      dataType: "JSON",
+      base_date: base.base_date,
+      base_time: base.base_time,
+      nx: String(grid.x),
+      ny: String(grid.y)
+    });
+
+    const directUrl = `${WEATHER_API}?${params.toString()}`;
+    return {
+      url: USE_VWORLD_PROXY_FOR_WEATHER ? VWORLD_PROXY + encodeURIComponent(directUrl) : directUrl,
+      grid,
+      base
+    };
+  }
+
+  function normalizeWeatherItems(json) {
+    const candidate = json?.response?.body?.items?.item ?? json?.body?.items?.item ?? json?.items?.item ?? json?.items;
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === "object") return [candidate];
+    return [];
+  }
+
+  function skyLabel(value) {
+    const v = String(value ?? "");
+    if (v === "1") return "맑음";
+    if (v === "3") return "구름많음";
+    if (v === "4") return "흐림";
+    return "-";
+  }
+
+  function ptyLabel(value) {
+    const v = String(value ?? "");
+    if (v === "0") return "없음";
+    if (v === "1") return "비";
+    if (v === "2") return "비/눈";
+    if (v === "3") return "눈";
+    if (v === "4") return "소나기";
+    return "-";
+  }
+
+  function weatherIconByState(sky, pty) {
+    if (String(pty ?? "") === "1") return "🌧️";
+    if (String(pty ?? "") === "2") return "🌨️";
+    if (String(pty ?? "") === "3") return "❄️";
+    if (String(pty ?? "") === "4") return "🌦️";
+    if (String(sky ?? "") === "1") return "☀️";
+    if (String(sky ?? "") === "3") return "⛅";
+    if (String(sky ?? "") === "4") return "☁️";
+    return "🌡️";
+  }
+
+  function summarizeWeatherItems(items) {
+    if (!items.length) return null;
+
+    const now = new Date();
+    const nowKey = `${formatDateYmd(now)}${pad2(now.getHours())}00`;
+    const futureTimes = [...new Set(
+      items
+        .filter((item) => ["TMP", "SKY", "PTY"].includes(item.category))
+        .map((item) => `${item.fcstDate || ""}${String(item.fcstTime || "").padStart(4, "0")}`)
+        .filter(Boolean)
+        .filter((key) => key >= nowKey)
+    )].sort();
+
+    const targetKey = futureTimes[0] || `${items[0].fcstDate || ""}${String(items[0].fcstTime || "").padStart(4, "0")}`;
+
+    function valueAt(category) {
+      const exact = items.find((item) => item.category === category && `${item.fcstDate || ""}${String(item.fcstTime || "").padStart(4, "0")}` === targetKey);
+      if (exact) return exact.fcstValue;
+      const fallback = items.find((item) => item.category === category);
+      return fallback?.fcstValue ?? null;
+    }
+
+    return {
+      fcstDate: targetKey.slice(0, 8),
+      fcstTime: targetKey.slice(8, 12),
+      tmp: valueAt("TMP"),
+      tmn: valueAt("TMN"),
+      tmx: valueAt("TMX"),
+      sky: valueAt("SKY"),
+      pty: valueAt("PTY")
+    };
+  }
+
+  function buildEmergencyApiUrl(pageNo = 1, numOfRows = EMERGENCY_NUM_ROWS) {
+    const params = new URLSearchParams({
+      serviceKey: getDecodedEmergencyServiceKey(),
+      pageNo: String(pageNo),
+      numOfRows: String(numOfRows)
+    });
+
+    const directUrl = `${EMERGENCY_API}?${params.toString()}`;
+    return USE_VWORLD_PROXY_FOR_EMERGENCY
+      ? VWORLD_PROXY + encodeURIComponent(directUrl)
+      : directUrl;
+  }
+
+  function normalizeEmergencyItemsFromXml(xmlText) {
+    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    const parseError = doc.querySelector("parsererror");
+    if (parseError) {
+      console.error("응급실 XML 파싱 실패:", parseError.textContent);
+      return { items: [], totalCount: null };
+    }
+
+    const items = Array.from(doc.querySelectorAll("item")).map((itemEl) => {
+      const obj = {};
+      Array.from(itemEl.children).forEach((child) => {
+        obj[child.tagName] = child.textContent?.trim() || "";
+      });
+      return obj;
+    });
+
+    const totalCount = toNumber(doc.querySelector("totalCount")?.textContent);
+    return { items, totalCount };
+  }
+
+  function normalizeEmergencyItemsFromJson(json) {
+    const candidates = [
+      json?.response?.body?.items?.item,
+      json?.response?.body?.items,
+      json?.response?.body,
+      json?.body?.items?.item,
+      json?.body?.items,
+      json?.items,
+      json?.data
+    ];
+
+    let items = [];
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      if (Array.isArray(candidate)) {
+        items = candidate;
+        break;
+      }
+      if (Array.isArray(candidate.item)) {
+        items = candidate.item;
+        break;
+      }
+      if (typeof candidate === "object" && candidate.dutyName) {
+        items = [candidate];
+        break;
+      }
+    }
+
+    const totalCount = toNumber(
+      json?.response?.body?.totalCount ??
+      json?.body?.totalCount ??
+      json?.totalCount
+    );
+
+    return { items, totalCount };
+  }
+
+  async function parseEmergencyResponse(res) {
+    const text = await res.text();
+    const trimmed = text.trim();
+
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        return normalizeEmergencyItemsFromJson(JSON.parse(trimmed));
+      } catch (e) {
+        console.error("응급실 JSON 파싱 실패:", e);
+        return { items: [], totalCount: null };
+      }
+    }
+
+    return normalizeEmergencyItemsFromXml(text);
+  }
+
+  function getEmergencyAddress(item) {
+    return item.dutyAddr || item.DUTYADDR || "";
+  }
+
+  function getEmergencyId(item, idx = 0) {
+    return item.hpid || item.HPID || `${item.dutyName || "ER"}-${getEmergencyAddress(item)}-${idx}`;
+  }
+
+  function getEmergencyLatLng(item) {
+    // 국립중앙의료원 응급의료기관 기본정보 API 좌표 필드
+    // 병원경도: wgs84Lon, 병원위도: wgs84Lat
+    const lat = toNumber(item.wgs84Lat ?? item.WGS84LAT ?? item.wgs84lat);
+    const lng = toNumber(item.wgs84Lon ?? item.WGS84LON ?? item.wgs84lon);
+
+    // 대한민국 영역 밖 좌표 또는 누락 좌표는 지도 표출에서 제외
+    if (lat === null || lng === null) return null;
+    if (lat < 30 || lat > 40 || lng < 120 || lng > 135) return null;
+
+    return { lat, lng };
+  }
+
+  function formatEmergencyYn(value) {
+    const v = String(value ?? "").trim().toUpperCase();
+    if (v === "Y" || v === "1") return "가능";
+    if (v === "N" || v === "2") return "불가";
+    return "-";
+  }
+
+  function getTodayEmergencyTime(item) {
+    const day = new Date().getDay(); // 0: 일요일, 1: 월요일 ... 6: 토요일
+    const idx = day === 0 ? 7 : day;
+    const start = item[`dutyTime${idx}s`];
+    const end = item[`dutyTime${idx}c`];
+    if (!start && !end) return "-";
+    return `${formatTime(start)} ~ ${formatTime(end)}`;
+  }
+
+  function markerColor(item) {
+    const night = String(item.CHCK_MATTER_NIGHT_OPN_AT ?? "").toUpperCase() === "Y";
+    const weekend = String(item.CHCK_MATTER_WKEND_HDAY_OPN_AT ?? "").toUpperCase() === "Y";
+    const capacity = toNumber(item.USE_PSBL_NMPR) || 0;
+
+    if (night) return "#8e44ad";
+    if (weekend) return "#2980b9";
+    if (capacity >= 100) return "#27ae60";
+    return "#e67e22";
+  }
+
+  function buildShelterApiUrl(pageNo = 1, numOfRows = DEFAULT_NUM_ROWS) {
+    const params = new URLSearchParams({
+      serviceKey: SAFETYDATA_KEY,
+      pageNo: String(pageNo),
+      numOfRows: String(numOfRows),
+      returnType: "json"
+    });
+
+    const directUrl = `${SAFETYDATA_API}?${params.toString()}`;
+    return USE_VWORLD_PROXY_FOR_SAFETYDATA
+      ? VWORLD_PROXY + encodeURIComponent(directUrl)
+      : directUrl;
+  }
+
+  function normalizeItemsFromApi(json) {
+    // API 제공기관별 응답 구조 차이를 흡수하기 위한 방어적 파서
+    const candidates = [
+      json?.body?.items,
+      json?.body?.item,
+      json?.body,
+      json?.response?.body?.items?.item,
+      json?.response?.body?.items,
+      json?.response?.body,
+      json?.result?.data,
+      json?.result?.items,
+      json?.data,
+      json?.items,
+      json?.DSSP_IF_10942,
+      json?.["DSSP-IF-10942"]
+    ];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      if (Array.isArray(candidate)) return candidate;
+      if (Array.isArray(candidate.item)) return candidate.item;
+      if (typeof candidate === "object" && candidate.RSTR_FCLTY_NO) return [candidate];
+    }
+
+    if (Array.isArray(json)) return json;
+    return [];
+  }
+
+  function getTotalCountFromApi(json) {
+    const candidates = [
+      json?.totalCount,
+      json?.body?.totalCount,
+      json?.body?.totalCnt,
+      json?.response?.body?.totalCount,
+      json?.response?.body?.totalCnt,
+      json?.result?.totalCount,
+      json?.result?.totalCnt,
+      json?.header?.totalCount
+    ];
+
+    for (const value of candidates) {
+      const n = toNumber(value);
+      if (n !== null) return n;
+    }
+    return null;
+  }
+
+  function showLoading(totalLabel, title = "무더위쉼터 데이터 불러오는 중...") {
+    const overlay = document.getElementById("loading-overlay");
+    overlay.style.display = "flex";
+    document.getElementById("loading-title").textContent = title;
+    document.getElementById("loading-count").innerText = totalLabel || "조회 준비 중";
+    document.getElementById("loading-progress").style.width = "0%";
+  }
+
+  function hideLoading() {
+    document.getElementById("loading-overlay").style.display = "none";
+  }
+
+  function updateLoading(current, total) {
+    if (!total) {
+      document.getElementById("loading-count").innerText = `${current}건 로딩`;
+      document.getElementById("loading-progress").style.width = "60%";
+      return;
+    }
+    const percent = Math.min(100, Math.round((current / total) * 100));
+    document.getElementById("loading-count").innerText = `${current} / ${total}`;
+    document.getElementById("loading-progress").style.width = percent + "%";
+  }
+
+  class HeatwaveShelterMap {
+    constructor(mapId, listId) {
+      this.map = L.map(mapId, { minZoom: 6 }).setView([36.5, 127.8], 7);
+      L.tileLayer(
+        "https://api.vworld.kr/req/wmts/1.0.0/" +
+          VWORLD_KEY +
+          "/Base/{z}/{y}/{x}.png",
+        {
+          maxZoom: 18,
+          attribution: '배경지도 &copy; <a href="https://www.vworld.kr/">브이월드</a>',
+        }
+      ).addTo(this.map);
+      this.map.removeControl(this.map.zoomControl);
+
+      this.listContainer = document.getElementById(listId);
+      this.cluster = L.markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 50
+      });
+      this.map.addLayer(this.cluster);
+
+      // shelterMarkers: { RSTR_FCLTY_NO: { marker, item } }
+      this.shelterMarkers = {};
+      this.userLocation = null;
+
+      this.emergencyFacilities = [];
+      this.emergencyLoadPromise = null;
+      this.emergencyPreloadDone = false;
+      this.emergencyPreloadFailed = false;
+      this.emergencyCluster = L.markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 45
+      });
+      this.map.addLayer(this.emergencyCluster);
+      this.emergencyRadiusCircle = null;
+      this.weatherTimer = null;
+
+      this.map.on("moveend", () => {
+        this.updateList();
+        this.scheduleWeatherRefresh();
+      });
+    }
+
+    async loadShelters() {
+      showLoading("1페이지 조회 중");
+
+      let pageNo = 1;
+      let loadedCount = 0;
+      let totalCount = null;
+      const allItems = [];
+
+      try {
+        while (pageNo <= MAX_PAGE_COUNT) {
+          const url = buildShelterApiUrl(pageNo, DEFAULT_NUM_ROWS);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("HTTP " + res.status);
+
+          const json = await res.json();
+          const items = normalizeItemsFromApi(json);
+          if (totalCount === null) totalCount = getTotalCountFromApi(json);
+
+          if (!items.length) break;
+
+          allItems.push(...items);
+          loadedCount += items.length;
+          updateLoading(loadedCount, totalCount);
+
+          if (totalCount && loadedCount >= totalCount) break;
+          if (items.length < DEFAULT_NUM_ROWS) break;
+          pageNo++;
+        }
+
+        this.drawShelters(allItems);
+        this.updateList();
+      } catch (e) {
+        console.error("무더위쉼터 데이터 조회 실패:", e);
+        alert(
+          "무더위쉼터 API 호출에 실패했습니다.\n" +
+          "브라우저 CORS 제한이면 USE_VWORLD_PROXY_FOR_SAFETYDATA 값을 true로 바꾸거나, 별도 백엔드 프록시를 사용하세요."
+        );
+      } finally {
+        hideLoading();
+      }
+    }
+
+    drawShelters(items) {
+      this.cluster.clearLayers();
+      this.shelterMarkers = {};
+
+      let validCount = 0;
+
+      items.forEach((item, idx) => {
+        const lat = toNumber(item.LA);
+        const lng = toNumber(item.LO);
+
+        // 대한민국 위경도 범위를 벗어나면 표출 제외
+        if (lat === null || lng === null) return;
+        if (lat < 30 || lat > 40 || lng < 120 || lng > 135) return;
+
+        const id = item.RSTR_FCLTY_NO || `${item.RSTR_NM || "shelter"}-${idx}`;
+        const marker = L.marker([lat, lng], {
+          icon: this.createShelterIcon(item)
+        });
+
+        this.shelterMarkers[id] = { marker, item };
+        marker.on("click", () => this.showPopup(id));
+        marker.addTo(this.cluster);
+        validCount++;
+      });
+
+      document.getElementById("shelter-list-title").textContent =
+        `현재 화면 내 무더위쉼터 · 전체 ${validCount.toLocaleString()}건`;
+    }
+
+    createShelterIcon(item) {
+      const color = markerColor(item);
+      return L.divIcon({
+        html:
+          `<div style="width:18px;height:18px;border-radius:50%;
+          background:${color};border:2px solid #fff;
+          box-shadow:0 0 4px rgba(0,0,0,.6)"></div>`,
+        className: "",
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+    }
+
+    getAllMarkers() {
+      const markers = [];
+      this.cluster.eachLayer((layer) => {
+        if (layer instanceof L.Marker) markers.push(layer);
+      });
+      return markers;
+    }
+
+    moveTo(lat, lng, zoom = 12) {
+      this.map.setView([lat, lng], zoom);
+    }
+
+    distanceMeters(lat1, lng1, lat2, lng2) {
+      return this.map.distance([lat1, lng1], [lat2, lng2]);
+    }
+
+    updateList() {
+      const bounds = this.map.getBounds();
+      const title = document.getElementById("shelter-list-title");
+      this.listContainer.innerHTML = "";
+      if (title) this.listContainer.appendChild(title);
+
+      const visibleShelters = [];
+
+      for (const [id, obj] of Object.entries(this.shelterMarkers)) {
+        const latlng = obj.marker.getLatLng();
+        if (!bounds.contains(latlng)) continue;
+
+        const distance = this.userLocation
+          ? this.distanceMeters(this.userLocation.lat, this.userLocation.lng, latlng.lat, latlng.lng)
+          : null;
+
+        visibleShelters.push({ id, ...obj, distance });
+      }
+
+      visibleShelters.sort((a, b) => {
+        if (a.distance !== null && b.distance !== null) return a.distance - b.distance;
+        return String(a.item.RSTR_NM || "").localeCompare(String(b.item.RSTR_NM || ""), "ko");
+      });
+
+      visibleShelters.slice(0, 200).forEach(({ id, marker, item, distance }) => {
+        const latlng = marker.getLatLng();
+        const div = document.createElement("div");
+        div.className = "scroll-item";
+        div.onclick = () => {
+          this.moveTo(latlng.lat, latlng.lng, 15);
+          this.showPopup(id);
+        };
+
+        const capacity = item.USE_PSBL_NMPR ? `${escapeHtml(item.USE_PSBL_NMPR)}명` : "-";
+        const area = item.AR ? `${escapeHtml(item.AR)}㎡` : "-";
+        const address = getShelterAddress(item);
+
+        div.innerHTML = `
+          <h3>${escapeHtml(item.RSTR_NM || "무더위쉼터")}</h3>
+          <div class="code">시설번호: ${escapeHtml(item.RSTR_FCLTY_NO || "-")}</div>
+          <div class="tag-row">
+            <span>${getOpenBadges(item)}</span>
+            <span class="capacity-label">수용 ${capacity}</span>
+          </div>
+          <div class="mini-info">
+            <span>주소: ${escapeHtml(address)}</span>
+            <span>면적: ${area}</span>
+            <span>유형: ${escapeHtml(item.FCLTY_TY || "-")} / ${escapeHtml(item.FCLTY_SCLAS || "-")}</span>
+          </div>
+        `;
+        this.listContainer.appendChild(div);
+      });
+
+      if (!visibleShelters.length) {
+        const empty = document.createElement("div");
+        empty.className = "scroll-item";
+        empty.innerHTML = `
+          <h3>현재 화면 내 쉼터 없음</h3>
+          <div class="mini-info">지도를 축소하거나 다른 지역으로 이동하세요.</div>
+        `;
+        this.listContainer.appendChild(empty);
+      }
+    }
+
+    showPopup(id) {
+      const obj = this.shelterMarkers[id];
+      if (!obj) return;
+      const { marker, item } = obj;
+      const latlng = marker.getLatLng();
+
+      const name = escapeHtml(item.RSTR_NM || "무더위쉼터");
+      const address = escapeHtml(getShelterAddress(item));
+      const detailPosition = escapeHtml(item.DTL_POSITION || "-");
+      const capacity = item.USE_PSBL_NMPR ? `${escapeHtml(item.USE_PSBL_NMPR)}명` : "-";
+      const area = item.AR ? `${escapeHtml(item.AR)}㎡` : "-";
+      const fan = item.COLR_HOLD_ELEFN ? `${escapeHtml(item.COLR_HOLD_ELEFN)}대` : "-";
+      const aircon = item.COLR_HOLD_ARCNDTN ? `${escapeHtml(item.COLR_HOLD_ARCNDTN)}대` : "-";
+      const weekdayTime = `${formatTime(item.WKDAY_OPER_BEGIN_TIME)} ~ ${formatTime(item.WKDAY_OPER_END_TIME)}`;
+      const weekendTime = `${formatTime(item.WKEND_HDAY_OPER_BEGIN_TIME)} ~ ${formatTime(item.WKEND_HDAY_OPER_END_TIME)}`;
+
+      const html = `
+        <div class="shelter-popup">
+          <h3>${name}</h3>
+          <p class="popup-label">시설번호: <span class="popup-value">${escapeHtml(item.RSTR_FCLTY_NO || "-")}</span></p>
+          <p class="popup-label">주소: <span class="popup-value">${address}</span></p>
+          <p class="popup-label">위치상세: <span class="popup-value">${detailPosition}</span></p>
+
+          <div class="popup-section">
+            <p class="popup-label">면적: <span class="popup-value">${area}</span></p>
+            <p class="popup-label">이용가능인원: <span class="popup-value">${capacity}</span></p>
+            <p class="popup-label">냉방기: <span class="popup-value">에어컨 ${aircon}, 선풍기 ${fan}</span></p>
+          </div>
+
+          <div class="popup-section">
+            <p class="popup-label">평일 운영시간: <span class="popup-value">${weekdayTime}</span></p>
+            <p class="popup-label">주말·휴일 운영시간: <span class="popup-value">${weekendTime}</span></p>
+            <p class="popup-label">야간개방: <span class="popup-value">${formatYn(item.CHCK_MATTER_NIGHT_OPN_AT)}</span></p>
+            <p class="popup-label">주말·휴일개방: <span class="popup-value">${formatYn(item.CHCK_MATTER_WKEND_HDAY_OPN_AT)}</span></p>
+            <p class="popup-label">숙박가능: <span class="popup-value">${formatYn(item.CHCK_MATTER_STAYNG_PSBL_AT)}</span></p>
+          </div>
+
+          <div class="popup-button-row">
+            <span class="emergency-button-wrap ${this.isEmergencyDataReady() ? "" : "show-loading-tooltip"}" data-tooltip="데이터를 불러오는 중입니다">
+              <button
+                type="button"
+                class="btn-emergency-near-shelter"
+                ${this.isEmergencyDataReady() ? "" : "disabled"}
+                title="${this.isEmergencyDataReady() ? "선택 쉼터 반경 3km 이내 응급실 표출" : "데이터를 불러오는 중입니다"}"
+                onclick="window.shelterMap.showEmergenciesNearShelterByEncodedId('${encodeURIComponent(id)}')"
+              >주변 응급실 3km</button>
+            </span>
+          </div>
+
+        </div>
+      `;
+
+      marker.bindPopup(html, {
+        className: "custom-popup",
+        maxWidth: 330,
+      }).openPopup();
+
+      // 팝업 버튼은 동적으로 생성되므로 팝업 생성 직후에도 현재 로딩 상태를 반영합니다.
+      this.updateEmergencyButtonState();
+    }
+
+
+    async fetchEmergencyFacilities(options = {}) {
+      const showUi = options.showUi !== false;
+      if (showUi) showLoading("1페이지 조회 중", "응급실 기본정보 불러오는 중...");
+
+      let pageNo = 1;
+      let loadedCount = 0;
+      let totalCount = null;
+      const allItems = [];
+
+      while (pageNo <= EMERGENCY_MAX_PAGE_COUNT) {
+        const url = buildEmergencyApiUrl(pageNo, EMERGENCY_NUM_ROWS);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("응급실 API HTTP " + res.status);
+
+        const { items, totalCount: parsedTotalCount } = await parseEmergencyResponse(res);
+        if (totalCount === null && parsedTotalCount !== null) totalCount = parsedTotalCount;
+        if (!items.length) break;
+
+        allItems.push(...items);
+        loadedCount += items.length;
+        if (showUi) updateLoading(loadedCount, totalCount);
+
+        if (totalCount && loadedCount >= totalCount) break;
+        if (items.length < EMERGENCY_NUM_ROWS) break;
+        pageNo++;
+      }
+
+      return allItems;
+    }
+
+    createEmergencyIcon() {
+      return L.divIcon({
+        html:
+          `<div style="width:26px;height:26px;border-radius:50%;
+          background:#c0392b;border:2px solid #fff;
+          color:#fff;font-size:10px;font-weight:700;line-height:26px;text-align:center;
+          box-shadow:0 0 5px rgba(0,0,0,.7)">ER</div>`,
+        className: "",
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+      });
+    }
+
+    clearEmergencyLayer() {
+      this.emergencyCluster.clearLayers();
+      if (this.emergencyRadiusCircle) {
+        this.map.removeLayer(this.emergencyRadiusCircle);
+        this.emergencyRadiusCircle = null;
+      }
+    }
+
+    buildEmergencyPopup(item, distance = null) {
+      const name = escapeHtml(item.dutyName || "응급의료기관");
+      const address = escapeHtml(getEmergencyAddress(item) || "-");
+      const tel1 = escapeHtml(item.dutyTel1 || "-");
+      const tel3 = escapeHtml(item.dutyTel3 || "-");
+      const beds = item.dutyHano ? `${escapeHtml(item.dutyHano)}병상` : "-";
+      const emergencyOpen = formatEmergencyYn(item.dutyEryn);
+      const kiosk = formatEmergencyYn(item.MKioskTy25);
+      const todayTime = escapeHtml(getTodayEmergencyTime(item));
+      const distanceText = distance !== null ? `${Math.round(distance).toLocaleString()}m` : "-";
+
+      return `
+        <div class="shelter-popup">
+          <h3>${name}</h3>
+          <p class="popup-label">주소: <span class="popup-value">${address}</span></p>
+          <p class="popup-label">거리: <span class="popup-value">${distanceText}</span></p>
+
+          <div class="popup-section">
+            <p class="popup-label">대표전화: <span class="popup-value">${tel1}</span></p>
+            <p class="popup-label">응급실전화: <span class="popup-value">${tel3}</span></p>
+            <p class="popup-label">병상수: <span class="popup-value">${beds}</span></p>
+          </div>
+
+          <div class="popup-section">
+            <p class="popup-label">응급실 운영여부: <span class="popup-value">${emergencyOpen}</span></p>
+            <p class="popup-label">오늘 진료시간: <span class="popup-value">${todayTime}</span></p>
+            <p class="popup-label">Emergency gate keeper: <span class="popup-value">${kiosk}</span></p>
+          </div>
+
+          <div class="popup-desc">응급상황은 지도 정보보다 119 신고를 우선하세요. 운영여부와 병상정보는 실제 현장 상황과 다를 수 있습니다.</div>
+        </div>
+      `;
+    }
+
+    drawEmergencyMarkers(items, centerLatLng = null) {
+      this.emergencyCluster.clearLayers();
+
+      const sorted = [...items].sort((a, b) => {
+        if (!centerLatLng) return String(a.dutyName || "").localeCompare(String(b.dutyName || ""), "ko");
+        const da = this.distanceMeters(centerLatLng.lat, centerLatLng.lng, a._lat, a._lng);
+        const db = this.distanceMeters(centerLatLng.lat, centerLatLng.lng, b._lat, b._lng);
+        return da - db;
+      });
+
+      sorted.forEach((item) => {
+        const latlng = L.latLng(item._lat, item._lng);
+        const distance = centerLatLng
+          ? this.distanceMeters(centerLatLng.lat, centerLatLng.lng, item._lat, item._lng)
+          : null;
+
+        const marker = L.marker(latlng, { icon: this.createEmergencyIcon() });
+        marker.bindPopup(this.buildEmergencyPopup(item, distance), {
+          className: "custom-popup",
+          maxWidth: 340
+        });
+        marker.addTo(this.emergencyCluster);
+      });
+
+      if (!sorted.length) {
+        alert("조건에 맞는 응급실 정보가 없습니다.");
+      }
+    }
+
+    getPreloadedEmergencyFacilities() {
+      if (!this.emergencyPreloadDone) {
+        alert("응급실 정보를 초기 로딩 중입니다. 데이터 로딩이 끝난 후 다시 선택하세요.");
+        return null;
+      }
+
+      if (this.emergencyPreloadFailed) {
+        alert("초기 응급실 정보 로딩에 실패했습니다. 인증키, 활용신청 상태, CORS/프록시 설정을 확인하세요.");
+        return null;
+      }
+
+      if (!this.emergencyFacilities || !this.emergencyFacilities.length) {
+        alert("초기 로딩된 응급실 정보가 없습니다.");
+        return null;
+      }
+
+      return this.emergencyFacilities;
+    }
+
+    showEmergenciesInCurrentMap() {
+      const facilities = this.getPreloadedEmergencyFacilities();
+      if (!facilities) return;
+
+      const bounds = this.map.getBounds();
+
+      this.clearEmergencyLayer();
+      const visible = facilities.filter((item) => bounds.contains([item._lat, item._lng]));
+      this.drawEmergencyMarkers(visible);
+
+      if (visible.length) {
+        alert(`현재 지도 화면 내 응급실 ${visible.length.toLocaleString()}건을 표출했습니다.`);
+      }
+    }
+
+    async showEmergenciesNearShelterByEncodedId(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      return this.showEmergenciesNearShelter(id);
+    }
+
+    showEmergenciesNearShelter(id) {
+      const shelter = this.shelterMarkers[id];
+      if (!shelter) return;
+
+      const facilities = this.getPreloadedEmergencyFacilities();
+      if (!facilities) return;
+
+      const center = shelter.marker.getLatLng();
+
+      this.clearEmergencyLayer();
+      this.emergencyRadiusCircle = L.circle(center, {
+        radius: EMERGENCY_RADIUS_METERS,
+        color: "#c0392b",
+        weight: 2,
+        fillColor: "#c0392b",
+        fillOpacity: 0.08
+      }).addTo(this.map);
+
+      const nearby = facilities.filter((item) => {
+        return this.distanceMeters(center.lat, center.lng, item._lat, item._lng) <= EMERGENCY_RADIUS_METERS;
+      });
+
+      this.drawEmergencyMarkers(nearby, center);
+
+      if (nearby.length) {
+        this.map.fitBounds(this.emergencyRadiusCircle.getBounds(), { padding: [30, 30] });
+        alert(`선택한 쉼터 반경 3km 이내 응급실 ${nearby.length.toLocaleString()}건을 표출했습니다.`);
+      }
+    }
+
+    isEmergencyDataReady() {
+      return (
+        this.emergencyPreloadDone === true &&
+        this.emergencyPreloadFailed === false &&
+        Array.isArray(this.emergencyFacilities) &&
+        this.emergencyFacilities.length > 0
+      );
+    }
+
+    setEmergencyButtonsDisabled(disabled) {
+      const buttons = document.querySelectorAll(
+        "#btn-emergency-in-view, .btn-emergency-near-shelter"
+      );
+
+      buttons.forEach((button) => {
+        button.disabled = disabled;
+        button.title = disabled
+          ? "데이터를 불러오는 중입니다"
+          : "초기 로딩된 응급실 데이터 기준으로 지도에 표출합니다.";
+
+        const wrapper = button.closest(".emergency-button-wrap");
+        if (wrapper) {
+          wrapper.dataset.tooltip = disabled ? "데이터를 불러오는 중입니다" : "";
+          wrapper.classList.toggle("show-loading-tooltip", disabled);
+        }
+      });
+    }
+
+    updateEmergencyButtonState() {
+      this.setEmergencyButtonsDisabled(!this.isEmergencyDataReady());
+    }
+
+    async preloadEmergencyData() {
+      // 초기 로딩 시 응급실 기본정보를 미리 가져와 캐시에 저장합니다.
+      // 이후 버튼은 API를 다시 호출하지 않고, this.emergencyFacilities 캐시만 필터링합니다.
+      this.emergencyPreloadDone = false;
+      this.emergencyPreloadFailed = false;
+      this.emergencyFacilities = [];
+
+      try {
+        const rawItems = await this.fetchEmergencyFacilities({ showUi: false });
+        const facilities = [];
+
+        rawItems.forEach((item, i) => {
+          const coord = getEmergencyLatLng(item);
+          if (!coord) return;
+
+          facilities.push({
+            ...item,
+            _id: getEmergencyId(item, i),
+            _lat: coord.lat,
+            _lng: coord.lng
+          });
+        });
+
+        this.emergencyFacilities = facilities;
+        console.info(`응급실 기본정보 초기 로딩 완료: ${facilities.length.toLocaleString()}건`);
+      } catch (e) {
+        console.error("응급실 정보 초기 로딩 실패:", e);
+        this.emergencyPreloadFailed = true;
+      } finally {
+        this.emergencyPreloadDone = true;
+        this.updateEmergencyButtonState();
+      }
+    }
+
+    async loadInitialData() {
+      this.setEmergencyButtonsDisabled(true);
+
+      const shelterPromise = this.loadShelters();
+      const emergencyPromise = this.preloadEmergencyData();
+
+      await Promise.allSettled([shelterPromise, emergencyPromise]);
+
+      this.updateEmergencyButtonState();
+      this.refreshWeatherPanel();
+    }
+
+    scheduleWeatherRefresh() {
+      clearTimeout(this.weatherTimer);
+      this.weatherTimer = setTimeout(() => this.refreshWeatherPanel(), 700);
+    }
+
+    setWeatherPanelHtml(html) {
+      const body = document.getElementById("weather-panel-body");
+      if (body) body.innerHTML = html;
+    }
+
+    async refreshWeatherPanel() {
+      const center = this.map.getCenter();
+      this.setWeatherPanelHtml("기상청 단기예보를 불러오는 중입니다.");
+
+      try {
+        const { url, grid, base } = buildWeatherApiUrl(center.lat, center.lng);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("날씨 API HTTP " + res.status);
+
+        const json = await res.json();
+        const resultCode = json?.response?.header?.resultCode;
+        if (resultCode && resultCode !== "00") {
+          throw new Error(json?.response?.header?.resultMsg || "기상청 API 오류");
+        }
+
+        const items = normalizeWeatherItems(json);
+        const summary = summarizeWeatherItems(items);
+        if (!summary) throw new Error("표출 가능한 날씨 항목이 없습니다.");
+
+        const icon = weatherIconByState(summary.sky, summary.pty);
+        const tmp = summary.tmp !== null && summary.tmp !== undefined ? `${escapeHtml(summary.tmp)}℃` : "-";
+        const tmn = summary.tmn !== null && summary.tmn !== undefined ? `${escapeHtml(summary.tmn)}℃` : "-";
+        const tmx = summary.tmx !== null && summary.tmx !== undefined ? `${escapeHtml(summary.tmx)}℃` : "-";
+        const sky = skyLabel(summary.sky);
+        const pty = ptyLabel(summary.pty);
+
+        this.setWeatherPanelHtml(`
+          <div class="weather-panel-main">${icon} ${tmp}</div>
+          <div class="weather-panel-row"><span>하늘상태</span><strong>${escapeHtml(sky)}</strong></div>
+          <div class="weather-panel-row"><span>강수형태</span><strong>${escapeHtml(pty)}</strong></div>
+          <div class="weather-panel-row"><span>최저 / 최고</span><strong>${tmn} / ${tmx}</strong></div>
+          <div class="weather-panel-muted">
+            예보시각: ${formatDisplayYmd(summary.fcstDate)} ${formatDisplayHm(summary.fcstTime)}<br>
+            기준시각: ${formatDisplayYmd(base.base_date)} ${formatDisplayHm(base.base_time)}
+          </div>
+        `);
+      } catch (e) {
+        console.error("날씨 정보 조회 실패:", e);
+        this.setWeatherPanelHtml(`
+          <div class="weather-panel-muted">
+            날씨 정보를 불러오지 못했습니다.<br>
+            기상청 API 활용신청, 인증키, CORS/프록시 설정을 확인하세요.
+          </div>
+        `);
+      }
+    }
+
+    moveToMyLocation() {
+      if (!navigator.geolocation) {
+        alert("이 브라우저에서는 위치정보를 사용할 수 없습니다.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          this.userLocation = { lat, lng };
+          this.moveTo(lat, lng, 14);
+
+          L.circleMarker([lat, lng], {
+            radius: 8,
+            color: "#2c3e50",
+            fillColor: "#ffffff",
+            fillOpacity: 1,
+            weight: 3
+          }).addTo(this.map).bindPopup("현재 위치").openPopup();
+
+          this.updateList();
+        },
+        () => {
+          alert("현재 위치를 가져올 수 없습니다. 브라우저 위치 권한을 확인하세요.");
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  }
+
+  // ------------------------------
+  // 초기화
+  // ------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const shelterMap = new HeatwaveShelterMap("map", "shelter-list");
+    window.shelterMap = shelterMap;
+
+    document.getElementById("btn-korea").onclick = () => shelterMap.moveTo(36.5, 127.8, 7);
+    document.getElementById("btn-seoul").onclick = () => shelterMap.moveTo(37.55, 126.98, 10);
+    document.getElementById("btn-gangwon").onclick = () => shelterMap.moveTo(37.8, 128.2, 8);
+    document.getElementById("btn-yeongnam").onclick = () => shelterMap.moveTo(35.6, 129.0, 8);
+    document.getElementById("btn-honam").onclick = () => shelterMap.moveTo(35.1, 126.9, 8);
+    document.getElementById("btn-jeju").onclick = () => shelterMap.moveTo(33.4, 126.5, 9);
+    document.getElementById("btn-my-location").onclick = () => shelterMap.moveToMyLocation();
+    document.getElementById("btn-emergency-in-view").onclick = () => shelterMap.showEmergenciesInCurrentMap();
+    document.getElementById("btn-weather-refresh").onclick = () => shelterMap.refreshWeatherPanel();
+
+    shelterMap.loadInitialData();
+  });
+</script>
+</body>
+</html>
